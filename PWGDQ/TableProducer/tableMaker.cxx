@@ -1369,7 +1369,7 @@ struct TableMaker {
 
   // Produce barrel only tables, with V0Bits and Mults
   void processBarrelOnlyWithV0BitsAndMults(MyEventsWithMults::iterator const& collision, aod::BCsWithTimestamps const& bcs,
-                                  soa::Filtered<MyBarrelTracksWithV0Bits> const& tracksBarrel)
+                                           soa::Filtered<MyBarrelTracksWithV0Bits> const& tracksBarrel)
   {
     fullSkimming<gkEventFillMapWithMult, gkTrackFillMapWithV0Bits, 0u>(collision, bcs, tracksBarrel, nullptr, nullptr, nullptr);
   }
