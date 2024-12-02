@@ -191,6 +191,7 @@ class VarManager : public TObject
     kIsVertexITSTPC,             // At least one ITS-TPC track
     kIsVertexTOFmatched,         // At least one TOF-matched track
     kIsSel8,                     // TVX in Run3
+    kIsNoHighMultInPrevCol,      // veto events if FT0C amplitude in previous ITS ROF is above threshold
     kIsINT7,
     kIsEMC7,
     kIsINT7inMUON,
@@ -1348,6 +1349,9 @@ void VarManager::FillEvent(T const& event, float* values)
     if (fgUsedVars[kIsVertexTOFmatched]) {
       values[kIsVertexTOFmatched] = event.selection_bit(o2::aod::evsel::kIsVertexTOFmatched);
     }
+    if (fgUsedVars[kIsNoHighMultInPrevCol]) {
+      values[kIsNoHighMultInPrevCol] = event.selection_bit(o2::aod::evsel::kNoHighMultCollInPrevRof);
+    }
     if (fgUsedVars[kIsSel8]) {
       values[kIsSel8] = event.selection_bit(o2::aod::evsel::kIsTriggerTVX) && event.selection_bit(o2::aod::evsel::kNoITSROFrameBorder) && event.selection_bit(o2::aod::evsel::kNoTimeFrameBorder);
     }
@@ -1467,6 +1471,9 @@ void VarManager::FillEvent(T const& event, float* values)
     }
     if (fgUsedVars[kIsVertexTOFmatched]) {
       values[kIsVertexTOFmatched] = (event.selection_bit(o2::aod::evsel::kIsVertexTOFmatched) > 0);
+    }
+    if (fgUsedVars[kIsNoHighMultInPrevCol]) {
+      values[kIsNoHighMultInPrevCol] = (event.selection_bit(o2::aod::evsel::kNoHighMultCollInPrevRof) > 0);
     }
     if (fgUsedVars[kIsSel8]) {
       values[kIsSel8] = event.selection_bit(o2::aod::evsel::kIsTriggerTVX) && event.selection_bit(o2::aod::evsel::kNoTimeFrameBorder) && event.selection_bit(o2::aod::evsel::kNoITSROFrameBorder);
