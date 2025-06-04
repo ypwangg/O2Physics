@@ -1971,6 +1971,9 @@ struct AnalysisDileptonTrackTrack {
 
   Produces<aod::DileptonTrackTrackCandidates> DileptonTrackTrackTable;
 
+  float mMagField = 0.0;
+  int fCurrentRun;
+
   Filter eventFilter = aod::dqanalysisflags::isEventSelected == 1;
   Filter dileptonFilter = aod::reducedpair::sign == 0;
   Filter filterBarrelTrackSelected = aod::dqanalysisflags::isBarrelSelected > 0;
@@ -1996,6 +1999,7 @@ struct AnalysisDileptonTrackTrack {
       return;
     }
 
+    fCurrentRun = 0;
     fValuesQuadruplet = new float[VarManager::kNVars];
     VarManager::SetDefaultVarNames();
     fHistMan = new HistogramManager("analysisHistos", "aa", VarManager::kNVars);
@@ -2041,8 +2045,48 @@ struct AnalysisDileptonTrackTrack {
   template <int TCandidateType, uint32_t TEventFillMap, uint32_t TTrackFillMap, typename TEvent, typename TTracks>
   void runDileptonTrackTrack(TEvent const& event, TTracks const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
   {
+    // set up KF or DCAfitter
+    if (fConfigUseKFVertexing || fConfigSetUpFourProngFitter) {
+      if (fCurrentRun != event.runNumber()) { // start: runNumber
+        if (fUseRemoteField.value) {
+          grpmag = ccdb->getForTimeStamp<o2::parameters::GRPMagField>(grpmagPath, event.timestamp());
+          if (grpmag != nullptr) {
+            mMagField = grpmag->getNominalL3Field();
+          } else {
+            LOGF(fatal, "GRP object is not available in CCDB at timestamp=%llu", event.timestamp());
+          }
+          if (fConfigUseKFVertexing) {
+            // VarManager::SetupTwoProngKFParticle(mMagField);
+            VarManager::SetupFourProngKFParticle(mMagField);
+          } else {
+            // VarManager::SetupTwoProngDCAFitter(mMagField, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false);
+            VarManager::SetupFourProngDCAFitter(mMagField, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
+          }
+        } else {
+          if (fConfigUseKFVertexing) {
+            // VarManager::SetupTwoProngKFParticle(fConfigMagField.value);
+            VarManager::SetupFourProngKFParticle(fConfigMagField.value);
+          } else {
+            // VarManager::SetupTwoProngDCAFitter(fConfigMagField.value, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false);
+            VarManager::SetupFourProngDCAFitter(fConfigMagField.value, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
+          }
+        }
+        fCurrentRun = event.runNumber();
+      } // end: runNumber
+    }
+
     VarManager::ResetValues(0, VarManager::kNVars, fValuesQuadruplet);
     VarManager::FillEvent<TEventFillMap>(event, fValuesQuadruplet);
+
+    int indexOffset = -999;
+    std::vector<int> trackGlobalIndexes;
+
+    if (dileptons.size() > 0) {
+      for (auto track : tracks) {
+        trackGlobalIndexes.push_back(track.globalIndex());
+        // std::cout << track.index() << " " << track.globalIndex() << std::endl;
+      }
+    }
 
     // LOGF(info, "Number of dileptons: %d", dileptons.size());
 
@@ -2059,6 +2103,14 @@ struct AnalysisDileptonTrackTrack {
       // get the index of the electron legs
       int indexLepton1 = dilepton.index0Id();
       int indexLepton2 = dilepton.index1Id();
+
+      if (indexOffset == -999) {
+        indexOffset = trackGlobalIndexes.at(0);
+      }
+      trackGlobalIndexes.clear();
+
+      auto lepton1 = tracks.iteratorAt(indexLepton1 - indexOffset);
+      auto lepton2 = tracks.iteratorAt(indexLepton2 - indexOffset);
 
       // loop over hadrons pairs
       for (auto& [t1, t2] : combinations(tracks, tracks)) {
@@ -2079,6 +2131,10 @@ struct AnalysisDileptonTrackTrack {
 
         // fill variables
         VarManager::FillDileptonTrackTrack<TCandidateType>(dilepton, t1, t2, fValuesQuadruplet);
+        if (fConfigSetupTwoProngFitter || fConfigUseKFVertexing) {
+          VarManager::FillDileptonTrackTrackVertexing<TCandidateType, TEventFillMap, TTrackFillMap>(event, lepton1, lepton2, t1, t2, fValuesQuadruplet);
+          // LOGP(info, "procCode: {}", fValuesQuadruplet[VarManager::kVertexingProcCode]);
+        }
 
         int iCut = 0;
         uint32_t CutDecision = 0;
