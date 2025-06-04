@@ -866,6 +866,9 @@ struct AnalysisEventMixing {
     } // end for (track1)
   }
 
+  // template <uint32_t TEventFillMap, int TPairType, typename TEvents, typename TTracks1, typename TTracks2>
+  // void runMixedPairingVertexing(TEvents& event1)
+
   // barrel-barrel and muon-muon event mixing
   template <int TPairType, uint32_t TEventFillMap, typename TEvents, typename TTracks>
   void runSameSide(TEvents& events, TTracks const& tracks, Preslice<TTracks>& preSlice)
@@ -1959,6 +1962,12 @@ struct AnalysisDileptonTrackTrack {
   Configurable<std::string> fConfigQuadrupletCuts{"cfgQuadrupletCuts", "pairX3872Cut1", "Comma separated list of Dilepton-Track-Track cut"};
   Configurable<std::string> fConfigAddDileptonHistogram{"cfgAddDileptonHistogram", "barrel", "Comma separated list of histograms"};
   Configurable<std::string> fConfigAddQuadrupletHistogram{"cfgAddQuadrupletHistogram", "xtojpsipipi", "Comma separated list of histograms"};
+  Configurable<bool> fConfigUseKFVertexing{"cfgUseKFVertexing", false, "Use KF Particle for secondary vertex reconstruction (DCAFitter is used by default)"};
+  Configurable<bool> fConfigSetUpFourProngFitter{"cfgSetUpFourProngFitter", false, "Set up the four prong fitter for the quadruplet vertexing"};
+  Configurable<bool> fUseRemoteField{"cfgUseRemoteField", false, "Chose whether to fetch the magnetic field from ccdb or set it manually"};
+  Configurable<std::string> grpmagPath{"grpmagPath", "GLO/Config/GRPMagField", "CCDB path of the GRPMagField object"};
+  Configurable<float> fConfigMagField{"cfgMagField", 5.0f, "Manually set magnetic field"};
+
 
   Produces<aod::DileptonTrackTrackCandidates> DileptonTrackTrackTable;
 
