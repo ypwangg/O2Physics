@@ -1970,8 +1970,10 @@ struct AnalysisDileptonTrackTrack {
 
 
   Produces<aod::DileptonTrackTrackCandidates> DileptonTrackTrackTable;
+  Service<o2::ccdb::BasicCCDBManager> ccdb;
 
   float mMagField = 0.0;
+  o2::parameters::GRPMagField* grpmag = nullptr;
   int fCurrentRun;
 
   Filter eventFilter = aod::dqanalysisflags::isEventSelected == 1;
@@ -2131,7 +2133,7 @@ struct AnalysisDileptonTrackTrack {
 
         // fill variables
         VarManager::FillDileptonTrackTrack<TCandidateType>(dilepton, t1, t2, fValuesQuadruplet);
-        if (fConfigSetupTwoProngFitter || fConfigUseKFVertexing) {
+        if (fConfigSetUpFourProngFitter || fConfigUseKFVertexing) {
           VarManager::FillDileptonTrackTrackVertexing<TCandidateType, TEventFillMap, TTrackFillMap>(event, lepton1, lepton2, t1, t2, fValuesQuadruplet);
           // LOGP(info, "procCode: {}", fValuesQuadruplet[VarManager::kVertexingProcCode]);
         }
