@@ -1640,6 +1640,13 @@ struct AnalysisDileptonTrackTrack {
     groupedMCTracks.bindInternalIndicesTo(&tracksMC);
     runMCGen<VarManager::kXtoJpsiPiPi>(groupedMCTracks);
   }
+  void processPsi2S(soa::Filtered<MyEventsVtxCovSelected>::iterator const& event, MyBarrelTracksSelectedWithCov const& tracks, soa::Join<aod::Dielectrons, aod::DielectronsExtra> const& dileptons, ReducedMCEvents const& eventsMC, ReducedMCTracks const& tracksMC)
+  {
+    runDileptonTrackTrack<VarManager::kPsi2StoJpsiPiPi, gkEventFillMapWithCov, gkMCEventFillMap, gkTrackFillMapWithCov>(event, tracks, dileptons, eventsMC, tracksMC);
+    auto groupedMCTracks = tracksMC.sliceBy(perReducedMcEvent, event.reducedMCevent().globalIndex());
+    groupedMCTracks.bindInternalIndicesTo(&tracksMC);
+    runMCGen<VarManager::kPsi2StoJpsiPiPi>(groupedMCTracks);
+  }
 
   void processDummy(MyEvents&)
   {
@@ -1723,7 +1730,7 @@ void DefineHistograms(HistogramManager* histMan, TString histClasses)
       dqhistograms::DefineHistograms(histMan, objArray->At(iclass)->GetName(), "dilepton-hadron-mass");
     }
     if (classStr.Contains("Quadruplet") || classStr.Contains("MCTruthRecQuad")) {
-      dqhistograms::DefineHistograms(histMan, objArray->At(iclass)->GetName(), "dilepton-dihadron", "xtojpsipipi");
+      dqhistograms::DefineHistograms(histMan, objArray->At(iclass)->GetName(), "dilepton-dihadron", "xtojpsipipi,vertexing");
     }
 
   } // end loop over histogram classes
