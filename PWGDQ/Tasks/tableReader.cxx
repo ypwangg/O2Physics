@@ -1514,6 +1514,8 @@ struct AnalysisSameEventPairing {
       constexpr bool trackHasCov = ((TTrackFillMap & VarManager::ObjTypes::TrackCov) > 0 || (TTrackFillMap & VarManager::ObjTypes::ReducedTrackBarrelCov) > 0);
       if constexpr ((TPairType == pairTypeEE) && trackHasCov && (TTwoProngFitter == true)) {
         dielectronExtraList(t1.globalIndex(), t2.globalIndex(), VarManager::fgValues[VarManager::kVertexingTauz], VarManager::fgValues[VarManager::kVertexingLz], VarManager::fgValues[VarManager::kVertexingLxy]);
+      } else {
+        dielectronExtraList(t1.globalIndex(), t2.globalIndex(), -999.f, -999.f, -999.f);
       }
       if constexpr ((TPairType == pairTypeMuMu) && (TTwoProngFitter == true)) {
         // LOGP(info, "mu1 collId = {}, mu2 collId = {}", t1.collisionId(), t2.collisionId());
@@ -1825,6 +1827,10 @@ struct AnalysisSameEventPairing {
   PROCESS_SWITCH(AnalysisSameEventPairing, processAllSkimmed, "Run all types of pairing, with skimmed tracks/muons", false);
   PROCESS_SWITCH(AnalysisSameEventPairing, processDummy, "Dummy function, enabled only if none of the others are enabled", false);
 };
+
+// struct AnalysisDileptonPair {
+
+// }
 
 struct AnalysisDileptonHadron {
   //
@@ -2146,7 +2152,7 @@ struct AnalysisDileptonTrackTrack {
     // set up KF or DCAfitter
     if (fConfigUseDCAVertexing) {
       VarManager::SetupTwoProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
-      // VarManager::SetupThreeProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
+      VarManager::SetupThreeProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
       VarManager::SetupFourProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
     } else if (fConfigUseKFVertexing) {
       VarManager::SetupFourProngKFParticle(5.0f);
@@ -2204,9 +2210,9 @@ struct AnalysisDileptonTrackTrack {
         // fill variables
         VarManager::FillDileptonTrackTrack<TCandidateType>(dilepton, t1, t2, fValuesQuadruplet);
         // reconstruct the secondary vertex
-        if (fConfigUseDCAVertexing || fConfigUseKFVertexing) {
-          VarManager::FillDileptonTrackTrackVertexing<TCandidateType, TEventFillMap, TTrackFillMap>(event, lepton1, lepton2, t1, t2, fValuesQuadruplet);
-        }
+        // if ((fConfigUseDCAVertexing || fConfigUseKFVertexing) && (TEventFillMap & VarManager::ObjTypes::ReducedEventVtxCov) && (TTrackFillMap & VarManager::ObjTypes::ReducedTrackBarrelCov)) {
+        //   VarManager::FillDileptonTrackTrackVertexing<TCandidateType, TEventFillMap, TTrackFillMap>(event, lepton1, lepton2, t1, t2, fValuesQuadruplet);
+        // }
 
         int iCut = 0;
         uint32_t CutDecision = 0;
@@ -2259,6 +2265,11 @@ struct AnalysisDileptonTrackTrack {
     runDileptonTrackTrack<VarManager::kPsi2StoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, tracks, dileptons);
   }
 
+  void processB0ToJpsiPiPi(soa::Filtered<MyEventsSelected>::iterator const& event, MyBarrelTracksSelected const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
+  {
+    runDileptonTrackTrack<VarManager::kB0toJpsiEEPiPi, gkEventFillMap, gkTrackFillMap>(event, tracks, dileptons);
+  }
+
   void processDummy(MyEvents&)
   {
     // do nothing
@@ -2266,6 +2277,7 @@ struct AnalysisDileptonTrackTrack {
 
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processChicToJpsiPiPi, "Run dilepton-dihadron pairing to study X(3872), using skimmed data", false);
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processPsi2SToJpsiPiPi, "Run dilepton-dihadron pairing to study Psi(2S), using skimmed data", false);
+  PROCESS_SWITCH(AnalysisDileptonTrackTrack, processB0ToJpsiPiPi, "Run dilepton-dihadron pairing to study B0->Jpsi+Pi+Pi, using skimmed data", false);
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processDummy, "Dummy function", false);
 };
 

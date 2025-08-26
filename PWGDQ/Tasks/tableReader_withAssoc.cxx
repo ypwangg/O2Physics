@@ -197,6 +197,9 @@ using MyEventsQvector = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended
 using MyEventsHashSelectedQvector = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::EventCuts, aod::MixingHashes, aod::ReducedEventsQvector>;
 using MyEventsQvectorCentr = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsQvectorCentr, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll>;
 using MyEventsQvectorCentrSelected = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsQvectorCentr, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll, aod::EventCuts>;
+using MyEventsVtxCovSelectedQvectorMultExtra = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsVtxCov, aod::EventCuts, aod::ReducedEventsQvector, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll>;
+using MyEventsVtxCovSelectedQvectorCentr = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsVtxCov, aod::EventCuts, aod::ReducedEventsQvectorCentr, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll>;
+using MyEventsHashSelectedQvectorCentr = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::EventCuts, aod::MixingHashes, aod::ReducedEventsQvectorCentr, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll>;
 
 using MyBarrelTracks = soa::Join<aod::ReducedTracks, aod::ReducedTracksBarrel, aod::ReducedTracksBarrelPID>;
 using MyBarrelTracksWithAmbiguities = soa::Join<aod::ReducedTracks, aod::ReducedTracksBarrel, aod::ReducedTracksBarrelPID, aod::BarrelAmbiguities>;
@@ -223,11 +226,15 @@ constexpr static uint32_t gkEventFillMapWithMultExtraWithQVector = VarManager::O
 constexpr static uint32_t gkEventFillMapWithMultExtraZdc = VarManager::ObjTypes::ReducedEvent | VarManager::ObjTypes::ReducedEventExtended | VarManager::ObjTypes::ReducedEventMultExtra | VarManager::ReducedZdc;
 constexpr static uint32_t gkEventFillMapWithCovZdcMultExtra = VarManager::ObjTypes::ReducedEvent | VarManager::ObjTypes::ReducedEventExtended | VarManager::ObjTypes::ReducedEventVtxCov | VarManager::ReducedZdc | VarManager::ReducedEventMultExtra;
 constexpr static uint32_t gkEventFillMapWithQvectorCentr = VarManager::ObjTypes::ReducedEvent | VarManager::ObjTypes::ReducedEventExtended | VarManager::ObjTypes::CollisionQvect | VarManager::ObjTypes::ReducedEventMultExtra;
+constexpr static uint32_t gkEventFillMapWithCovQvectorCentr = VarManager::ObjTypes::ReducedEvent | VarManager::ObjTypes::ReducedEventExtended | VarManager::ObjTypes::ReducedEventVtxCov | VarManager::ObjTypes::CollisionQvect | VarManager::ObjTypes::ReducedEventMultExtra;
 // constexpr static uint32_t gkEventFillMapWithQvector = VarManager::ObjTypes::ReducedEvent | VarManager::ObjTypes::ReducedEventExtended | VarManager::ObjTypes::ReducedEventQvector;
 // constexpr static uint32_t gkEventFillMapWithCovQvector = VarManager::ObjTypes::ReducedEvent | VarManager::ObjTypes::ReducedEventExtended | VarManager::ObjTypes::ReducedEventVtxCov | VarManager::ObjTypes::ReducedEventQvector;
 constexpr static uint32_t gkTrackFillMap = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelPID;
 constexpr static uint32_t gkTrackFillMapWithCov = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelCov | VarManager::ObjTypes::ReducedTrackBarrelPID;
+constexpr static uint32_t gkTrackFillMapWithCovV0 = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelCov | VarManager::ObjTypes::ReducedTrackBarrelPID | VarManager::ObjTypes::TrackV0Bits;
 constexpr static uint32_t gkTrackFillMapWithCovWithColl = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelCov | VarManager::ObjTypes::ReducedTrackBarrelPID | VarManager::ObjTypes::ReducedTrackCollInfo;
+constexpr static uint32_t gkTrackFillMapWithCovAmbiguities = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelCov | VarManager::ObjTypes::ReducedTrackBarrelPID | VarManager::ObjTypes::AmbiTrack;
+constexpr static uint32_t gkTrackFillMapWithCovV0Ambiguities = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelCov | VarManager::ObjTypes::ReducedTrackBarrelPID | VarManager::ObjTypes::TrackV0Bits | VarManager::ObjTypes::AmbiTrack;
 
 // constexpr static uint32_t gkMuonFillMap = VarManager::ObjTypes::ReducedMuon | VarManager::ObjTypes::ReducedMuonExtra;
 constexpr static uint32_t gkMuonFillMapWithCov = VarManager::ObjTypes::ReducedMuon | VarManager::ObjTypes::ReducedMuonExtra | VarManager::ObjTypes::ReducedMuonCov;
@@ -235,6 +242,7 @@ constexpr static uint32_t gkMuonFillMapWithCov = VarManager::ObjTypes::ReducedMu
 
 constexpr static int pairTypeEE = VarManager::kDecayToEE;
 constexpr static int pairTypeMuMu = VarManager::kDecayToMuMu;
+constexpr static int pairTypePiPi = VarManager::kDecayToPiPi;
 // constexpr static int pairTypeEMu = VarManager::kElectronMuon;
 
 // Global function used to define needed histogram classes
@@ -1306,8 +1314,8 @@ struct AnalysisSameEventPairing {
   void init(o2::framework::InitContext& context)
   {
     LOG(info) << "Starting initialization of AnalysisSameEventPairing (idstoreh)";
-    fEnableBarrelHistos = context.mOptions.get<bool>("processAllSkimmed") || context.mOptions.get<bool>("processBarrelOnlySkimmed") || context.mOptions.get<bool>("processBarrelOnlyWithCollSkimmed") || context.mOptions.get<bool>("processBarrelOnlySkimmedNoCov") || context.mOptions.get<bool>("processBarrelOnlySkimmedNoCovWithMultExtra") || context.mOptions.get<bool>("processBarrelOnlyWithQvectorCentrSkimmedNoCov");
-    fEnableBarrelMixingHistos = context.mOptions.get<bool>("processMixingAllSkimmed") || context.mOptions.get<bool>("processMixingBarrelSkimmed") || context.mOptions.get<bool>("processMixingBarrelSkimmedFlow");
+    fEnableBarrelHistos = context.mOptions.get<bool>("processAllSkimmed") || context.mOptions.get<bool>("processBarrelOnlySkimmed") || context.mOptions.get<bool>("processBarrelOnlyWithCollSkimmed") || context.mOptions.get<bool>("processBarrelOnlySkimmedNoCov") || context.mOptions.get<bool>("processBarrelOnlySkimmedNoCovWithMultExtra") || context.mOptions.get<bool>("processBarrelOnlyWithQvectorCentrSkimmedNoCov") || context.mOptions.get<bool>("processPiPiSkimmedNoCov");
+    fEnableBarrelMixingHistos = context.mOptions.get<bool>("processMixingAllSkimmed") || context.mOptions.get<bool>("processMixingBarrelSkimmed");
     fEnableMuonHistos = context.mOptions.get<bool>("processAllSkimmed") || context.mOptions.get<bool>("processMuonOnlySkimmed") || context.mOptions.get<bool>("processMuonOnlySkimmedMultExtra") || context.mOptions.get<bool>("processMixingMuonSkimmed");
     fEnableMuonMixingHistos = context.mOptions.get<bool>("processMixingAllSkimmed") || context.mOptions.get<bool>("processMixingMuonSkimmed");
 
@@ -1722,7 +1730,7 @@ struct AnalysisSameEventPairing {
 
       bool isFirst = true;
       for (auto& [a1, a2] : o2::soa::combinations(groupedAssocs, groupedAssocs)) {
-        if constexpr (TPairType == VarManager::kDecayToEE) {
+        if constexpr (TPairType == VarManager::kDecayToEE || TPairType == VarManager::kDecayToPiPi) {
           twoTrackFilter = a1.isBarrelSelected_raw() & a2.isBarrelSelected_raw() & a1.isBarrelSelectedPrefilter_raw() & a2.isBarrelSelectedPrefilter_raw() & fTrackFilterMask;
 
           if (!twoTrackFilter) { // the tracks must have at least one filter bit in common to continue
@@ -1954,7 +1962,7 @@ struct AnalysisSameEventPairing {
             isUnambiguous = !(isAmbiInBunch || isAmbiOutOfBunch);
             isLeg1Ambi = (twoTrackFilter & (static_cast<uint32_t>(1) << 28) || (twoTrackFilter & (static_cast<uint32_t>(1) << 30)));
             isLeg2Ambi = (twoTrackFilter & (static_cast<uint32_t>(1) << 29) || (twoTrackFilter & (static_cast<uint32_t>(1) << 31)));
-            if constexpr (TPairType == VarManager::kDecayToEE) {
+            if constexpr (TPairType == VarManager::kDecayToEE || TPairType == VarManager::kDecayToPiPi) {
               if (isLeg1Ambi && isLeg2Ambi) {
                 std::pair<uint32_t, uint32_t> iPair(a1.reducedtrackId(), a2.reducedtrackId());
                 if (fAmbiguousPairs.find(iPair) != fAmbiguousPairs.end()) {
@@ -1982,7 +1990,7 @@ struct AnalysisSameEventPairing {
                   fHistMan->FillHistClass(histNames[icut][3 + histIdxOffset + 6].Data(), VarManager::fgValues);
                 }
               }
-              if constexpr (TPairType == VarManager::kDecayToEE) {
+              if constexpr (TPairType == VarManager::kDecayToEE || TPairType == VarManager::kDecayToPiPi) {
                 fHistMan->FillHistClass(Form("PairsBarrelSEPM_%s", fTrackCuts[icut].Data()), VarManager::fgValues);
                 if (isAmbiExtra) {
                   fHistMan->FillHistClass(Form("PairsBarrelSEPM_ambiguousextra_%s", fTrackCuts[icut].Data()), VarManager::fgValues);
@@ -2002,7 +2010,7 @@ struct AnalysisSameEventPairing {
                     fHistMan->FillHistClass(histNames[icut][4 + histIdxOffset + 6].Data(), VarManager::fgValues);
                   }
                 }
-                if constexpr (TPairType == VarManager::kDecayToEE) {
+                if constexpr (TPairType == VarManager::kDecayToEE || TPairType == VarManager::kDecayToPiPi) {
                   fHistMan->FillHistClass(Form("PairsBarrelSEPP_%s", fTrackCuts[icut].Data()), VarManager::fgValues);
                   if (isAmbiExtra) {
                     fHistMan->FillHistClass(Form("PairsBarrelSEPP_ambiguousextra_%s", fTrackCuts[icut].Data()), VarManager::fgValues);
@@ -2021,7 +2029,7 @@ struct AnalysisSameEventPairing {
                     fHistMan->FillHistClass(histNames[icut][5 + histIdxOffset + 6].Data(), VarManager::fgValues);
                   }
                 }
-                if constexpr (TPairType == VarManager::kDecayToEE) {
+                if constexpr (TPairType == VarManager::kDecayToEE || TPairType == VarManager::kDecayToPiPi) {
                   fHistMan->FillHistClass(Form("PairsBarrelSEMM_%s", fTrackCuts[icut].Data()), VarManager::fgValues);
                   if (isAmbiExtra) {
                     fHistMan->FillHistClass(Form("PairsBarrelSEMM_ambiguousextra_%s", fTrackCuts[icut].Data()), VarManager::fgValues);
@@ -2254,6 +2262,14 @@ struct AnalysisSameEventPairing {
     runSameEventPairing<false, VarManager::kDecayToEE, gkEventFillMap, gkTrackFillMap>(events, trackAssocsPerCollision, barrelAssocs, barrelTracks);
   }
 
+  // void processPiPiSkimmed
+  void processPiPiSkimmedNoCov(MyEventsSelected const& events,
+                              soa::Join<aod::ReducedTracksAssoc, aod::BarrelTrackCuts, aod::Prefilter> const& barrelAssocs,
+                              MyBarrelTracksWithCovWithAmbiguities const& barrelTracks)
+  {
+    runSameEventPairing<false, VarManager::kDecayToPiPi, gkEventFillMap, gkTrackFillMap>(events, trackAssocsPerCollision, barrelAssocs, barrelTracks);
+  }
+
   void processBarrelOnlySkimmedNoCovWithMultExtra(MyEventsMultExtraSelected const& events,
                                                   soa::Join<aod::ReducedTracksAssoc, aod::BarrelTrackCuts, aod::Prefilter> const& barrelAssocs,
                                                   MyBarrelTracksWithAmbiguities const& barrelTracks)
@@ -2322,6 +2338,7 @@ struct AnalysisSameEventPairing {
   PROCESS_SWITCH(AnalysisSameEventPairing, processBarrelOnlySkimmed, "Run barrel only pairing, with skimmed tracks", false);
   PROCESS_SWITCH(AnalysisSameEventPairing, processBarrelOnlyWithCollSkimmed, "Run barrel only pairing, with skimmed tracks and with collision information", false);
   PROCESS_SWITCH(AnalysisSameEventPairing, processBarrelOnlySkimmedNoCov, "Run barrel only pairing (no covariances), with skimmed tracks and with collision information", false);
+  PROCESS_SWITCH(AnalysisSameEventPairing, processPiPiSkimmedNoCov, "Run barrel only pairing (no covariances), with skimmed tracks, with PiPi decay channel", false);
   PROCESS_SWITCH(AnalysisSameEventPairing, processBarrelOnlySkimmedNoCovWithMultExtra, "Run barrel only pairing (no covariances), with skimmed tracks, with collision information, with MultsExtra", false);
   PROCESS_SWITCH(AnalysisSameEventPairing, processBarrelOnlyWithQvectorCentrSkimmedNoCov, "Run barrel only pairing (no covariances), with skimmed tracks, with Qvector from central framework", false);
   PROCESS_SWITCH(AnalysisSameEventPairing, processBarrelOnlySkimmedFlow, "Run barrel only pairing, with skimmed tracks and with flow", false);
@@ -3822,6 +3839,7 @@ struct AnalysisDileptonTrackTrack {
         VarManager::SetupFourProngKFParticle(magField);
       } else if (fConfigSetupFourProngFitter.value) {
         VarManager::SetupTwoProngDCAFitter(magField, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false);  // TODO: get these parameters from Configurables
+        VarManager::SetupThreeProngDCAFitter(magField, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false);
         VarManager::SetupFourProngDCAFitter(magField, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
       }
     } else {
@@ -3831,6 +3849,7 @@ struct AnalysisDileptonTrackTrack {
       } else if (fConfigSetupFourProngFitter.value) {
         LOGP(info, "Setting up DCA fitter for two and four prong candidates");
         VarManager::SetupTwoProngDCAFitter(fConfigMagField.value, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false);  // TODO: get these parameters from Configurables
+        VarManager::SetupThreeProngDCAFitter(fConfigMagField.value, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false);
         VarManager::SetupFourProngDCAFitter(fConfigMagField.value, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
       }
     }
@@ -3859,6 +3878,19 @@ struct AnalysisDileptonTrackTrack {
       VarManager::FillTrack<fgDileptonFillMap>(dilepton, fValuesQuadruplet);
       // LOGP(info, "is dilepton selected: {}", fDileptonCut.IsSelected(fValuesQuadruplet));
 
+      bool isAmbiguousLepton = (dilepton.filterMap_raw() & (static_cast<uint32_t>(1) << 28)) || 
+                         (dilepton.filterMap_raw() & (static_cast<uint32_t>(1) << 29)) ||
+                         (dilepton.filterMap_raw() & (static_cast<uint32_t>(1) << 30)) ||
+                         (dilepton.filterMap_raw() & (static_cast<uint32_t>(1) << 31));
+      // if (isAmbi && isAmbiguousLepton)
+        // continue; // skip ambiguous dileptons
+      if constexpr ((TTrackFillMap & VarManager::ObjTypes::AmbiTrack)> 0) {
+        if (isAmbiguousLepton) {
+          // LOGP(info, "Dilepton {} is ambiguous, skipping", dilepton.index0Id());
+          continue; // skip ambiguous dileptons
+        }
+      }
+
       // apply the dilepton cut
       if (!fDileptonCut.IsSelected(fValuesQuadruplet))
         continue;
@@ -3884,6 +3916,13 @@ struct AnalysisDileptonTrackTrack {
         // avoid self combinations
         if (track1.globalIndex() == indexLepton1 || track1.globalIndex() == indexLepton2 || track2.globalIndex() == indexLepton1 || track2.globalIndex() == indexLepton2) {
           continue;
+        }
+
+        if constexpr ((TTrackFillMap & VarManager::ObjTypes::AmbiTrack)> 0) {
+          if ((track1.barrelAmbiguityInBunch() > 1) || (track2.barrelAmbiguityInBunch() > 1) ||
+              (track1.barrelAmbiguityOutOfBunch() > 1) || (track2.barrelAmbiguityOutOfBunch() > 1)) {
+            continue;
+          }
         }
 
         // fill variables
@@ -3952,7 +3991,43 @@ struct AnalysisDileptonTrackTrack {
     for (auto& event : events) {
       auto groupedBarrelAssocs = assocs.sliceBy(trackAssocsPerCollision, event.globalIndex());
       auto groupedDielectrons = dileptons.sliceBy(dielectronsPerCollision, event.globalIndex());
-      runDileptonTrackTrack<VarManager::kXtoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, groupedBarrelAssocs, tracks, groupedDielectrons);
+      runDileptonTrackTrack<VarManager::kPsi2StoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, groupedBarrelAssocs, tracks, groupedDielectrons);
+    }
+  }
+
+  void processB0ToJpsiPiPi(soa::Filtered<MyEventsVtxCovSelected> const& events,
+                          soa::Filtered<soa::Join<aod::ReducedTracksAssoc, aod::BarrelTrackCuts>> const& assocs,
+                       MyBarrelTracksWithCov const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
+  {
+    if (events.size() == 0) {
+      return;
+    }
+    if (fCurrentRun != events.begin().runNumber()) { // start: runNumber
+      initParamsFromCCDB(events.begin().timestamp());
+      fCurrentRun = events.begin().runNumber();
+    } // end: runNumber
+    for (auto& event : events) {
+      auto groupedBarrelAssocs = assocs.sliceBy(trackAssocsPerCollision, event.globalIndex());
+      auto groupedDielectrons = dileptons.sliceBy(dielectronsPerCollision, event.globalIndex());
+      runDileptonTrackTrack<VarManager::kB0toJpsiEEPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, groupedBarrelAssocs, tracks, groupedDielectrons);
+    }
+  }
+
+  void processJpsiPiPiNoAmbi(soa::Filtered<MyEventsVtxCovSelected> const& events,
+                                          soa::Filtered<soa::Join<aod::ReducedTracksAssoc, aod::BarrelTrackCuts>> const& assocs,
+                                          MyBarrelTracksWithCovWithAmbiguities const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
+  {
+    if (events.size() == 0) {
+      return;
+    }
+    if (fCurrentRun != events.begin().runNumber()) { // start: runNumber
+      initParamsFromCCDB(events.begin().timestamp());
+      fCurrentRun = events.begin().runNumber();
+    } // end: runNumber
+    for (auto& event : events) {
+      auto groupedBarrelAssocs = assocs.sliceBy(trackAssocsPerCollision, event.globalIndex());
+      auto groupedDielectrons = dileptons.sliceBy(dielectronsPerCollision, event.globalIndex());
+      runDileptonTrackTrack<VarManager::kPsi2StoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCovAmbiguities>(event, groupedBarrelAssocs, tracks, groupedDielectrons);
     }
   }
 
@@ -3962,6 +4037,8 @@ struct AnalysisDileptonTrackTrack {
   }
 
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processJpsiPiPi, "Run barrel pairing of J/psi with pion candidate", false);
+  PROCESS_SWITCH(AnalysisDileptonTrackTrack, processB0ToJpsiPiPi, "Run barrel pairing of B0 to J/psi with pion candidates", false);
+  PROCESS_SWITCH(AnalysisDileptonTrackTrack, processJpsiPiPiNoAmbi, "Run barrel pairing of J/psi with pion candidate without ambiguities", false);
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processDummy, "Dummy function", true);
 };
 

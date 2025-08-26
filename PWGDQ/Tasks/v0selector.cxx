@@ -59,6 +59,8 @@ using FullTracksExt = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksDCA,
                                 aod::pidTPCFullEl, aod::pidTPCFullPi,
                                 aod::pidTPCFullKa, aod::pidTPCFullPr>;
 
+using MyEvent = soa::Join<aod::Collisions, aod::EvSels>;
+
 constexpr static uint32_t gkTrackFillMap = VarManager::ObjTypes::Track | VarManager::ObjTypes::TrackExtra | VarManager::ObjTypes::TrackTPCPID;
 
 struct v0selector {
@@ -199,7 +201,7 @@ struct v0selector {
     }
   }
 
-  void process(aod::V0Datas const& V0s, FullTracksExt const& tracks, aod::Collisions const&)
+  void process(aod::V0Datas const& V0s, FullTracksExt const& tracks, MyEvent const&)
   {
     std::vector<uint8_t> pidmap;
     pidmap.clear();
@@ -211,6 +213,10 @@ struct v0selector {
       v0pidmap.resize(V0s.size(), -1);
     }
     for (auto& V0 : V0s) {
+      auto event = V0.collision_as<MyEvent>();
+      if (!event.sel8()) {
+        continue;
+      }
       // if (!(V0.posTrack_as<FullTracksExt>().trackType() & o2::aod::track::TPCrefit)) {
       //   continue;
       // }

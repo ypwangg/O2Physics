@@ -135,6 +135,7 @@ constexpr static uint32_t gkTrackFillMap = VarManager::ObjTypes::Track | VarMana
 constexpr static uint32_t gkTrackFillMapWithCov = VarManager::ObjTypes::Track | VarManager::ObjTypes::TrackExtra | VarManager::ObjTypes::TrackDCA | VarManager::ObjTypes::TrackSelection | VarManager::ObjTypes::TrackCov | VarManager::ObjTypes::TrackPID | VarManager::ObjTypes::TrackPIDExtra;
 constexpr static uint32_t gkTrackFillMapWithCovOnlyStdPID = VarManager::ObjTypes::Track | VarManager::ObjTypes::TrackExtra | VarManager::ObjTypes::TrackDCA | VarManager::ObjTypes::TrackSelection | VarManager::ObjTypes::TrackCov | VarManager::ObjTypes::TrackPID;
 constexpr static uint32_t gkTrackFillMapWithV0Bits = gkTrackFillMap | VarManager::ObjTypes::TrackV0Bits;
+constexpr static uint32_t gkTrackFillMapWithV0BitsAndCov = gkTrackFillMapWithCov | VarManager::ObjTypes::TrackV0Bits;
 constexpr static uint32_t gkTrackFillMapWithV0BitsForMaps = VarManager::ObjTypes::Track | VarManager::ObjTypes::TrackExtra | VarManager::ObjTypes::TrackDCA | VarManager::ObjTypes::TrackV0Bits | VarManager::ObjTypes::TrackSelection | VarManager::ObjTypes::TrackTPCPID;
 constexpr static uint32_t gkTrackFillMapWithDalitzBits = gkTrackFillMap | VarManager::ObjTypes::DalitzBits;
 constexpr static uint32_t gkTrackFillMapWithV0AndDalitzBits = gkTrackFillMap | VarManager::ObjTypes::TrackV0Bits | VarManager::ObjTypes::DalitzBits;
@@ -1419,6 +1420,13 @@ struct TableMaker {
                                    soa::Filtered<MyBarrelTracksWithV0Bits> const& tracksBarrel)
   {
     fullSkimming<gkEventFillMap, gkTrackFillMapWithV0Bits, 0u>(collision, bcs, tracksBarrel, nullptr, nullptr, nullptr);
+  }
+
+  // Produce barrel only tables, with V0Bits and Cov --------------------------------------------------------------------------------------
+  void processBarrelOnlyWithV0BitsAndCov(MyEvents::iterator const& collision, aod::BCsWithTimestamps const& bcs,
+                                         soa::Filtered<MyBarrelTracksWithV0Bits> const& tracksBarrel)
+  {
+    fullSkimming<gkEventFillMap, gkTrackFillMapWithV0BitsAndCov, 0u>(collision, bcs, tracksBarrel, nullptr, nullptr, nullptr);
   }
 
   // Produce barrel only tables, with V0Bits and Mults

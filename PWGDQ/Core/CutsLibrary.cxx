@@ -640,6 +640,18 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
     return cut;
   }
 
+  if (!nameStr.compare("pionPIDCut3")) {
+    cut->AddCut(GetAnalysisCut("pionQualityCut3"));
+    cut->AddCut(GetAnalysisCut("pionPIDnsigma"));
+    return cut;
+  }
+
+  if (!nameStr.compare("pionDCArej")) {
+    cut->AddCut(GetAnalysisCut("pionDCArej"));
+    cut->AddCut(GetAnalysisCut("pionPIDnsigma"));
+    return cut;
+  }
+
   if (!nameStr.compare("pionPIDCut2")) {
     cut->AddCut(GetAnalysisCut("pionQualityCut2"));
     cut->AddCut(GetAnalysisCut("pionPIDnsigma"));
@@ -3466,6 +3478,11 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
     return cut;
   }
 
+  if (!nameStr.compare("pairJpsi4")) {
+    cut->AddCut(GetAnalysisCut("pairJpsi4"));
+    return cut;
+  }
+
   if (!nameStr.compare("pairPsi2S")) {
     cut->AddCut(GetAnalysisCut("pairPsi2S"));
     return cut;
@@ -3491,6 +3508,93 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
     return cut;
   }
 
+  // Psi2S to Jpsi Pi Pi cut by yiping
+  if (!nameStr.compare("pairX3872Minitree")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_minitree"));
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872Cut8")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_8"));
+    return cut;
+  }
+  if (!nameStr.compare("pairX3872Cut9")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_9"));
+    return cut;
+  }
+  if (!nameStr.compare("pairX3872Cut10")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_10"));
+    return cut;
+  }
+  if (!nameStr.compare("pairX3872Cut11")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_11"));
+    return cut;
+  }
+  if (!nameStr.compare("pairX3872Cut12")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_12"));
+    return cut;
+  }
+  if (!nameStr.compare("pairX3872Cut15")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_15"));
+    return cut;
+  }
+  if (!nameStr.compare("pairX3872CutPt1")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_13"));
+    cut->AddCut(GetAnalysisCut("dileptonPt_rejection"));
+    cut->AddCut(GetAnalysisCut("deltaR_rejection"));
+    return cut;
+  }
+  if (!nameStr.compare("pairX3872CutPt2")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_14"));
+    cut->AddCut(GetAnalysisCut("dileptonPt_rejection"));
+    cut->AddCut(GetAnalysisCut("deltaR_rejection"));
+    return cut;
+  }
+  if (!nameStr.compare("pairX3872CutPt3")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_14"));
+    cut->AddCut(GetAnalysisCut("dileptonPt_rejection"));
+    cut->AddCut(GetAnalysisCut("deltaR_2sigrejection"));
+    return cut;
+  }
+  if (!nameStr.compare("pairX3872CutPt4")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_14"));
+    cut->AddCut(GetAnalysisCut("dileptonPt_rejection"));
+    cut->AddCut(GetAnalysisCut("deltaR_15sigrejection"));
+    return cut;
+  }
+  // following cuts are used for prompt-non-prompt Psi2S to ee
+  if (!nameStr.compare("electronSelection1_yiping")) {
+    cut->AddCut(GetAnalysisCut("jpsiStandardKine4"));
+    cut->AddCut(GetAnalysisCut("electronStandardQualityForO2MCdebug4"));
+    cut->AddCut(GetAnalysisCut("dcaCut1_ionut"));
+    cut->AddCut(GetAnalysisCut("jpsi_TPCPID_debug4"));
+    return cut;
+  }
+  if (!nameStr.compare("electronSelection2_yiping")) {
+    cut->AddCut(GetAnalysisCut("jpsiStandardKine"));
+    cut->AddCut(GetAnalysisCut("electronStandardQualityForO2MCdebug4"));
+    cut->AddCut(GetAnalysisCut("dcaCut1_ionut"));
+    cut->AddCut(GetAnalysisCut("jpsi_TPCPID_debug4"));
+    return cut;
+  }
+  if (!nameStr.compare("electronSelection3_yiping")) {
+    cut->AddCut(GetAnalysisCut("jpsiStandardKine"));
+    cut->AddCut(GetAnalysisCut("electronStandardQualityForO2MCdebug4"));
+    cut->AddCut(GetAnalysisCut("dcaCut1_ionut"));
+    cut->AddCut(GetAnalysisCut("jpsi_TPCPID_debug6"));
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872hasVtx")) {
+    cut->AddCut(GetAnalysisCut("pairX3872_hasVtx"));
+    return cut;
+  }
+
+  if (!nameStr.compare("pairB0test")) {
+    cut->AddCut(GetAnalysisCut("pair_b0test"));
+    return cut;
+  }
+
   if (!nameStr.compare("DipionPairCut1")) {
     cut->AddCut(GetAnalysisCut("DipionMassCut1"));
     return cut;
@@ -3507,13 +3611,13 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
   }
 
   if (!nameStr.compare("pairJpsiLowPt1")) {
-    cut->AddCut(GetAnalysisCut("pairJpsi"));
+    cut->AddCut(GetAnalysisCut("pairJpsi2"));
     cut->AddCut(GetAnalysisCut("pairPtLow1"));
     return cut;
   }
 
   if (!nameStr.compare("pairJpsiLowPt2")) {
-    cut->AddCut(GetAnalysisCut("pairJpsi"));
+    cut->AddCut(GetAnalysisCut("pairJpsi2"));
     cut->AddCut(GetAnalysisCut("pairPtLow2"));
     return cut;
   }
@@ -4399,7 +4503,7 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
   if (!nameStr.compare("jpsi_trackCut_debug6")) {
     cut->AddCut(VarManager::kTPCchi2, 0.0, 4.0);
     cut->AddCut(VarManager::kTPCncls, 120., 159);
-    cut->AddCut(VarManager::kTPCnclsCR, 140., 159);
+    // cut->AddCut(VarManager::kTPCnclsCR, 140., 159);
     cut->AddCut(VarManager::kIsITSibAny, 0.5, 1.5);
     cut->AddCut(VarManager::kIsSPDfirst, 0.5, 1.5);
     return cut;
@@ -4698,6 +4802,22 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kIsITSibAny, 0.5, 1.5);
     cut->AddCut(VarManager::kTPCncls, 90, 161);
     cut->AddCut(VarManager::kTPCnclsCR, 70, 161);
+    return cut;
+  }
+
+  if (!nameStr.compare("pionQualityCut3")) {
+    cut->AddCut(VarManager::kPt, 0.15, 1000.0);
+    cut->AddCut(VarManager::kIsITSibAny, 0.5, 1.5);
+    cut->AddCut(VarManager::kTPCncls, 70, 161);
+    cut->AddCut(VarManager::kTrackDCAxy, -0.5, 0.5);
+    cut->AddCut(VarManager::kTrackDCAz, -0.5, 0.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("pionDCArej")) {
+    cut->AddCut(VarManager::kTPCncls, 120, 161);
+    cut->AddCut(VarManager::kTrackDCAxy, -0.1, 0.1, true);
+    cut->AddCut(VarManager::kTrackDCAz, -0.1, 0.1, true);
     return cut;
   }
 
@@ -6472,6 +6592,11 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     return cut;
   }
 
+  if (!nameStr.compare("pairJpsi4")) {
+    cut->AddCut(VarManager::kMass, 2.8, 3.2);
+    return cut;
+  }
+
   if (!nameStr.compare("pairPsi2S")) {
     cut->AddCut(VarManager::kMass, 3.4, 3.9);
     return cut;
@@ -6500,6 +6625,162 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kQ, 0.0, 0.5);
     cut->AddCut(VarManager::kDeltaR, 0.0, 5.0);
     cut->AddCut(VarManager::kQuadPt, 0.0, 1000.0);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_minitree")) {
+    cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
+    cut->AddCut(VarManager::kQ, -0.5, 0.5);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 3.5);
+    cut->AddCut(VarManager::kDitrackMass, 0.0, 0.8);
+    cut->AddCut(VarManager::kQuadPt, 0.0, 1000.0);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_8")) {
+    cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
+    cut->AddCut(VarManager::kQ, -0.5, 0.5);
+    cut->AddCut(VarManager::kDeltaR1, 0.0, 2.0);
+    cut->AddCut(VarManager::kDeltaR2, 0.0, 2.0);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 1.5);
+    cut->AddCut(VarManager::kDitrackMass, 0.0, 0.8);
+    cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
+    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_9")) {
+    cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
+    cut->AddCut(VarManager::kQ, -0.4, 0.4);
+    cut->AddCut(VarManager::kDeltaR1, 0.0, 1.0);
+    cut->AddCut(VarManager::kDeltaR2, 0.0, 1.0);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 1.5);
+    cut->AddCut(VarManager::kDitrackMass, 0.2, 0.6);
+    cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
+    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_10")) {
+    cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
+    cut->AddCut(VarManager::kQ, -0.2, 0.2);
+    // cut->AddCut(VarManager::kDeltaR1, 0.0, 1.0);
+    // cut->AddCut(VarManager::kDeltaR2, 0.0, 1.0);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 1.0);
+    cut->AddCut(VarManager::kDitrackMass, 0.45, 0.55);
+    // cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
+    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_11")) {
+    cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
+    cut->AddCut(VarManager::kQ, -0.2, 0.2);
+    // cut->AddCut(VarManager::kDeltaR1, 0.0, 1.0);
+    // cut->AddCut(VarManager::kDeltaR2, 0.0, 1.0);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 1.0);
+    cut->AddCut(VarManager::kDitrackMass, 0.45, 0.55);
+    // cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
+    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kPtOverPairPt, 1.0, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_12")) {
+    cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
+    cut->AddCut(VarManager::kQ, -0.2, 0.2);
+    // cut->AddCut(VarManager::kDeltaR1, 0.0, 1.0);
+    // cut->AddCut(VarManager::kDeltaR2, 0.0, 1.0);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 1.0);
+    cut->AddCut(VarManager::kDitrackMass, 0.45, 0.55);
+    // cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
+    // cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
+    // cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kPtOverPairPt, 1.0, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_13")) {
+    cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
+    cut->AddCut(VarManager::kQ, -0.2, 0.2);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 5.0);
+    cut->AddCut(VarManager::kDitrackMass, 0.45, 0.55);
+    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_14")) {
+    cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
+    cut->AddCut(VarManager::kQ, -0.4, 0.2);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 5.0);
+    cut->AddCut(VarManager::kDitrackMass, 0.4, 0.58);
+    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_15")) {
+    cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
+    cut->AddCut(VarManager::kQ, -0.4, 0.2);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 1.0);
+    cut->AddCut(VarManager::kDitrackMass, 0.4, 0.58);
+    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kPtOverPairPt, 1.0, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("pairX3872_hasVtx")) {
+    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
+    cut->AddCut(VarManager::kVertexingQuadProcCode,0.5, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("dileptonPt_rejection")) {
+    TF1* fPairPtLow = new TF1("f1", "pol1", 0., 20.);
+    fPairPtLow->SetParameters(-0.419607, 1.07925);
+    TF1* fPairPtHigh = new TF1("f2", "pol1", 0., 20.);
+    fPairPtHigh->SetParameters(0.515923, 1.34061);
+    cut->AddCut(VarManager::kQuadPt, fPairPtLow, fPairPtHigh, false, VarManager::kPairPt, 0., 20.);
+    return cut;
+  }
+
+  if (!nameStr.compare("deltaR_rejection")) {
+    TF1* fDeltaRLow = new TF1("f1", "[0]*exp([1]*x)+[2]", 0., 5.);
+    fDeltaRLow->SetParameters(12.3641, -6.45546, 0.332389);
+    TF1* fDeltaRHigh = new TF1("f2", "[0]*exp([1]*x)+[2]", 0., 5.);
+    fDeltaRHigh->SetParameters(28.7518, -1.25672, 1.06815);
+    cut->AddCut(VarManager::kQuadPt, fDeltaRLow, fDeltaRHigh, false, VarManager::kDeltaR, 0., 5.);
+    return cut;
+  }
+
+  if (!nameStr.compare("deltaR_2sigrejection")) {
+    TF1* fDeltaRLow = new TF1("f1", "[0]*exp([1]*x)+[2]", 0., 5.);
+    fDeltaRLow->SetParameters(17.5661, -3.39083, 0.340562);
+    TF1* fDeltaRHigh = new TF1("f2", "[0]*exp([1]*x)+[2]", 0., 5.);
+    fDeltaRHigh->SetParameters(28.8933, -1.51157, 1.10834);
+    cut->AddCut(VarManager::kQuadPt, fDeltaRLow, fDeltaRHigh, false, VarManager::kDeltaR, 0., 5.);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 3.0);
+    return cut;
+  }
+
+  if (!nameStr.compare("deltaR_15sigrejection")) {
+    TF1* fDeltaRLow = new TF1("f1", "[0]*exp([1]*x)+[2]", 0., 5.);
+    fDeltaRLow->SetParameters(21.1786, -3.30186, 0.80823);
+    TF1* fDeltaRHigh = new TF1("f2", "[0]*exp([1]*x)+[2]", 0., 5.);
+    fDeltaRHigh->SetParameters(28.8547, -1.67054, 1.1059);
+    cut->AddCut(VarManager::kQuadPt, fDeltaRLow, fDeltaRHigh, false, VarManager::kDeltaR, 0., 5.);
+    cut->AddCut(VarManager::kDeltaR, 0.0, 3.0);
+    return cut;
+  }
+
+  if (!nameStr.compare("pair_b0test")) {
+    cut->AddCut(VarManager::kDitrackMass, 0.49, 0.502);
     return cut;
   }
 
