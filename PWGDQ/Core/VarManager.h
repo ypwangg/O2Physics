@@ -4315,7 +4315,7 @@ void VarManager::FillDileptonTrackVertexing(C const& collision, T1 const& lepton
         mlepton1 = o2::constants::physics::MassKaonCharged;
         mlepton2 = o2::constants::physics::MassPionCharged;
         mtrack = o2::constants::physics::MassPionCharged;
-      } 
+      }
       std::array<float, 5> lepton1pars = {lepton1.y(), lepton1.z(), lepton1.snp(), lepton1.tgl(), lepton1.signed1Pt()};
       std::array<float, 15> lepton1covs = {lepton1.cYY(), lepton1.cZY(), lepton1.cZZ(), lepton1.cSnpY(), lepton1.cSnpZ(),
                                            lepton1.cSnpSnp(), lepton1.cTglY(), lepton1.cTglZ(), lepton1.cTglSnp(), lepton1.cTglTgl(),
