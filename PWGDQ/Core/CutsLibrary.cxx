@@ -3541,6 +3541,11 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
     return cut;
   }
 
+  if (!nameStr.compare("pairJpsi4")) {
+    cut->AddCut(GetAnalysisCut("pairJpsi4"));
+    return cut;
+  }
+
   if (!nameStr.compare("pairPsi2S")) {
     cut->AddCut(GetAnalysisCut("pairPsi2S"));
     return cut;
@@ -3709,13 +3714,13 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
   }
 
   if (!nameStr.compare("pairJpsiLowPt1")) {
-    cut->AddCut(GetAnalysisCut("pairJpsi"));
+    cut->AddCut(GetAnalysisCut("pairJpsi2"));
     cut->AddCut(GetAnalysisCut("pairPtLow1"));
     return cut;
   }
 
   if (!nameStr.compare("pairJpsiLowPt2")) {
-    cut->AddCut(GetAnalysisCut("pairJpsi"));
+    cut->AddCut(GetAnalysisCut("pairJpsi2"));
     cut->AddCut(GetAnalysisCut("pairPtLow2"));
     return cut;
   }
@@ -4601,7 +4606,7 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
   if (!nameStr.compare("jpsi_trackCut_debug6")) {
     cut->AddCut(VarManager::kTPCchi2, 0.0, 4.0);
     cut->AddCut(VarManager::kTPCncls, 120., 159);
-    cut->AddCut(VarManager::kTPCnclsCR, 140., 159);
+    // cut->AddCut(VarManager::kTPCnclsCR, 140., 159);
     cut->AddCut(VarManager::kIsITSibAny, 0.5, 1.5);
     cut->AddCut(VarManager::kIsSPDfirst, 0.5, 1.5);
     return cut;
@@ -6708,6 +6713,11 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     return cut;
   }
 
+  if (!nameStr.compare("pairJpsi4")) {
+    cut->AddCut(VarManager::kMass, 2.8, 3.2);
+    return cut;
+  }
+
   if (!nameStr.compare("pairPsi2S")) {
     cut->AddCut(VarManager::kMass, 3.4, 3.9);
     return cut;
@@ -6739,8 +6749,6 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     return cut;
   }
 
-<<<<<<< HEAD
-=======
   if (!nameStr.compare("pairX3872_minitree")) {
     cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
     cut->AddCut(VarManager::kQ, -0.5, 0.5);
@@ -6758,13 +6766,8 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kDeltaR, 0.0, 1.5);
     cut->AddCut(VarManager::kDitrackMass, 0.0, 0.8);
     cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
-<<<<<<< HEAD
-    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
-    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
-=======
     cut->AddCut(VarManager::kVertexingProcCode, 0.5, 2.5);
     cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 2.5);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     return cut;
   }
 
@@ -6776,13 +6779,8 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kDeltaR, 0.0, 1.5);
     cut->AddCut(VarManager::kDitrackMass, 0.2, 0.6);
     cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
-<<<<<<< HEAD
-    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
-    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
-=======
     cut->AddCut(VarManager::kVertexingProcCode, 0.5, 2.5);
     cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 2.5);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     return cut;
   }
 
@@ -6794,13 +6792,8 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kDeltaR, 0.0, 1.0);
     cut->AddCut(VarManager::kDitrackMass, 0.45, 0.55);
     // cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
-<<<<<<< HEAD
-    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
-    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
-=======
     cut->AddCut(VarManager::kVertexingProcCode, 0.5, 2.5);
     cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 2.5);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     return cut;
   }
 
@@ -6812,13 +6805,8 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kDeltaR, 0.0, 1.0);
     cut->AddCut(VarManager::kDitrackMass, 0.45, 0.55);
     // cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
-<<<<<<< HEAD
-    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
-    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
-=======
     cut->AddCut(VarManager::kVertexingProcCode, 0.5, 2.5);
     cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 2.5);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     cut->AddCut(VarManager::kPtOverPairPt, 1.0, 1.5);
     return cut;
   }
@@ -6831,13 +6819,8 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kDeltaR, 0.0, 1.0);
     cut->AddCut(VarManager::kDitrackMass, 0.45, 0.55);
     // cut->AddCut(VarManager::kQuadPt, 2.0, 1000.0);
-<<<<<<< HEAD
-    // cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
-    // cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
-=======
     // cut->AddCut(VarManager::kVertexingProcCode, 0.5, 2.5);
     // cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 2.5);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     cut->AddCut(VarManager::kPtOverPairPt, 1.0, 1.5);
     return cut;
   }
@@ -6845,34 +6828,20 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
   if (!nameStr.compare("pairX3872_13")) {
     cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
     cut->AddCut(VarManager::kQ, -0.2, 0.2);
-<<<<<<< HEAD
-    cut->AddCut(VarManager::kDeltaR, 0.0, 5.0);
-    cut->AddCut(VarManager::kDitrackMass, 0.45, 0.55);
-    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
-    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
-=======
     cut->AddCut(VarManager::kDeltaR, 0.0, 1.5);
     cut->AddCut(VarManager::kDitrackMass, 0.45, 0.55);
     cut->AddCut(VarManager::kVertexingProcCode, 0.5, 2.5);
     cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 2.5);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     return cut;
   }
 
   if (!nameStr.compare("pairX3872_14")) {
     cut->AddCut(VarManager::kQuadDefaultDileptonMass, 3.0, 5.0);
     cut->AddCut(VarManager::kQ, -0.4, 0.2);
-<<<<<<< HEAD
-    cut->AddCut(VarManager::kDeltaR, 0.0, 5.0);
-    cut->AddCut(VarManager::kDitrackMass, 0.4, 0.58);
-    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
-    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
-=======
     cut->AddCut(VarManager::kDeltaR, 0.0, 1.5);
     cut->AddCut(VarManager::kDitrackMass, 0.4, 0.58);
     cut->AddCut(VarManager::kVertexingProcCode, 0.5, 2.5);
     cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 2.5);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     return cut;
   }
 
@@ -6881,23 +6850,14 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kQ, -0.4, 0.2);
     cut->AddCut(VarManager::kDeltaR, 0.0, 1.0);
     cut->AddCut(VarManager::kDitrackMass, 0.4, 0.58);
-<<<<<<< HEAD
-    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
-    cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 1.5);
-=======
     cut->AddCut(VarManager::kVertexingProcCode, 0.5, 2.5);
     cut->AddCut(VarManager::kVertexingQuadProcCode, 0.5, 2.5);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     cut->AddCut(VarManager::kPtOverPairPt, 1.0, 1.5);
     return cut;
   }
 
   if (!nameStr.compare("pairX3872_hasVtx")) {
-<<<<<<< HEAD
-    cut->AddCut(VarManager::kVertexingProcCode, 0.5, 1.5);
-=======
     cut->AddCut(VarManager::kVertexingProcCode, 0.5, 2.5);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     cut->AddCut(VarManager::kVertexingQuadProcCode,0.5, 1.5);
     return cut;
   }
@@ -6941,20 +6901,15 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
   }
 
   if (!nameStr.compare("pair_b0test")) {
-<<<<<<< HEAD
-    cut->AddCut(VarManager::kDitrackMass, 0.49, 0.502);
-=======
     cut->AddCut(VarManager::kDitrackMass, 0.49, 0.51);
     return cut;
   }
 
   if (!nameStr.compare("pair_bstest")) {
     cut->AddCut(VarManager::kDitrackMass, 1.0, 1.04);
->>>>>>> 450e56187 (updated psi2s analysis and dilepton v0)
     return cut;
   }
 
->>>>>>> 9942c0482 (updated psi2s analysis and dilepton v0)
   if (!nameStr.compare("pairPtLow1")) {
     cut->AddCut(VarManager::kPt, 2.0, 1000.0);
     return cut;
