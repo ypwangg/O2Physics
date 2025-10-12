@@ -4306,7 +4306,7 @@ void VarManager::FillDileptonTrackVertexing(C const& collision, T1 const& lepton
 
       procCode = VarManager::fgFitterThreeProngFwd.process(pars1, pars2, pars3);
       procCodeJpsi = VarManager::fgFitterTwoProngFwd.process(pars1, pars2);
-    } else if constexpr ((candidateType == kBtoJpsiEEK || candidateType == kDstarToD0KPiPi || candidateType == kB0toJpsiEEPiPi) && trackHasCov) {
+    } else if constexpr ((candidateType == kBtoJpsiEEK || candidateType == kDstarToD0KPiPi) && trackHasCov) {
       if constexpr ((candidateType == kBtoJpsiEEK) && trackHasCov) {
         mlepton1 = o2::constants::physics::MassElectron;
         mlepton2 = o2::constants::physics::MassElectron;
@@ -4315,11 +4315,7 @@ void VarManager::FillDileptonTrackVertexing(C const& collision, T1 const& lepton
         mlepton1 = o2::constants::physics::MassKaonCharged;
         mlepton2 = o2::constants::physics::MassPionCharged;
         mtrack = o2::constants::physics::MassPionCharged;
-      } else if constexpr ((candidateType) == kB0toJpsiEEPiPi && trackHasCov) {
-        mlepton1 = o2::constants::physics::MassElectron;
-        mlepton2 = o2::constants::physics::MassElectron;
-        mtrack = o2::constants::physics::MassKaonNeutral;
-      }
+      } 
       std::array<float, 5> lepton1pars = {lepton1.y(), lepton1.z(), lepton1.snp(), lepton1.tgl(), lepton1.signed1Pt()};
       std::array<float, 15> lepton1covs = {lepton1.cYY(), lepton1.cZY(), lepton1.cZZ(), lepton1.cSnpY(), lepton1.cSnpZ(),
                                            lepton1.cSnpSnp(), lepton1.cTglY(), lepton1.cTglZ(), lepton1.cTglSnp(), lepton1.cTglTgl(),
@@ -4393,7 +4389,7 @@ void VarManager::FillDileptonTrackVertexing(C const& collision, T1 const& lepton
       o2::dataformats::VertexBase primaryVertex = {std::move(vtxXYZ), std::move(vtxCov)};
       auto covMatrixPV = primaryVertex.getCov();
 
-      if constexpr ((candidateType == kBtoJpsiEEK || candidateType == kDstarToD0KPiPi || candidateType == kB0toJpsiEEPiPi) && trackHasCov) {
+      if constexpr ((candidateType == kBtoJpsiEEK || candidateType == kDstarToD0KPiPi) && trackHasCov) {
         secondaryVertex = fgFitterThreeProngBarrel.getPCACandidate();
         covMatrixPCA = fgFitterThreeProngBarrel.calcPCACovMatrixFlat();
       } else if constexpr (candidateType == kBcToThreeMuons && muonHasCov) {
