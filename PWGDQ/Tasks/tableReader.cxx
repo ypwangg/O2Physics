@@ -2135,7 +2135,7 @@ struct AnalysisDileptonTrackTrack {
     fOutputList.setObject(fHistMan->GetMainHistogramList());
   }
   // Template function to run pair - track - track combinations
-  template <int TCandidateType, uint32_t TEventFillMap, uint32_t TTrackFillMap, typename TEvent, typename TTracks>
+  template <int NProng, int TCandidateType, uint32_t TEventFillMap, uint32_t TTrackFillMap, typename TEvent, typename TTracks>
   void runDileptonTrackTrack(TEvent const& event, TTracks const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
   {
     VarManager::ResetValues(0, VarManager::kNVars, fValuesQuadruplet);
@@ -2144,12 +2144,25 @@ struct AnalysisDileptonTrackTrack {
     // LOGF(info, "Number of dileptons: %d", dileptons.size());
 
     // set up KF or DCAfitter
-    if (fConfigUseDCAVertexing) {
-      VarManager::SetupTwoProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
-      // VarManager::SetupThreeProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
+    // if (fConfigUseDCAVertexing) {
+    //   VarManager::SetupTwoProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
+    //   // VarManager::SetupThreeProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
+    //   VarManager::SetupFourProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
+    // } else if (fConfigUseKFVertexing) {
+    //   VarManager::SetupFourProngKFParticle(5.0f);
+    // }
+    if (NProng == 3) {
+      if (fConfigUseKFVertexing) {
+        VarManager::SetupThreeProngKFParticle(5.0f);
+      } else {
+        VarManager::SetupThreeProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
+      }
+    } else if (NProng == 4) {
+      if (fConfigUseKFVertexing) {
+        VarManager::SetupFourProngKFParticle(5.0f);
+      } else {
       VarManager::SetupFourProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
-    } else if (fConfigUseKFVertexing) {
-      VarManager::SetupFourProngKFParticle(5.0f);
+      }
     }
 
     int indexOffset = -999;
@@ -2204,7 +2217,7 @@ struct AnalysisDileptonTrackTrack {
         // fill variables
         VarManager::FillDileptonTrackTrack<TCandidateType>(dilepton, t1, t2, fValuesQuadruplet);
         // reconstruct the secondary vertex
-        if (fConfigUseDCAVertexing || fConfigUseKFVertexing) {
+        if constexpr (NProng > 0) {
           VarManager::FillDileptonTrackTrackVertexing<TCandidateType, TEventFillMap, TTrackFillMap>(event, lepton1, lepton2, t1, t2, fValuesQuadruplet);
         }
 
@@ -2251,12 +2264,17 @@ struct AnalysisDileptonTrackTrack {
 
   void processChicToJpsiPiPi(soa::Filtered<MyEventsVtxCovSelected>::iterator const& event, MyBarrelTracksSelectedWithCov const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
   {
-    runDileptonTrackTrack<VarManager::kXtoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, tracks, dileptons);
+    runDileptonTrackTrack<4, VarManager::kXtoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, tracks, dileptons);
   }
 
   void processPsi2SToJpsiPiPi(soa::Filtered<MyEventsVtxCovSelected>::iterator const& event, MyBarrelTracksSelectedWithCov const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
   {
-    runDileptonTrackTrack<VarManager::kPsi2StoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, tracks, dileptons);
+    runDileptonTrackTrack<4, VarManager::kPsi2StoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, tracks, dileptons);
+  }
+
+  void processB0ToJpsiPiPi(soa::Filtered<MyEventsSelected>::iterator const& event, MyBarrelTracksSelected const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
+  {
+    runDileptonTrackTrack<0, VarManager::kB0toJpsiEEPiPi, gkEventFillMap, gkTrackFillMap>(event, tracks, dileptons);
   }
 
   void processDummy(MyEvents&)

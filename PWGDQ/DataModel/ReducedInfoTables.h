@@ -698,6 +698,17 @@ DECLARE_SOA_COLUMN(Tauxy, tauxy, float);                                        
 DECLARE_SOA_COLUMN(TauxyErr, tauxyErr, float);                                           //! Error on transverse pseudo-proper time of lepton pair (in ns)
 DECLARE_SOA_COLUMN(Lz, lz, float);                                                       //! Longitudinal projection of decay length
 DECLARE_SOA_COLUMN(Lxy, lxy, float);                                                     //! Transverse projection of decay length
+DECLARE_SOA_COLUMN(LzErr, lzerr, float);                                                 //! Lz over error
+DECLARE_SOA_COLUMN(LxyErr, lxyerr, float);
+DECLARE_SOA_COLUMN(TauzProj, tauzproj, float);
+DECLARE_SOA_COLUMN(TauxyProj, tauxyproj, float);
+DECLARE_SOA_COLUMN(TauzProjErr, tauzprojerr, float);
+DECLARE_SOA_COLUMN(TauxyProjErr, tauxyprojerr, float);
+DECLARE_SOA_COLUMN(LzProj, lzproj, float);
+DECLARE_SOA_COLUMN(LxyProj, lxyproj, float);
+DECLARE_SOA_COLUMN(Lxyz, lxyz, float);
+DECLARE_SOA_COLUMN(Tauxyz, tauxyz, float);
+DECLARE_SOA_COLUMN(TauxyzErr, tauxyzerr, float);
 DECLARE_SOA_COLUMN(Chi2pca, chi2pca, float);                                             //! Chi2 for PCA of the dilepton
 DECLARE_SOA_COLUMN(CosPointingAngle, cosPointingAngle, float);                           //! Cosine of the pointing angle
 DECLARE_SOA_COLUMN(U2Q2, u2q2, float);                                                   //! Scalar product between unitary vector with event flow vector (harmonic 2)
@@ -836,6 +847,16 @@ DECLARE_SOA_TABLE(DielectronsAll, "AOD", "RTDIELECTRONALL", //!
                   reducedpair::Tauz, reducedpair::Tauxy,
                   reducedpair::Lz,
                   reducedpair::Lxy);
+
+DECLARE_SOA_TABLE(DielectronsVertexing, "AOD", "RTDIELECTRONVTX", //!
+                  reducedpair::Mass,
+                  reducedpair::Pt, reducedpair::Eta, reducedpair::Phi, reducedpair::Sign,
+                  reducedpair::FilterMap,
+                  reducedpair::McDecision,
+                  dilepton_track_index::Pt1, dilepton_track_index::Eta1, dilepton_track_index::Phi1, dilepton_track_index::ITSClusterMap1, dilepton_track_index::ITSChi2NCl1, dilepton_track_index::TPCNClsCR1, dilepton_track_index::TPCNClsFound1, dilepton_track_index::TPCChi2NCl1, dilepton_track_index::DcaXY1, dilepton_track_index::DcaZ1, dilepton_track_index::TPCSignal1, dilepton_track_index::TPCNSigmaEl1, dilepton_track_index::TPCNSigmaPi1, dilepton_track_index::TPCNSigmaPr1, dilepton_track_index::TOFBeta1, dilepton_track_index::TOFNSigmaEl1, dilepton_track_index::TOFNSigmaPi1, dilepton_track_index::TOFNSigmaPr1,
+                  dilepton_track_index::Pt2, dilepton_track_index::Eta2, dilepton_track_index::Phi2, dilepton_track_index::ITSClusterMap2, dilepton_track_index::ITSChi2NCl2, dilepton_track_index::TPCNClsCR2, dilepton_track_index::TPCNClsFound2, dilepton_track_index::TPCChi2NCl2, dilepton_track_index::DcaXY2, dilepton_track_index::DcaZ2, dilepton_track_index::TPCSignal2, dilepton_track_index::TPCNSigmaEl2, dilepton_track_index::TPCNSigmaPi2, dilepton_track_index::TPCNSigmaPr2, dilepton_track_index::TOFBeta2, dilepton_track_index::TOFNSigmaEl2, dilepton_track_index::TOFNSigmaPi2, dilepton_track_index::TOFNSigmaPr2,
+                  reducedpair::Lxy, reducedpair::Tauxy, reducedpair::TauxyErr, reducedpair::Lz, reducedpair::Tauz, reducedpair::TauzErr);
+                  // reducedpair::LxyProj, reducedpair::TauxyProj, reducedpair::TauxyProjErr, reducedpair::LzProj, reducedpair::TauzProj, reducedpair::TauzProjErr);
 
 DECLARE_SOA_TABLE(DimuonsAll, "AOD", "RTDIMUONALL", //!
                   collision::PosX, collision::PosY, collision::PosZ, collision::NumContrib,
