@@ -818,6 +818,8 @@ void VarManager::SetDefaultVarNames()
   fgVariableUnits[kVertexingTauxyErr] = "ns";
   fgVariableNames[kVertexingProcCode] = "DCAFitterN<2> processing code";
   fgVariableUnits[kVertexingProcCode] = "";
+  fgVariableNames[kVertexingQuadProcCode] = "DCAFitterN<4> processing code dilepton";
+  fgVariableUnits[kVertexingQuadProcCode] = "";
   fgVariableNames[kVertexingChi2PCA] = "Pair #chi^{2} at PCA";
   fgVariableUnits[kVertexingChi2PCA] = "";
   fgVariableNames[kVertexingLxyOverErr] = "Pair Lxy/DLxy";
@@ -1254,6 +1256,10 @@ void VarManager::SetDefaultVarNames()
   fgVariableUnits[kDeltaR1] = "";
   fgVariableNames[kDeltaR2] = "angular distance prong 2";
   fgVariableUnits[kDeltaR2] = "";
+  fgVariableNames[kDeltaR] = "angular distance";
+  fgVariableUnits[kDeltaR] = "";
+  fgVariableNames[kPtOverPairPt] = "p_{T}^{Quad}/p_{T}^{dilepton}";
+  fgVariableUnits[kPtOverPairPt] = "";
   fgVariableNames[kV22m] = "v_{2}(2)_{#mu^{-}}";
   fgVariableUnits[kV22m] = "";
   fgVariableNames[kV24m] = "v_{2}(4)_{#mu^{-}}";
@@ -1730,6 +1736,7 @@ void VarManager::SetDefaultVarNames()
   fgVarNamesMap["kVertexingPz"] = kVertexingPz;
   fgVarNamesMap["kVertexingSV"] = kVertexingSV;
   fgVarNamesMap["kVertexingProcCode"] = kVertexingProcCode;
+  fgVarNamesMap["kVertexingQuadProcCode"] = kVertexingQuadProcCode;
   fgVarNamesMap["kVertexingChi2PCA"] = kVertexingChi2PCA;
   fgVarNamesMap["kCosThetaHE"] = kCosThetaHE;
   fgVarNamesMap["kPhiHE"] = kPhiHE;
@@ -1897,6 +1904,7 @@ void VarManager::SetDefaultVarNames()
   fgVarNamesMap["kQ"] = kQ;
   fgVarNamesMap["kDeltaR1"] = kDeltaR1;
   fgVarNamesMap["kDeltaR2"] = kDeltaR2;
+  fgVarNamesMap["kPtOverPairPt"] = kPtOverPairPt;
   fgVarNamesMap["kMassCharmHadron"] = kMassCharmHadron;
   fgVarNamesMap["kPtCharmHadron"] = kPtCharmHadron;
   fgVarNamesMap["kRapCharmHadron"] = kRapCharmHadron;

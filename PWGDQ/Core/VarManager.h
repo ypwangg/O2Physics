@@ -656,6 +656,8 @@ class VarManager : public TObject
     kVertexingTauxyzProjected,
     kVertexingTauz,
     kVertexingTauzErr,
+    kVertexingTauxyz,
+    kVertexingTauxyzErr,
     kVertexingPz,
     kVertexingSV,
     kVertexingProcCode,
@@ -839,6 +841,8 @@ class VarManager : public TObject
     kDeltaR1,
     kDeltaR2,
     kDeltaR,
+    kPtOverPairPt,
+    kVertexingQuadProcCode,
 
     // DQ-HF correlation variables
     kMassCharmHadron,
@@ -3692,6 +3696,10 @@ void VarManager::FillPairVertexing(C const& collision, T const& t1, T const& t2,
     m1 = o2::constants::physics::MassMuon;
     m2 = o2::constants::physics::MassMuon;
   }
+  if constexpr (pairType == kDecayToPiPi) {
+    m1 = o2::constants::physics::MassPionCharged;
+    m2 = o2::constants::physics::MassPionCharged;
+  }
   ROOT::Math::PtEtaPhiMVector v1(t1.pt(), t1.eta(), t1.phi(), m1);
   ROOT::Math::PtEtaPhiMVector v2(t2.pt(), t2.eta(), t2.phi(), m2);
   ROOT::Math::PtEtaPhiMVector v12 = v1 + v2;
@@ -3896,7 +3904,8 @@ void VarManager::FillPairVertexing(C const& collision, T const& t1, T const& t2,
         if (fabs(values[kVertexingLxyz]) < 1.e-8f)
           values[kVertexingLxyz] = 1.e-8f;
         values[kVertexingLxyzErr] = values[kVertexingLxyzErr] < 0. ? 1.e8f : std::sqrt(values[kVertexingLxyzErr]) / values[kVertexingLxyz];
-        values[kVertexingTauxy] = KFGeoTwoProng.GetPseudoProperDecayTime(KFPV, KFGeoTwoProng.GetMass()) / (o2::constants::physics::LightSpeedCm2NS);
+        // values[kVertexingTauxy] = KFGeoTwoProng.GetPseudoProperDecayTime(KFPV, KFGeoTwoProng.GetMass()) / (o2::constants::physics::LightSpeedCm2NS);
+        values[kVertexingTauxy] = values[kVertexingLxy] * KFGeoTwoProng.GetMass() / (KFGeoTwoProng.GetPt() * o2::constants::physics::LightSpeedCm2NS);
         values[kVertexingTauz] = -1 * dzPair2PV * KFGeoTwoProng.GetMass() / (TMath::Abs(KFGeoTwoProng.GetPz()) * o2::constants::physics::LightSpeedCm2NS);
         values[kVertexingPz] = TMath::Abs(KFGeoTwoProng.GetPz());
         values[kVertexingSV] = KFGeoTwoProng.GetZ();
@@ -5201,6 +5210,7 @@ void VarManager::FillDileptonTrackTrack(T1 const& dilepton, T2 const& hadron1, T
     ROOT::Math::PtEtaPhiMVector v23 = v2 + v3;
     values[kPairMass] = v1.M();
     values[kPairPt] = v1.Pt();
+    values[kPtOverPairPt] = values[kPairPt] > 0 ? values[kQuadPt] / values[kPairPt] : 0;
     values[kDitrackMass] = v23.M();
     values[kDitrackPt] = v23.Pt();
     values[kCosthetaDileptonDitrack] = (v1.Px() * v123.Px() + v1.Py() * v123.Py() + v1.Pz() * v123.Pz()) / (v1.P() * v123.P());
@@ -5230,7 +5240,7 @@ void VarManager::FillDileptonTrackTrackVertexing(C const& collision, T1 const& l
   float mtrack1, mtrack2;
   float mlepton1, mlepton2;
 
-  if constexpr (candidateType == kXtoJpsiPiPi || candidateType == kPsi2StoJpsiPiPi) {
+  if constexpr (candidateType == kXtoJpsiPiPi || candidateType == kPsi2StoJpsiPiPi || candidateType == kB0toJpsiEEPiPi) {
     mlepton1 = o2::constants::physics::MassElectron;
     mlepton2 = o2::constants::physics::MassElectron;
     mtrack1 = o2::constants::physics::MassPionCharged;
@@ -5289,6 +5299,8 @@ void VarManager::FillDileptonTrackTrackVertexing(C const& collision, T1 const& l
       values[kVertexingTauxyErr] = -999.;
       values[kVertexingTauz] = -999.;
       values[kVertexingTauzErr] = -999.;
+      values[kVertexingTauxyz] = -999.;
+      values[kVertexingTauxyzErr] = -999.;
       values[kVertexingLzProjected] = -999.;
       values[kVertexingLxyProjected] = -999.;
       values[kVertexingLxyzProjected] = -999.;
@@ -5348,6 +5360,9 @@ void VarManager::FillDileptonTrackTrackVertexing(C const& collision, T1 const& l
 
       values[kVertexingTauzErr] = values[kVertexingLzErr] * v1234.M() / (TMath::Abs(v1234.Pz()) * o2::constants::physics::LightSpeedCm2NS);
       values[kVertexingTauxyErr] = values[kVertexingLxyErr] * v1234.M() / (v1234.Pt() * o2::constants::physics::LightSpeedCm2NS);
+
+      values[kVertexingTauxyz] = values[kVertexingLxyz] * v1234.M() / (v1234.P() * o2::constants::physics::LightSpeedCm2NS);
+      values[kVertexingTauxyzErr] = values[kVertexingLxyzErr] * v1234.M() / (v1234.P() * o2::constants::physics::LightSpeedCm2NS);
 
       values[kCosPointingAngle] = ((collision.posX() - secondaryVertex[0]) * v1234.Px() +
                                    (collision.posY() - secondaryVertex[1]) * v1234.Py() +
@@ -5524,6 +5539,7 @@ void VarManager::FillQuadMC(T1 const& dilepton, T2 const& track1, T2 const& trac
   values[kDeltaR] = sqrt(pow(values[kDeltaR1], 2) + pow(values[kDeltaR2], 2));
   values[kDitrackMass] = v23.M();
   values[kDitrackPt] = v23.Pt();
+  values[kPairPt] = v1.Pt();
 }
 
 //__________________________________________________________________
