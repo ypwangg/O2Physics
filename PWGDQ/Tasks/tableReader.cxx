@@ -1514,6 +1514,8 @@ struct AnalysisSameEventPairing {
       constexpr bool trackHasCov = ((TTrackFillMap & VarManager::ObjTypes::TrackCov) > 0 || (TTrackFillMap & VarManager::ObjTypes::ReducedTrackBarrelCov) > 0);
       if constexpr ((TPairType == pairTypeEE) && trackHasCov && (TTwoProngFitter == true)) {
         dielectronExtraList(t1.globalIndex(), t2.globalIndex(), VarManager::fgValues[VarManager::kVertexingTauz], VarManager::fgValues[VarManager::kVertexingLz], VarManager::fgValues[VarManager::kVertexingLxy]);
+      } else {
+        dielectronExtraList(t1.globalIndex(), t2.globalIndex(), -999.f, -999.f, -999.f);
       }
       if constexpr ((TPairType == pairTypeMuMu) && (TTwoProngFitter == true)) {
         // LOGP(info, "mu1 collId = {}, mu2 collId = {}", t1.collisionId(), t2.collisionId());
@@ -2284,6 +2286,7 @@ struct AnalysisDileptonTrackTrack {
 
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processChicToJpsiPiPi, "Run dilepton-dihadron pairing to study X(3872), using skimmed data", false);
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processPsi2SToJpsiPiPi, "Run dilepton-dihadron pairing to study Psi(2S), using skimmed data", false);
+  PROCESS_SWITCH(AnalysisDileptonTrackTrack, processB0ToJpsiPiPi, "Run dilepton-dihadron pairing to study B0->Jpsi+Pi+Pi, using skimmed data", false);
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processDummy, "Dummy function", false);
 };
 

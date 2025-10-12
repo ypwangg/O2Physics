@@ -228,6 +228,7 @@ constexpr static uint32_t gkEventFillMapWithCovMultExtra = VarManager::ObjTypes:
 constexpr static uint32_t gkTrackFillMap = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelPID;
 constexpr static uint32_t gkTrackFillMapWithCov = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelCov | VarManager::ObjTypes::ReducedTrackBarrelPID;
 constexpr static uint32_t gkTrackFillMapWithCovWithColl = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelCov | VarManager::ObjTypes::ReducedTrackBarrelPID | VarManager::ObjTypes::ReducedTrackCollInfo;
+constexpr static uint32_t gkTrackFillMapWithCovAmbiguities = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelCov | VarManager::ObjTypes::ReducedTrackBarrelPID | VarManager::ObjTypes::AmbiTrack;
 // constexpr static uint32_t gkTrackFillMapWithColl = VarManager::ObjTypes::ReducedTrack | VarManager::ObjTypes::ReducedTrackBarrel | VarManager::ObjTypes::ReducedTrackBarrelPID | VarManager::ObjTypes::ReducedTrackCollInfo;
 
 constexpr static uint32_t gkMuonFillMap = VarManager::ObjTypes::ReducedMuon | VarManager::ObjTypes::ReducedMuonExtra;
@@ -4637,7 +4638,8 @@ WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
     adaptAnalysisTask<AnalysisPrefilterSelection>(cfgc),
     adaptAnalysisTask<AnalysisSameEventPairing>(cfgc),
     adaptAnalysisTask<AnalysisAsymmetricPairing>(cfgc),
-    adaptAnalysisTask<AnalysisDileptonTrack>(cfgc)};
+    adaptAnalysisTask<AnalysisDileptonTrack>(cfgc), 
+    adaptAnalysisTask<AnalysisDileptonTrackTrack>(cfgc)};
 }
 
 void DefineHistograms(HistogramManager* histMan, TString histClasses, const char* histGroups)
@@ -4737,6 +4739,10 @@ void DefineHistograms(HistogramManager* histMan, TString histClasses, const char
 
     if (classStr.Contains("DileptonHadronCorrelation")) {
       dqhistograms::DefineHistograms(histMan, objArray->At(iclass)->GetName(), "dilepton-hadron-correlation");
+    }
+
+    if (classStr.Contains("Quadruplet")) {
+      dqhistograms::DefineHistograms(histMan, objArray->At(iclass)->GetName(), "dilepton-dihadron", histName);
     }
   } // end loop over histogram classes
 }
