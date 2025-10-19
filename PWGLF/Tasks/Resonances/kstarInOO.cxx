@@ -194,8 +194,10 @@ struct kstarInOO {
       histos.add("hMC_USS_PiK", "hMC_USS_PiK", kTHnSparseF, {cfgCentAxis, ptAxis, minvAxis});
       histos.add("hMC_LSS_KPi", "hMC_LSS_KPi", kTHnSparseF, {cfgCentAxis, ptAxis, minvAxis});
       histos.add("hMC_LSS_PiK", "hMC_LSS_PiK", kTHnSparseF, {cfgCentAxis, ptAxis, minvAxis});
+
       histos.add("hMC_USS_KPi_Mix", "hMC_USS_KPi_Mix", kTHnSparseF, {cfgCentAxis, ptAxis, minvAxis});
       histos.add("hMC_USS_PiK_Mix", "hMC_USS_PiK_Mix", kTHnSparseF, {cfgCentAxis, ptAxis, minvAxis});
+
       histos.add("hMC_USS_KPi_True", "hMC_USS_KPi_True", kTHnSparseF, {cfgCentAxis, ptAxis, minvAxis});
       histos.add("hMC_USS_PiK_True", "hMC_USS_PiK_True", kTHnSparseF, {cfgCentAxis, ptAxis, minvAxis});
     }
@@ -417,17 +419,17 @@ struct kstarInOO {
     std::vector<int> PIDPurityKey_Kaon;
     std::vector<int> PIDPurityKey_Pion;
 
-    double KstarPt_Kpi, Minv_Kpi;
+    // double KstarPt_Kpi, Minv_Kpi;
 
     for (const auto& [trk1, trk2] : combinations(o2::soa::CombinationsFullIndexPolicy(tracks1, tracks2))) {
       if (!trk1.has_mcParticle() || !trk2.has_mcParticle())
         continue;
 
-      // auto [KstarPt_Kpi, Minv_Kpi] = minvReconstruction(trk1, trk2, QA, false);
-      // auto [KstarPt_piK, Minv_piK] = minvReconstruction(trk1, trk2, QA, true);
+      auto [KstarPt_Kpi, Minv_Kpi] = minvReconstruction(trk1, trk2, QA, false);
+      auto [KstarPt_piK, Minv_piK] = minvReconstruction(trk1, trk2, QA, true);
 
-      std::tie(KstarPt_Kpi, Minv_Kpi) = minvReconstruction(trk1, trk2, QA, false);
-      std::tie(KstarPt_Kpi, Minv_Kpi) = minvReconstruction(trk1, trk2, QA, true);
+      // std::tie(KstarPt_Kpi, Minv_Kpi) = minvReconstruction(trk1, trk2, QA, false);
+      // std::tie(KstarPt_Kpi, Minv_Kpi) = minvReconstruction(trk1, trk2, QA, true);
 
       if (Minv_Kpi < 0)
         continue;
@@ -437,12 +439,15 @@ struct kstarInOO {
         if (!IsMix) {
           if (conjugate < 0) {
             histos.fill(HIST("hMC_USS_KPi"), centrality, KstarPt_Kpi, Minv_Kpi);
+            histos.fill(HIST("hMC_USS_PiK"), centrality, KstarPt_piK, Minv_piK);
           } else if (conjugate > 0) {
             histos.fill(HIST("hMC_LSS_KPi"), centrality, KstarPt_Kpi, Minv_Kpi);
+            histos.fill(HIST("hMC_LSS_PiK"), centrality, KstarPt_piK, Minv_piK);
           }
         } else {
           if (conjugate < 0) {
             histos.fill(HIST("hMC_USS_KPi_Mix"), centrality, KstarPt_Kpi, Minv_Kpi);
+            histos.fill(HIST("hMC_USS_PiK_Mix"), centrality, KstarPt_piK, Minv_piK);
           }
         }
       }
@@ -536,18 +541,13 @@ struct kstarInOO {
     if (!trackSelection(trk1, false) || !trackSelection(trk2, false))
       return {-1.0, -1.0};
 
-    if (!flip) {
-      if (!trackPIDKaon(trk1, QA) || !trackPIDPion(trk2, QA)) {
-        return {-1.0, -1.0};
-      }
-    } else {
-      if (!trackPIDPion(trk1, false) || !trackPIDKaon(trk2, false))
-        return {-1.0, -1.0};
-    }
+    if (!trackPIDKaon(trk1, QA) || !trackPIDPion(trk2, QA))
+      return {-1.0, -1.0};
 
-    //    if (trk1.globalIndex() == trk2.globalIndex())
+    // if (trk1.index() >= trk2.index())
     //   return {-1.0, -1.0};
-    if (trk1.index() >= trk2.index())
+    // I checked that index and globalIndex was same function
+    if (trk1.globalIndex() >= trk2.globalIndex())
       return {-1.0, -1.0};
 
     TLorentzVector lDecayDaughter1, lDecayDaughter2, lResonance;
