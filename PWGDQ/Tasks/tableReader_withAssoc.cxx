@@ -239,6 +239,7 @@ using MyV0s = aod::V0Datas;
 using MyV0sWithCov = soa::Join<aod::V0Datas, aod::V0Covs, aod::V0DauCovs>;
 
 using FullTracksExt = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksDCA, aod::pidTPCFullPi>;
+using FullTracksExtEl = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksDCA, aod::pidTPCFullEl>;
 
 // bit maps used for the Fill functions of the VarManager
 constexpr static uint32_t gkEventFillMap = VarManager::ObjTypes::ReducedEvent | VarManager::ObjTypes::ReducedEventExtended;
@@ -3792,10 +3793,10 @@ struct AnalysisDileptonTrack {
 struct AnalysisDileptonV0 {
   OutputObj<THashList> fOutputList{"output"};
 
-  Configurable<float> fConfigDileptonLowMass{"cfgDileptonLowMass", 2.8, "Low mass cut for the dileptons used in analysis"};
-  Configurable<float> fConfigDileptonHighMass{"cfgDileptonHighMass", 3.2, "High mass cut for the dileptons used in analysis"};
-  Configurable<float> fConfigDileptonpTCut{"cfgDileptonpTCut", 0.0, "pT cut for dileptons used in the triplet vertexing"};
-  Configurable<float> fConfigDileptonLxyCut{"cfgDileptonLxyCut", 0.0, "Lxy cut for dileptons used in the triplet vertexing"};
+  // Configurable<float> fConfigDileptonLowMass{"cfgDileptonLowMass", 2.8, "Low mass cut for the dileptons used in analysis"};
+  // Configurable<float> fConfigDileptonHighMass{"cfgDileptonHighMass", 3.2, "High mass cut for the dileptons used in analysis"};
+  // Configurable<float> fConfigDileptonpTCut{"cfgDileptonpTCut", 0.0, "pT cut for dileptons used in the triplet vertexing"};
+  // Configurable<float> fConfigDileptonLxyCut{"cfgDileptonLxyCut", 0.0, "Lxy cut for dileptons used in the triplet vertexing"};
   // Configurable<int> fConfigV0Type{"cfgV0Type", -1, "V0 type"};
   Configurable<bool> fConfigUseKFVertexing{"cfgUseKFVertexing", false, "Use KF Particle for secondary vertex reconstruction (DCAFitter is used by default)"};
 
@@ -3815,6 +3816,13 @@ struct AnalysisDileptonV0 {
     // Configurable<float> DaughterEtaCut{"DaughterEtaCut", 0.9, "Eta cut for V0 daughter tracks"};
   } fConfigV0Cuts;
 
+  struct : ConfigurableGroup {
+    Configurable<float> cfgDileptonMassLow{"DileptonMassLow", 2.8, "Low mass cut for the dileptons used in analysis"};
+    Configurable<float> cfgDileptonMassHigh{"DileptonMassHigh", 3.2, "High mass cut for the dileptons used in analysis"};
+    Configurable<float> cfgDileptonpTCut{"DileptonpTCut", 0.0, "pT cut for dileptons used in the triplet vertexing"};
+    Configurable<float> cfgDileptonLxyCut{"DileptonLxyCut", 0.0, "Lxy cut for dileptons used in the triplet vertexing"};
+  } fConfigDileptonCuts;
+
   Configurable<bool> fConfigUseRemoteField{"cfgUseRemoteField", false, "Chose whether to fetch the magnetic field from ccdb or set it manually"};
   Configurable<std::string> fConfigGRPmagPath{"cfgGrpmagPath", "GLO/Config/GRPMagField", "CCDB path of the GRPMagField object"};
   Configurable<float> fConfigMagField{"cfgMagField", 5.0f, "Manually set magnetic field"};
@@ -3824,7 +3832,7 @@ struct AnalysisDileptonV0 {
   Configurable<std::string> fConfigGeoPath{"geoPath", "GLO/Config/GeometryAligned", "Path of the geometry file"};
 
   Filter eventFilter = aod::dqanalysisflags::isEventSelected > static_cast<uint8_t>(0);
-  Filter dileptonFilter = aod::reducedpair::sign == 0 && aod::reducedpair::mass > fConfigDileptonLowMass && aod::reducedpair::mass < fConfigDileptonHighMass;
+  Filter dileptonFilter = aod::reducedpair::sign == 0 && aod::reducedpair::mass > fConfigDileptonCuts.cfgDileptonMassLow && aod::reducedpair::mass < fConfigDileptonCuts.cfgDileptonMassHigh && aod::reducedpair::pt > fConfigDileptonCuts.cfgDileptonpTCut && aod::reducedpair::lxy > fConfigDileptonCuts.cfgDileptonLxyCut;
   // Filter filterV0Selected = aod::v0mapID::v0addid == fConfigV0Type;
   // Filter filterV0Selected = aod::v0data::mK0Short > fConfigV0Cuts.V0MassLow && aod::v0data::mK0Short < fConfigV0Cuts.V0MassHigh;
 
@@ -3864,14 +3872,17 @@ struct AnalysisDileptonV0 {
     // fHistMan->SetDefaultVarNames(VarManager::fgVariableNames, VarManager::fgVariableUnits);
     // ---------------------------------------------
 
-    registry.add("hInvMassDileptonV0", "hInvMassDileptonV0", HistType::kTH1F, {{2000, 4.0, 6.0}});
+    registry.add("hMassB0", "hMassB0", HistType::kTH1F, {{2000, 4.0, 6.0}});
+    registry.add("h3MassB0PtB0PtDilepton", "hMassB0PtB0PtDilepton", HistType::kTH3F, {{2000, 4.0, 6.0}, {200, 0.0, 10.0}, {200, 0.0, 10.0}});
+    registry.add("hMassChic", "hMassChic", HistType::kTH1F, {{2000, 2.5, 4.5}});
     registry.add("hInvMassDilepton", "hInvMassDilepton", HistType::kTH1F, {{2000, 2.0, 4.0}});
     registry.add("hPtV0", "hPtV0", HistType::kTH1F, {{2000, 0.0, 10.0}});
     registry.add("hPtV0Pos", "hPtV0Pos", HistType::kTH1F, {{2000, 0.0, 10.0}});
     registry.add("hPosDCAToPV", "hPosDCAToPV", HistType::kTH1F, {{1000, -5.0, 5.0}});
     registry.add("hNegDCAToPV", "hNegDCAToPV", HistType::kTH1F, {{1000, -5.0, 5.0}});
     // registry.add("")
-    registry.add("hV0Selected", "hV0Selected", HistType::kTH1F, {{100, 0.45, 0.55}});
+    registry.add("hMassK0s", "hMassK0s", HistType::kTH1F, {{100, 0.45, 0.55}});
+    registry.add("hMassGamma", "hMassGamma", HistType::kTH1F, {{100, 0.0, 0.1}});
     registry.add("hIsV0Vertexing", "hIsV0Vertexing", HistType::kTH1F, {{2, -0.5, 1.5}});
     registry.add("hIsDileptonVertexing", "hIsDileptonVertexing", HistType::kTH1F, {{2, -0.5, 1.5}});
     registry.add("hAssociatedCollisions", "hAssociatedCollisions", HistType::kTH1F, {{100, -0.5, 99.5}});
@@ -3890,7 +3901,7 @@ struct AnalysisDileptonV0 {
       if (event.collisionId() != dilepton.collisionId()) {
         continue;
       }
-      LOGP(info, "dilepton in collision: {}", dilepton.collisionId());
+      // LOGP(info, "dilepton in collision: {}", dilepton.collisionId());
       // get full track info of tracks based on the index
       int indexLepton1 = dilepton.index0Id();
       int indexLepton2 = dilepton.index1Id();
@@ -3909,7 +3920,7 @@ struct AnalysisDileptonV0 {
       registry.fill(HIST("hInvMassDilepton"), dilepton.mass());
 
       for (auto v0 : v0s) {
-        LOGP(info, "v0 in collision: {}", v0.collisionId());
+        // LOGP(info, "v0 in collision: {}", v0.collisionId());
         // apply basic V0 cuts
         registry.fill(HIST("hPosDCAToPV"), v0.dcapostopv());
         registry.fill(HIST("hNegDCAToPV"), v0.dcanegtopv());
@@ -3935,19 +3946,20 @@ struct AnalysisDileptonV0 {
           }
 
 
-          float hadronMass = o2::constants::physics::MassKaonNeutral;
+          // float hadronMass = o2::constants::physics::MassKaonNeutral;
+          float hadronMass = v0.mK0Short();
           float daughterMass = o2::constants::physics::MassPionCharged;
           // Check V0 mass window
-          ROOT::Math::PtEtaPhiMVector v0vec(v0_pos.pt(), v0_pos.eta(), v0_pos.phi(), daughterMass);
-          ROOT::Math::PtEtaPhiMVector v1vec(v0_neg.pt(), v0_neg.eta(), v0_neg.phi(), daughterMass);
-          ROOT::Math::PtEtaPhiMVector v0sum = v0vec + v1vec;
+          // ROOT::Math::PtEtaPhiMVector v0vec(v0_pos.pt(), v0_pos.eta(), v0_pos.phi(), daughterMass);
+          // ROOT::Math::PtEtaPhiMVector v1vec(v0_neg.pt(), v0_neg.eta(), v0_neg.phi(), daughterMass);
+          // ROOT::Math::PtEtaPhiMVector v0sum = v0vec + v1vec;
           // if (v0sum.M() < fConfigV0Cuts.V0MassLow || v0sum.M() > fConfigV0Cuts.V0MassHigh) {
           //   continue;
           // }
           if (v0.mK0Short() < fConfigV0Cuts.V0MassLow || v0.mK0Short() > fConfigV0Cuts.V0MassHigh) {
             continue;
           }
-          registry.fill(HIST("hV0Selected"), v0.mK0Short());
+          registry.fill(HIST("hMassK0s"), v0.mK0Short());
           // VarManager::FillDileptonHadron(dilepton, v0, fValuesV0, hadronMass);
 
           //Reconstruct directly here
@@ -3957,7 +3969,9 @@ struct AnalysisDileptonV0 {
           float invmass = v12.M();
           // float massJpsi = 3.0969;
           float mass = invmass - dilepton.mass() + 3.096;
-          registry.fill(HIST("hInvMassDileptonV0"), mass);
+          float pt = v12.Pt();
+          registry.fill(HIST("hMassB0"), mass);
+          registry.fill(HIST("h3MassB0PtB0PtDilepton"), mass, pt, dilepton.pt());
           registry.fill(HIST("hPtV0"), v0.pt());
           registry.fill(HIST("hPtV0Pos"), v0_pos.pt());
 
@@ -4008,6 +4022,41 @@ struct AnalysisDileptonV0 {
             auto covMatrixPV = primaryVertex.getCov();
             // TODO: calculate decay length
           } // secondary vertex reconstruction
+        } else if constexpr (TCandidateType == VarManager::kChictoJpsiEE) {
+          auto v0_pos = v0.template posTrack_as<TFullTracks>();
+          auto v0_neg = v0.template negTrack_as<TFullTracks>();
+
+          // apply daughter track cuts
+          if (v0_pos.tpcNClsFound() < fConfigV0Cuts.CutTPCncls || v0_neg.tpcNClsFound() < fConfigV0Cuts.CutTPCncls) {
+            continue;
+          }
+          if (std::abs(v0_pos.tpcNSigmaEl()) > fConfigV0Cuts.CutTPCnSigPi || std::abs(v0_neg.tpcNSigmaEl()) > fConfigV0Cuts.CutTPCnSigPi) {
+            continue;
+          }
+          if (v0_pos.tpcChi2NCl() > fConfigV0Cuts.CutTPCChi2Ncls || v0_neg.tpcChi2NCl() > fConfigV0Cuts.CutTPCChi2Ncls) {
+            continue;
+          }
+
+
+          // float hadronMass = o2::constants::physics::MassKaonNeutral;
+          float hadronMass = v0.mGamma();
+          // Check V0 mass window
+          if (v0.mGamma() < fConfigV0Cuts.V0MassLow || v0.mGamma() > fConfigV0Cuts.V0MassHigh) {
+            continue;
+          }
+          registry.fill(HIST("hMassGamma"), v0.mGamma());
+
+          //Reconstruct directly here
+          ROOT::Math::PtEtaPhiMVector v1(dilepton.pt(), dilepton.eta(), dilepton.phi(), dilepton.mass());
+          ROOT::Math::PtEtaPhiMVector v2(v0.pt(), v0.eta(), v0.phi(), hadronMass);
+          ROOT::Math::PtEtaPhiMVector v12 = v1 + v2;
+          float invmass = v12.M();
+          // float massJpsi = 3.0969;
+          float mass = invmass - dilepton.mass() + 3.096;
+          float pt = v12.Pt();
+          registry.fill(HIST("hMassChic"), mass);
+          registry.fill(HIST("hPtV0"), v0.pt());
+          registry.fill(HIST("hPtV0Pos"), v0_pos.pt());
         }
       } // loop over v0s
     } // loop over dileptons
@@ -4032,6 +4081,22 @@ struct AnalysisDileptonV0 {
     }
   }
 
+  void processChicToJpsiGamma(soa::Filtered<MyEventsWithCollSelected> const& events, 
+                          MyBarrelTracks const& tracks, 
+                          MyV0s const& v0s, FullTracksExtEl const& fulltracks, 
+                          soa::Filtered<MyDielectronCandidatesWithColl> const& dileptons)
+  {
+    if (events.size() == 0) {
+      return;
+    }
+
+    for (auto event : events) {
+      auto groupedDileptons = dileptons.sliceBy(dileptonsPerCollision, event.collisionId());
+      auto groupedV0s = v0s.sliceBy(v0sPerCollision, event.collisionId());
+      runDileptonV0<false, VarManager::kChictoJpsiEE, gkEventFillMap, gkTrackFillMap>(event, tracks, groupedV0s, fulltracks, groupedDileptons);
+    }
+  }
+
   void processV0(soa::Filtered<MyEventsWithCollSelected> const& events, 
                  MyV0s const& v0s)
   {
@@ -4053,7 +4118,7 @@ struct AnalysisDileptonV0 {
         if (v0.mK0Short() < fConfigV0Cuts.V0MassLow || v0.mK0Short() > fConfigV0Cuts.V0MassHigh) {
           continue;
         }
-        registry.fill(HIST("hV0Selected"), v0.mK0Short());
+        registry.fill(HIST("hMassK0s"), v0.mK0Short());
       }
     }
   }
@@ -4092,6 +4157,7 @@ struct AnalysisDileptonV0 {
   }
 
   PROCESS_SWITCH(AnalysisDileptonV0, processB0ToJpsiK0s, "Run B0 to J/psi K0s analysis", false);
+  PROCESS_SWITCH(AnalysisDileptonV0, processChicToJpsiGamma, "Run Chic to J/psi Gamma analysis", false);
   PROCESS_SWITCH(AnalysisDileptonV0, processV0, "Run V0 analysis", false);
   PROCESS_SWITCH(AnalysisDileptonV0, processDilepton, "Run dilepton analysis", false);
   PROCESS_SWITCH(AnalysisDileptonV0, processDummy, "Dummy function", true);

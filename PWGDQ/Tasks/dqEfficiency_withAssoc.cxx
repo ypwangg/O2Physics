@@ -1341,6 +1341,8 @@ struct AnalysisSameEventPairing {
     Configurable<std::string> recSignals{"cfgBarrelMCRecSignals", "", "Comma separated list of MC signals (reconstructed)"};
     Configurable<std::string> recSignalsJSON{"cfgMCRecSignalsJSON", "", "Comma separated list of MC signals (reconstructed) via JSON"};
     Configurable<bool> skimSignalOnly{"cfgSkimSignalOnly", false, "Configurable to select only matched candidates"};
+    Configurable<float> genPtMin{"cfgGenPtMin", 1.0f, "Min pt cut for generated particles"};
+    Configurable<float> genEtaMax{"cfgGenEtaMax", 0.9f, "Max eta cut for generated particles"};
     // Configurable<bool> runMCGenPair{"cfgRunMCGenPair", false, "Do pairing of true MC particles"};
   } fConfigMC;
 
@@ -1655,6 +1657,7 @@ struct AnalysisSameEventPairing {
         } else if (sig->GetNProngs() == 2) {
           histNames += Form("MCTruthGenPair_%s;", sig->GetName());
           histNames += Form("MCTruthGenPairSel_%s;", sig->GetName());
+          histNames += Form("MCTruthGenPairAccepted_%s;", sig->GetName());
           fHasTwoProngGenMCsignals = true;
         }
       }
@@ -2155,6 +2158,11 @@ struct AnalysisSameEventPairing {
                 // WARNING! To be checked
                 dileptonMiniTreeGen(mcDecision, -999, t1.pt(), t1.eta(), t1.phi(), t2.pt(), t2.eta(), t2.phi());
               }
+              if (t1.pt() < fConfigMC.genPtMin) continue;
+              if (TMath::Abs(t1.eta()) > fConfigMC.genEtaMax) continue;
+              if (t2.pt() < fConfigMC.genPtMin) continue;
+              if (TMath::Abs(t2.eta()) > fConfigMC.genEtaMax) continue;
+              fHistMan->FillHistClass(Form("MCTruthGenPairAccepted_%s", sig->GetName()), VarManager::fgValues);
             }
             isig++;
           }
@@ -4168,6 +4176,10 @@ struct AnalysisDileptonTrackTrack{
   Configurable<std::string> fConfigMCRecSignals{"cfgBarrelMCRecSignals", "", "Comma separated list of MC signals (reconstructed)"};
   Configurable<std::string> fConfigMCGenSignals{"cfgBarrelMCGenSignals", "", "Comma separated list of MC signals (generated)"};
   Configurable<std::string> fConfigDileptonMCRecSignal{"cfgDileptonMCRecSignal", "", "Comma separated list of MC signals (reconstructed)"};
+  Configurable<float> fConfigTrackPtMin{"cfgTrackPtMin", 0.15f, "Minimum pt of tracks to be used in the quadruplet"};
+  Configurable<float> fConfigTrackEtaAbs{"cfgTrackEtaAbs", 0.9f, "Maximum absolute eta of tracks to be used in the quadruplet"};
+  Configurable<float> fConfigDileptonPtMin{"cfgDileptonPtMin", 1.0f, "Minimum pt of dileptons to be used in the quadruplet"};
+  Configurable<float> fConfigDileptonEtaAbs{"cfgDileptonEtaAbs", 0.9f, "Maximum absolute eta of dileptons to be used in the quadruplet"};
   Configurable<std::string> fConfigAddDileptonHistogram{"cfgAddDileptonHistogram", "barrel", "Comma separated list of histograms"};
   Configurable<std::string> fConfigAddQuadrupletHistogram{"cfgAddQuadrupletHistogram", "xtojpsipipi", "Comma separated list of histograms"};
 
@@ -4296,7 +4308,7 @@ struct AnalysisDileptonTrackTrack{
     if (isMCGen) {
       for (auto& sig : fGenMCSignals) {
         DefineHistograms(fHistMan, Form("MCTruthGenQuad_%s", sig->GetName()), "");
-        DefineHistograms(fHistMan, Form("MCTruthGenQuadSel_%s", sig->GetName()), "");
+        DefineHistograms(fHistMan, Form("MCTruthGenQuadAccepted_%s", sig->GetName()), "");
       }
       // DefineHistograms(fHistMan, "MCTruthGenQuadAccepted", "");
     }
@@ -4570,7 +4582,26 @@ struct AnalysisDileptonTrackTrack{
             auto dilepton = mcTracks.rawIteratorAt(daughterIdFirst);
             auto track1 = mcTracks.rawIteratorAt(daughterIdFirst + 1);
             auto track2 = mcTracks.rawIteratorAt(daughterIdFirst + 2);
+            // LOGP(info, "PDG of dilepton: {}, track1: {}, track2: {}", dilepton.pdgCode(), track1.pdgCode(), track2.pdgCode());
             VarManager::FillQuadMC<VarManager::kPsi2StoJpsiPiPi>(dilepton, track1, track2);
+            int daughterIdFirst2 = dilepton.daughtersIds()[0];
+            int daughterIdEnd2 = dilepton.daughtersIds()[1];
+            int Ndaughters2 = daughterIdEnd2 - daughterIdFirst2 + 1;
+            if (Ndaughters2 == 2) {
+              auto lepton1 = mcTracks.rawIteratorAt(daughterIdFirst2);
+              auto lepton2 = mcTracks.rawIteratorAt(daughterIdFirst2 + 1);
+              VarManager::FillPairMC<VarManager::kDecayToEE>(lepton1, lepton2);
+              // LOGP(info, "PDG of lepton1: {}, lepton2: {}", lepton1.pdgCode(), lepton2.pdgCode());
+              if (lepton1.pt() > fConfigDileptonPtMin && lepton2.pt() > fConfigDileptonPtMin) {
+                if (TMath::Abs(lepton1.eta()) < fConfigDileptonEtaAbs && TMath::Abs(lepton2.eta()) < fConfigDileptonEtaAbs) {
+                  if (track1.pt() > fConfigTrackPtMin && track2.pt() > fConfigTrackPtMin) {
+                    if (TMath::Abs(track1.eta()) < fConfigTrackEtaAbs && TMath::Abs(track2.eta()) < fConfigTrackEtaAbs) {
+                      fHistMan->FillHistClass(Form("MCTruthGenQuadAccepted_%s", sig->GetName()), VarManager::fgValues);
+                    }
+                  }
+                }
+              }
+            }
           }
           fHistMan->FillHistClass(Form("MCTruthGen_%s", sig->GetName()), VarManager::fgValues);
         }

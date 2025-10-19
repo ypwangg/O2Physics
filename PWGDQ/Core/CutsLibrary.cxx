@@ -3655,6 +3655,24 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
     return cut;
   }
 
+  for (unsigned int i = 0; i < 10; ++i) {
+    for (unsigned int j = 0; j < 5; ++j) {
+      if (!nameStr.compare(Form("electronSelection_cutvar_yiping%i%i", i, j))) {
+        cut->AddCut(GetAnalysisCut("jpsiStandardKine"));
+        cut->AddCut(GetAnalysisCut("electronStandardQualityForO2MCdebug4"));
+        cut->AddCut(GetAnalysisCut("dcaCut1_ionut"));
+        cut->AddCut(GetAnalysisCut(Form("pidJpsiEle_yiping_%i", i)));
+        cut->AddCut(GetAnalysisCut(Form("pidJpsiEle_yiping_hadronRej_%i", j)));
+        return cut;
+      }
+    }
+  }
+
+  if (!nameStr.compare("trackingEff_kine_ele")) {
+    cut->AddCut(GetAnalysisCut("jpsiStandardKine"));
+    return cut;
+  }
+
   if (!nameStr.compare("trackingEff_ele")) {
     cut->AddCut(GetAnalysisCut("jpsiStandardKine"));
     cut->AddCut(GetAnalysisCut("electronStandardQualityForO2MCdebug4"));
@@ -4825,6 +4843,20 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     return cut;
   }
 
+  if (!nameStr.compare("electronStandardQualityForO2MCdebug5")) {
+    cut->AddCut(VarManager::kIsITSibAny, 0.5, 1.5);
+    cut->AddCut(VarManager::kTPCchi2, 0.0, 4.0);
+    cut->AddCut(VarManager::kTPCncls, 100.0, 161.);
+    return cut;
+  }
+
+  if (!nameStr.compare("electronStandardQualityForO2MCdebug6")) {
+    cut->AddCut(VarManager::kIsITSibAny, 0.5, 10);
+    cut->AddCut(VarManager::kTPCchi2, 0.0, 4.0);
+    cut->AddCut(VarManager::kTPCncls, 120.0, 161.);
+    return cut;
+  }
+
   if (!nameStr.compare("electronStandardQualityITSOnly")) {
     cut->AddCut(VarManager::kIsSPDany, 0.5, 1.5);
     cut->AddCut(VarManager::kITSchi2, 0.0, 5.0);
@@ -5279,6 +5311,24 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kTPCnSigmaPi, 4.0, 999);
     cut->AddCut(VarManager::kTPCnSigmaPr, 3.5, 999);
     return cut;
+  }
+
+  // yiping's test: cut variation study for jpsi electron PID
+  std::vector<double> yiping_TPCnSigmaEl_low = {-4.0, -3.0, -2.7, -2.5, -2.0, -4.0, -3.0, -2.7, -2.5, -2.0};
+  std::vector<double> yiping_TPCnSigmaEl_high = {4.0, 4.0, 4.0, 4.0, 4.0, 3.0, 3.0, 3.0, 3.0, 3.0};
+  for (unsigned int i = 0; i < yiping_TPCnSigmaEl_low.size(); i++) {
+    if (!nameStr.compare(Form("pidJpsiEle_yiping_%i", i))) {
+      cut->AddCut(VarManager::kTPCnSigmaEl, yiping_TPCnSigmaEl_low.at(i), yiping_TPCnSigmaEl_high.at(i));
+      return cut;
+    }
+  }
+  std::vector<double> yiping_hadronRej = {2.0, 2.5, 2.7, 3.0, 3.5};
+  for (unsigned int i = 0; i < yiping_hadronRej.size(); i++) {
+    if (!nameStr.compare(Form("pidJpsiEle_yiping_hadronRej_%i", i))) {
+      cut->AddCut(VarManager::kTPCnSigmaPi, yiping_hadronRej.at(i), 999.0);
+      cut->AddCut(VarManager::kTPCnSigmaPr, yiping_hadronRej.at(i), 999.0);
+      return cut;
+    }
   }
 
   if (!nameStr.compare("pidCut_lowP_Corr")) {
