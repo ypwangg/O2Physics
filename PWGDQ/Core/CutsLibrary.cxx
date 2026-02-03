@@ -338,7 +338,7 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
     return cut;
   }
 
-if (!nameStr.compare("electronSelection2_yiping")) {
+  if (!nameStr.compare("electronSelection2_yiping")) {
     cut->AddCut(GetAnalysisCut("jpsiStandardKine"));
     cut->AddCut(GetAnalysisCut("electronStandardQualityForO2MCdebug2"));
     cut->AddCut(GetAnalysisCut("dcaCut1_ionut"));
@@ -660,7 +660,7 @@ if (!nameStr.compare("electronSelection2_yiping")) {
     return cut;
   }
 
-if (!nameStr.compare("pionPIDCut9")) {
+  if (!nameStr.compare("pionPIDCut9")) {
     cut->AddCut(GetAnalysisCut("pionQualityCut9"));
     cut->AddCut(GetAnalysisCut("pionPIDnsigma"));
     return cut;
