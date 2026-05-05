@@ -195,8 +195,9 @@ DECLARE_SOA_TABLE(JPsieeCandidates, "AOD", "DQPSEUDOPROPER", dqanalysisflags::Ma
 
 // Declarations of various short names
 using MyEvents = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll>;
+using MyEventsSimple = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended>;
 using MyEventsMultExtra = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll, aod::ReducedEventsQvectorCentr, aod::ReducedEventsMergingTable>;
-using MyEventsMultExtraQVector = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll, aod::ReducedEventsQvectorCentr, aod::ReducedEventsQvectorCentrExtra>;
+using MyEventsMultExtraQVector = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll, aod::ReducedEventsQvectorCentr, aod::ReducedEventsQvectorCentrExtra, aod::ReducedEventsMergingTable>;
 using MyEventsZdc = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedZdcs>;
 using MyEventsMultExtraZdc = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll, aod::ReducedZdcs>;
 using MyEventsMultExtraZdcFit = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll, aod::ReducedZdcs, aod::ReducedFITs>;
@@ -212,7 +213,7 @@ using MyEventsVtxCovZdcFitSelected = soa::Join<aod::ReducedEvents, aod::ReducedE
 using MyEventsVtxCovZdcFitSelectedMultExtra = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsVtxCov, aod::ReducedZdcs, aod::ReducedFITs, aod::EventCuts, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll>;
 using MyEventsQvector = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsQvector>;
 using MyEventsHashSelectedQvector = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::EventCuts, aod::MixingHashes, aod::ReducedEventsQvector>;
-using MyEventsQvectorCentr = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsQvectorCentr, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll>;
+using MyEventsQvectorCentr = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsQvectorCentr, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll, aod::ReducedEventsMergingTable>;
 using MyEventsQvectorCentrSelected = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsQvectorCentr, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll, aod::EventCuts>;
 using MyEventsHashSelectedQvectorCentr = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::EventCuts, aod::MixingHashes, aod::ReducedEventsQvectorCentr, aod::ReducedEventsMultPV, aod::ReducedEventsMultAll>;
 
@@ -280,6 +281,8 @@ struct AnalysisEventSelection {
   Configurable<std::string> fConfigEventCutsJSON{"cfgEventCutsJSON", "", "Additional event cuts specified in JSON format"};
   Configurable<std::string> fConfigAddEventHistogram{"cfgAddEventHistogram", "", "Comma separated list of histograms"};
   Configurable<std::string> fConfigAddJSONHistograms{"cfgAddJSONHistograms", "", "Add event histograms defined via JSON formatting (see HistogramsLibrary)"};
+  Configurable<float> fCentHighEdge{"cfgCentHighEdge", 100.0, "High edge of the centrality percentile for event selection"};
+  Configurable<float> fCentLowEdge{"cfgCentLowEdge", 0.0, "Low edge of the centrality percentile for event selection"};
   Configurable<bool> fConfigQA{"cfgQA", true, "If true, QA histograms will be created and filled"};
 
   Configurable<int> fConfigITSROFrameStartBorderMargin{"cfgITSROFrameStartBorderMargin", -1, "Number of bcs at the start of ITS RO Frame border. Take from CCDB if -1"};
@@ -528,6 +531,11 @@ struct AnalysisEventSelection {
     runEventSelection<gkEventFillMap>(events);
     publishSelections<gkEventFillMap>(events);
   }
+  void processSkimmedSimple(MyEventsSimple const& events)
+  {
+    runEventSelection<gkEventFillMap>(events);
+    publishSelections<gkEventFillMap>(events);
+  }
   void processSkimmedWithZdc(MyEventsZdc const& events)
   {
     runEventSelection<gkEventFillMapWithZdc>(events);
@@ -553,12 +561,13 @@ struct AnalysisEventSelection {
     runEventSelection<gkEventFillMapWithQvectorCentr>(events);
     publishSelections<gkEventFillMapWithQvectorCentr>(events);
   }
-  void processDummy(MyEvents&)
+  void processDummy(MyEventsSimple&)
   {
     // do nothing
   }
 
   PROCESS_SWITCH(AnalysisEventSelection, processSkimmed, "Run event selection on DQ skimmed events", false);
+  PROCESS_SWITCH(AnalysisEventSelection, processSkimmedSimple, "Run event selection on DQ skimmed events, with simple event table", false);
   PROCESS_SWITCH(AnalysisEventSelection, processSkimmedWithZdc, "Run event selection on DQ skimmed events, with ZDC", false);
   PROCESS_SWITCH(AnalysisEventSelection, processSkimmedWithMultExtra, "Run event selection on DQ skimmed events, with mult extra", false);
   PROCESS_SWITCH(AnalysisEventSelection, processSkimmedWithMultExtraZdc, "Run event selection on DQ skimmed events, with mult extra and ZDC", false);
@@ -814,7 +823,7 @@ struct AnalysisTrackSelection {
   {
     runTrackSelection<gkEventFillMapWithCov, gkTrackFillMapWithCov>(assocs, events, tracks);
   }
-  void processDummy(MyEvents&)
+  void processDummy(MyEventsSimple&)
   {
     // do nothing
   }
@@ -1025,7 +1034,7 @@ struct AnalysisMuonSelection {
   {
     runMuonSelection<gkEventFillMapWithCov, gkMuonFillMapWithCov>(assocs, events, muons);
   }
-  void processDummy(MyEvents&)
+  void processDummy(MyEventsSimple&)
   {
     // do nothing
   }
@@ -1174,7 +1183,7 @@ struct AnalysisPrefilterSelection {
     } // end loop over combinations
   }
 
-  void processBarrelSkimmed(MyEvents const& events, soa::Join<aod::ReducedTracksAssoc, aod::BarrelTrackCuts> const& assocs, MyBarrelTracks const& tracks)
+  void processBarrelSkimmed(MyEventsSimple const& events, soa::Join<aod::ReducedTracksAssoc, aod::BarrelTrackCuts> const& assocs, MyBarrelTracks const& tracks)
   {
     fPrefilterMap.clear();
 
@@ -1207,7 +1216,7 @@ struct AnalysisPrefilterSelection {
     }
   }
 
-  void processDummy(MyEvents&)
+  void processDummy(MyEventsSimple&)
   {
     // do nothing
   }
@@ -1237,6 +1246,8 @@ struct AnalysisSameEventPairing {
   Produces<aod::DileptonPolarization> dileptonPolarList;
 
   o2::base::MatLayerCylSet* fLUT = nullptr;
+  TH1D* ResoFlowSP = nullptr;
+  TH1D* ResoFlowEP = nullptr;
   int fCurrentRun; // needed to detect if the run changed and trigger update of calibrations etc.
 
   OutputObj<THashList> fOutputList{"output"};
@@ -1262,6 +1273,8 @@ struct AnalysisSameEventPairing {
     Configurable<std::string> lutPath{"lutPath", "GLO/Param/MatLUT", "Path of the Lut parametrization"};
     Configurable<std::string> geoPath{"geoPath", "GLO/Config/GeometryAligned", "Path of the geometry file"};
     Configurable<std::string> GrpLhcIfPath{"grplhcif", "GLO/Config/GRPLHCIF", "Path on the CCDB for the GRPLHCIF object"};
+    Configurable<std::string> flowPath{"flowPath", "Users/y/yiping/FlowResolution", "Path to the flow resolution object"};
+    Configurable<std::string> flowPathLocal{"flowPathLocal", "/lustre/alice/users/ywang/calib/FlowReso.root", "Path to the flow resolution object in the local cache"};
   } fConfigCCDB;
 
   struct : ConfigurableGroup {
@@ -1278,6 +1291,8 @@ struct AnalysisSameEventPairing {
     Configurable<float> centerMassEnergy{"energy", 13600, "Center of mass energy in GeV"};
     Configurable<bool> propTrack{"cfgPropTrack", true, "Propgate tracks to associated collision to recalculate DCA and momentum vector"};
     Configurable<bool> useRemoteCollisionInfo{"cfgUseRemoteCollisionInfo", false, "Use remote collision information from CCDB"};
+    Configurable<bool> useRemoteFlow{"cfgUseRemoteFlow", false, "Use remote flow information from CCDB"};
+    Configurable<bool> useLocalFlow{"cfgUseLocalFlow", false, "Use flow information from local cache"};
   } fConfigOptions;
   struct : ConfigurableGroup {
     Configurable<bool> applyBDT{"applyBDT", false, "Flag to apply ML selections"};
@@ -1677,6 +1692,29 @@ struct AnalysisSameEventPairing {
       o2::parameters::GRPLHCIFData* grpo = fCCDB->getForTimeStamp<o2::parameters::GRPLHCIFData>(fConfigCCDB.GrpLhcIfPath, timestamp);
       VarManager::SetCollisionSystem(grpo);
     }
+
+    if (fConfigOptions.useRemoteFlow) {
+      TString PathFlow = fConfigCCDB.flowPath.value;
+      TString ccdbPathFlowSP = Form("%s/ScalarProduct", PathFlow.Data());
+      TString ccdbPathFlowEP = Form("%s/EventPlane", PathFlow.Data());
+      ResoFlowSP = fCCDB->getForTimeStamp<TH1D>(ccdbPathFlowSP.Data(), timestamp);
+      ResoFlowEP = fCCDB->getForTimeStamp<TH1D>(ccdbPathFlowEP.Data(), timestamp);
+      if (ResoFlowSP == nullptr || ResoFlowEP == nullptr) {
+        LOGF(fatal, "Flow resolution histograms not available in CCDB at timestamp=%llu", timestamp);
+      }
+    } else if (fConfigOptions.useLocalFlow) {
+      // LOGP(info, "Developing");
+      TString  pathFlow = fConfigCCDB.flowPathLocal.value;
+      TFile* fileFlow = TFile::Open(pathFlow.Data(), "READ");
+      if (fileFlow == nullptr || fileFlow->IsZombie()) {
+        LOGF(fatal, "Flow resolution file %s cannot be opened", pathFlow.Data());
+      }
+      fileFlow->GetObject("ScalarProduct", ResoFlowSP);
+      fileFlow->GetObject("EventPlane", ResoFlowEP);
+      if (ResoFlowSP == nullptr || ResoFlowEP == nullptr) {
+        LOGF(fatal, "Flow resolution histograms not available in file %s", pathFlow.Data());
+      }
+    }
   }
 
   // Template function to run same event pairing (barrel-barrel, muon-muon, barrel-muon)
@@ -1734,6 +1772,7 @@ struct AnalysisSameEventPairing {
     constexpr bool eventHasQvector = ((TEventFillMap & VarManager::ObjTypes::ReducedEventQvector) > 0);
     constexpr bool eventHasQvectorCentr = ((TEventFillMap & VarManager::ObjTypes::CollisionQvect) > 0);
     constexpr bool trackHasCov = ((TTrackFillMap & VarManager::ObjTypes::TrackCov) > 0 || (TTrackFillMap & VarManager::ObjTypes::ReducedTrackBarrelCov) > 0);
+    constexpr bool fillFlowReso = eventHasQvector || eventHasQvectorCentr;
     bool isSelectedBDT = false;
 
     for (auto& event : events) {
@@ -1752,6 +1791,13 @@ struct AnalysisSameEventPairing {
       auto groupedAssocs = assocs.sliceBy(preslice, event.globalIndex());
       if (groupedAssocs.size() == 0) {
         continue;
+      }
+
+      if (fillFlowReso) {
+        if (ResoFlowSP == nullptr || ResoFlowEP == nullptr) {
+          LOGF(fatal, "Flow resolution histograms are not available, cannot fill flow variables!");
+        }
+        VarManager::FillEventFlowResoFactor(ResoFlowSP, ResoFlowEP);
       }
 
       bool isFirst = true;
@@ -1780,6 +1826,15 @@ struct AnalysisSameEventPairing {
           }
           if (t2.barrelAmbiguityOutOfBunch() > 1) {
             twoTrackFilter |= (static_cast<uint32_t>(1) << 31);
+          }
+
+          VarManager::fgValues[VarManager::kAmbi1] = -999.;
+          VarManager::fgValues[VarManager::kAmbi2] = -999.;
+          if (t1.reducedeventId() != event.globalIndex()) {
+            VarManager::fgValues[VarManager::kAmbi1] = 1.;
+          }
+          if (t2.reducedeventId() != event.globalIndex()) {
+            VarManager::fgValues[VarManager::kAmbi2] = 1.;
           }
 
           VarManager::FillPair<TPairType, TTrackFillMap>(t1, t2);
@@ -2258,6 +2313,13 @@ struct AnalysisSameEventPairing {
   template <int TPairType, uint32_t TEventFillMap, typename TEvents, typename TAssocs, typename TTracks>
   void runSameSideMixing(TEvents& events, TAssocs const& assocs, TTracks const& tracks, Preslice<TAssocs>& preSlice)
   {
+    LOG(info) << "Running same-side mixing";
+    if (ResoFlowSP == nullptr || ResoFlowEP == nullptr) {
+      LOG(info) << "Flow resolution objects not set, flow will not be filled for mixed events";
+      if (events.size() > 0) {
+        initParamsFromCCDB(events.begin().timestamp(), events.begin().runNumber(), false);
+      }
+    }
     events.bindExternalIndices(&assocs);
     int mixingDepth = fConfigMixingDepth.value;
     fAmbiguousPairs.clear();
@@ -2271,6 +2333,10 @@ struct AnalysisSameEventPairing {
       auto assocs2 = assocs.sliceBy(preSlice, event2.globalIndex());
       assocs2.bindExternalIndices(&events);
 
+      VarManager::FillTwoMixEvents<TEventFillMap>(event1, event2, assocs1, assocs2);
+      if (fConfigOptions.useRemoteFlow || fConfigOptions.useLocalFlow) {
+        VarManager::FillTwoMixEventsFlowResoFactor(ResoFlowSP, ResoFlowEP);
+      }
       runMixedPairing<TPairType, TEventFillMap>(assocs1, assocs2, tracks, tracks);
     } // end event loop
   }
@@ -2483,7 +2549,7 @@ struct AnalysisSameEventPairing {
   }
 
   void processMixingBarrelSkimmedFlow(soa::Filtered<MyEventsVtxCovSelectedQvectorWithHash>& events,
-                                      soa::Join<aod::ReducedTracksAssoc, aod::BarrelTrackCuts, aod::Prefilter> const& trackAssocs, aod::ReducedTracks const& tracks)
+                                      soa::Join<aod::ReducedTracksAssoc, aod::BarrelTrackCuts, aod::Prefilter> const& trackAssocs, MyBarrelTracksWithAmbiguities const& tracks)
   {
     runSameSideMixing<pairTypeEE, gkEventFillMapWithMultExtraWithQVector>(events, trackAssocs, tracks, trackAssocsPerCollision);
   }
@@ -2500,7 +2566,7 @@ struct AnalysisSameEventPairing {
     runSameSideMixing<pairTypeMuMu, gkEventFillMap>(events, muonAssocs, muons, muonAssocsPerCollision);
   }
 
-  void processDummy(MyEvents&)
+  void processDummy(MyEventsSimple&)
   {
     // do nothing
   }
@@ -3246,7 +3312,7 @@ struct AnalysisAsymmetricPairing {
     runThreeProng<true, gkEventFillMapWithCovZdcFit, gkTrackFillMapWithCov>(events, trackAssocsPerCollision, barrelAssocs, barrelTracks, VarManager::kTripleCandidateToPKPi);
   }
 
-  void processDummy(MyEvents&)
+  void processDummy(MyEventsSimple&)
   {
     // do nothing
   }
@@ -3930,7 +3996,7 @@ struct AnalysisDileptonTrack {
     } // end event loop
   }
 
-  void processDummy(MyEvents&)
+  void processDummy(MyEventsSimple&)
   {
     // do nothing
   }
@@ -4185,7 +4251,7 @@ struct AnalysisDileptonTrackTrack {
     }
   }
 
-  void processDummy(MyEvents&)
+  void processDummy(MyEventsSimple&)
   {
     // do nothing
   }

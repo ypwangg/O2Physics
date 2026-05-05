@@ -198,6 +198,7 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
         hm->AddHistogram(histClass, "NcontribReal_centT0C", "Ncontrib vs Cent", false, 100, 0, 100, VarManager::kCentFT0C, 4000, 0, 4000, VarManager::kVtxNcontribReal);
         hm->AddHistogram(histClass, "globalTracks_centT0C", "globalTracks vs Cent", false, 100, 0, 100, VarManager::kCentFT0C, 4000, 0, 4000, VarManager::kMultA);
         hm->AddHistogram(histClass, "ITSTPCTracks_centT0C", "ITSTPCTracks vs Cent", false, 100, 0, 100, VarManager::kCentFT0C, 4000, 0, 4000, VarManager::kMultAllTracksITSTPC);
+        hm->AddHistogram(histClass, "globalTracks_ncontribReal", "globalTracks vs ncontribReal", false, 100, 0, 10000, VarManager::kVtxNcontribReal, 4000, 0, 4000, VarManager::kMultA);
       }
     }
     if (subGroupStr.Contains("ftmulpbpb")) {
@@ -863,6 +864,12 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
         hm->AddHistogram(histClass, "TOFnSigPr_pIN", "TOF n-#sigma(p) vs pIN", false, 100, 0.0, 10.0, VarManager::kPin, 100, -5.0, 5.0, VarManager::kTOFnSigmaPr);
       }
     }
+    if (subGroupStr.Contains("combpid")) {
+      hm->AddHistogram(histClass, "CombnSigmaEl_pIN", "Comb. TPC n-#sigma(e) vs pIN", false, 100, 0.0, 10.0, VarManager::kPin, 100, 0.0, 10.0, VarManager::kCombnSigmaEl);
+      hm->AddHistogram(histClass, "CombnSigmaPi_pIN", "Comb. TPC n-#sigma(#pi) vs pIN", false, 100, 0.0, 10.0, VarManager::kPin, 100, 0.0, 10.0, VarManager::kCombnSigmaPi);
+      hm->AddHistogram(histClass, "CombnSigmaKa_pIN", "Comb. TPC n-#sigma(K) vs pIN", false, 100, 0.0, 10.0, VarManager::kPin, 100, 0.0, 10.0, VarManager::kCombnSigmaKa);
+      hm->AddHistogram(histClass, "CombnSigmaPr_pIN", "Comb. TPC n-#sigma(p) vs pIN", false, 100, 0.0, 10.0, VarManager::kPin, 100, 0.0, 10.0, VarManager::kCombnSigmaPr);
+    }
     if (subGroupStr.Contains("pidcorre")) {
       const int kNvarsPID = 3;
       const int kNbins_pIN = 169;
@@ -1317,6 +1324,56 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
         hm->AddHistogram(histClass, "CosThetaStarTPC", "", false, 100, -1.0, 1.0, VarManager::kCosThetaStarTPC);
         hm->AddHistogram(histClass, "CosThetaStarFT0A", "", false, 100, -1.0, 1.0, VarManager::kCosThetaStarFT0A);
         hm->AddHistogram(histClass, "CosThetaStarFT0C", "", false, 100, -1.0, 1.0, VarManager::kCosThetaStarFT0C);
+      }
+      if (subGroupStr.Contains("flow-jpsi-ep")) {
+        int varA2_TPC[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_TPC, VarManager::kDeltaPhiA2_TPC};
+        int varA2_FT0C[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_FT0C, VarManager::kDeltaPhiA2_FT0C};
+        int varA2_FT0A[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_FT0A, VarManager::kDeltaPhiA2_FT0A};
+
+        int bins[6] = {50, 20, 20, 9, 400, 40};
+        double minBins[6] = {2.0, 0.0, -1., 0.0, -10.0, -2.0};
+        double maxBins[6] = {4.0, 2.0, 1.0, 90.0, 10.0, 2.0};
+        TString labels[6] = {"kMass", "kPt", "kRapidity", "kCentFT0C", "kA2EP", "kDeltaPhiA2"};
+        if (subGroupStr.Contains("tpc")) {
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2_TPC", "", 6, varA2_TPC, bins, minBins, maxBins, 0, -1, kTRUE);
+        }
+        if (subGroupStr.Contains("ft0c")) {
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2_FT0C", "", 6, varA2_FT0C, bins, minBins, maxBins, 0, -1, kTRUE);
+        }
+        if (subGroupStr.Contains("ft0a")) {
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2_FT0A", "", 6, varA2_FT0A, bins, minBins, maxBins, 0, -1, kTRUE);
+        }
+        hm->AddHistogram(histClass, "DeltaPhiA2_TPC", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_TPC);
+        hm->AddHistogram(histClass, "DeltaPhiA2_FT0C", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_FT0C);
+        hm->AddHistogram(histClass, "DeltaPhiA2_FT0A", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_FT0A);
+        hm->AddHistogram(histClass, "A2_TPC", "", false, 400, -10.0, 10.0, VarManager::kA2EP_TPC);
+        hm->AddHistogram(histClass, "A2_FT0C", "", false, 400, -10.0, 10.0, VarManager::kA2EP_FT0C);
+        hm->AddHistogram(histClass, "A2_FT0A", "", false, 400, -10.0, 10.0, VarManager::kA2EP_FT0A);
+
+        hm->AddHistogram(histClass, "A2_TPC_CentFT0C", "", false, 400, -10.0, 10.0, VarManager::kA2EP_TPC, 20, 0.0, 100.0, VarManager::kCentFT0C);
+        hm->AddHistogram(histClass, "IsNumA2_TPC_CentFT0C", "", false, 2, -0.5, 1.5, VarManager::kNullA2, 20, 0.0, 100.0, VarManager::kCentFT0C);
+        hm->AddHistogram(histClass, "IsDenA2_TPC_CentFT0C", "", false, 2, -0.5, 1.5, VarManager::kInfA2, 20, 0.0, 100.0, VarManager::kCentFT0C);
+        hm->AddHistogram(histClass, "Psi2A_CentFT0C", "", false, 100, -TMath::Pi(), TMath::Pi(), VarManager::kPsi2A, 20, 0.0, 100.0, VarManager::kCentFT0C);
+        hm->AddHistogram(histClass, "MultA_CentFT0C", "", false, 250, 0.0, 250.0, VarManager::kMultA, 20, 0.0, 100.0, VarManager::kCentFT0C);
+        hm->AddHistogram(histClass, "Nnorm_CentFT0C", "", false, 102, -2.0, 100.0, VarManager::kNnorm, 20, 0.0, 100.0, VarManager::kCentFT0C);
+        hm->AddHistogram(histClass, "Nnorm_MultA", "", false, 102, -2.0, 100.0, VarManager::kNnorm, 20, 0.0, 100.0, VarManager::kMultA);
+
+        if (subGroupStr.Contains("me")) {
+          int varA2_TPC[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2ME_EP_TPC, VarManager::kDeltaPhiA2_TPC};
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_ME_A2_TPC", "", 6, varA2_TPC, bins, minBins, maxBins, 0, -1, kFALSE);
+        }
+      }
+      if (subGroupStr.Contains("coherent")) {
+        hm->AddHistogram(histClass, "Mass_Pt_CentFT0C_Coherent", "", false, 50, 2.0, 4.0, VarManager::kMass, 20, 0.0, 1.0, VarManager::kPt, 10, 0.0, 100.0, VarManager::kCentFT0C);
+        int varCoherent[5] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kOpeningAngle};
+        int binsCoherent[5] = {50, 20, 20, 10, 10};
+        double minCoherent[5] = {2.0, 0.0, -1.0, 0.0, 0.0};
+        double maxCoherent[5] = {4.0, 1.0, 1.0, 100.0, TMath::Pi()};
+        double minHadronic[5] = {2.0, 1.0, -1.0, 0.0, 0.0};
+        double maxHadronic[5] = {4.0, 11.0, 1.0, 100.0, TMath::Pi()};
+
+        hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_Coherent", "", 5, varCoherent, binsCoherent, minCoherent, maxCoherent, 0, -1, kTRUE);
+        hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_Hadronic", "", 5, varCoherent, binsCoherent, minHadronic, maxHadronic, 0, -1, kTRUE);
       }
       if (subGroupStr.Contains("upsilon")) {
         hm->AddHistogram(histClass, "MassUpsilon_Pt", "", false, 500, 7.0, 12.0, VarManager::kMass, 400, 0.0, 40.0, VarManager::kPt);

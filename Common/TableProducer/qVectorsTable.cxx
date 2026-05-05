@@ -60,7 +60,7 @@ using namespace o2::framework;
 using MyCollisions = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::FT0sCorrected,
                                aod::CentFT0Ms, aod::CentFT0As, aod::CentFT0Cs, aod::CentFV0As>;
 
-using MyTracks = soa::Join<aod::Tracks, aod::TracksExtra, aod::TrackSelection, aod::TrackSelectionExtension>;
+using MyTracks = soa::Join<aod::Tracks, aod::TracksExtra, aod::TrackSelection, aod::TrackSelectionExtension, aod::TracksDCA>;
 
 struct qVectorsTable {
   enum {
@@ -224,6 +224,9 @@ struct qVectorsTable {
     histosQA.add("FT0AmpCor", "", {HistType::kTH2F, {axisFITamp, axisChID}});
     histosQA.add("FV0Amp", "", {HistType::kTH2F, {axisFITamp, axisChID}});
     histosQA.add("FV0AmpCor", "", {HistType::kTH2F, {axisFITamp, axisChID}});
+    // tmp QA
+    histosQA.add("DCAxy", "", {HistType::kTH2F, {{60, 0.f, 6.f}, {100, -0.5f, 0.5f}}});
+    histosQA.add("DCAz", "", {HistType::kTH1F, {{400, -4.f, 4.f}}});
   }
 
   void initCCDB(aod::BCsWithTimestamps::iterator const& bc)
@@ -472,6 +475,8 @@ struct qVectorsTable {
       if (trk.eta() < cfgEtaMin) {
         continue;
       }
+      histosQA.fill(HIST("DCAxy"), trk.pt(), trk.dcaXY());
+      histosQA.fill(HIST("DCAz"), trk.dcaZ());
       qVectTPCall[0] += trk.pt() * std::cos(trk.phi() * nmode);
       qVectTPCall[1] += trk.pt() * std::sin(trk.phi() * nmode);
       TrkTPCallLabel.push_back(trk.globalIndex());
