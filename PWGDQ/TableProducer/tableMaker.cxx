@@ -39,7 +39,8 @@
 #include "Common/DataModel/FwdTrackReAlignTables.h"
 #include "Common/DataModel/MftmchMatchingML.h"
 #include "Common/DataModel/Multiplicity.h"
-#include "Common/DataModel/PIDResponse.h"
+#include "Common/DataModel/PIDResponseTOF.h"
+#include "Common/DataModel/PIDResponseTPC.h"
 #include "Common/DataModel/TrackSelectionTables.h"
 #include "EventFiltering/Zorro.h"
 
@@ -237,8 +238,6 @@ struct TableMaker {
 
   // TODO: filter on TPC dedx used temporarily until electron PID will be improved
   Filter barrelSelectedTracks = ifnode(fIsRun2.node() == true, aod::track::trackType == uint8_t(aod::track::Run2Track), aod::track::trackType == uint8_t(aod::track::Track)) && o2::aod::track::pt >= fConfigBarrelTrackPtLow && nabs(o2::aod::track::eta) <= fConfigBarrelTrackMaxAbsEta && o2::aod::track::tpcSignal >= configTpcSignal.fConfigMinTpcSignal && o2::aod::track::tpcSignal <= configTpcSignal.fConfigMaxTpcSignal && o2::aod::track::tpcChi2NCl < 4.0f && o2::aod::track::itsChi2NCl < 36.0f;
-  // Filter barrelSelectedTracks = o2::aod::track::tpcSignal <= configTpcSignal.fConfigMaxTpcSignal && o2::aod::track::tpcChi2NCl < 4.0f && o2::aod::track::itsChi2NCl < 36.0f;
-  // Filter barrelSelectedTracks = o2::aod::track::tpcChi2NCl < 4.0f && o2::aod::track::itsChi2NCl < 36.0f;
 
   Filter muonFilter = o2::aod::fwdtrack::pt >= fConfigMuonPtLow;
 

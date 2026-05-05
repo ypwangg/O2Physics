@@ -16,41 +16,46 @@
 //   The skimmed MC stack includes the MC truth particles corresponding to the list of user specified MC signals (see MCsignal.h)
 //    and the MC truth particles corresponding to the reconstructed tracks selected by the specified track cuts on reconstructed data.
 
-#include <iostream>
-#include <string>
-#include <map>
-#include <memory>
-#include <vector>
-#include "TList.h"
-#include "Framework/AnalysisTask.h"
-#include "Framework/AnalysisDataModel.h"
-#include "Framework/ASoAHelpers.h"
-#include "Framework/ASoA.h"
-#include "Framework/DataTypes.h"
-#include "Framework/runDataProcessing.h"
-#include "Common/DataModel/Multiplicity.h"
-#include "Common/DataModel/EventSelection.h"
-#include "Common/DataModel/Centrality.h"
-#include "Common/CCDB/TriggerAliases.h"
-#include "PWGDQ/DataModel/ReducedInfoTables.h"
-#include "PWGDQ/Core/VarManager.h"
-#include "PWGDQ/Core/HistogramManager.h"
-#include "PWGDQ/Core/AnalysisCut.h"
 #include "PWGDQ/Core/AnalysisCompositeCut.h"
-#include "PWGDQ/Core/HistogramsLibrary.h"
+#include "PWGDQ/Core/AnalysisCut.h"
 #include "PWGDQ/Core/CutsLibrary.h"
+#include "PWGDQ/Core/HistogramManager.h"
+#include "PWGDQ/Core/HistogramsLibrary.h"
 #include "PWGDQ/Core/MCSignal.h"
 #include "PWGDQ/Core/MCSignalLibrary.h"
-#include "Common/DataModel/PIDResponse.h"
-#include "Common/DataModel/TrackSelectionTables.h"
+#include "PWGDQ/Core/VarManager.h"
+#include "PWGDQ/DataModel/ReducedInfoTables.h"
+
+#include "Common/CCDB/TriggerAliases.h"
+#include "Common/DataModel/Centrality.h"
 #include "Common/DataModel/CollisionAssociationTables.h"
+#include "Common/DataModel/EventSelection.h"
+#include "Common/DataModel/Multiplicity.h"
+#include "Common/DataModel/PIDResponseTOF.h"
+#include "Common/DataModel/PIDResponseTPC.h"
+#include "Common/DataModel/TrackSelectionTables.h"
+
+#include "CCDB/BasicCCDBManager.h"
 #include "DataFormatsParameters/GRPMagField.h"
 #include "DataFormatsParameters/GRPObject.h"
-#include "Field/MagneticField.h"
-#include "TGeoGlobalMagField.h"
-#include "DetectorsBase/Propagator.h"
 #include "DetectorsBase/GeometryManager.h"
-#include "CCDB/BasicCCDBManager.h"
+#include "DetectorsBase/Propagator.h"
+#include "Field/MagneticField.h"
+#include "Framework/ASoA.h"
+#include "Framework/ASoAHelpers.h"
+#include "Framework/AnalysisDataModel.h"
+#include "Framework/AnalysisTask.h"
+#include "Framework/DataTypes.h"
+#include "Framework/runDataProcessing.h"
+
+#include "TGeoGlobalMagField.h"
+#include "TList.h"
+
+#include <iostream>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 using std::cout;
 using std::endl;
@@ -104,57 +109,6 @@ constexpr static uint32_t gkMuonFillMapWithAmbi = VarManager::ObjTypes::Muon | V
 constexpr static uint32_t gkMuonFillMapWithCovAmbi = VarManager::ObjTypes::Muon | VarManager::ObjTypes::MuonCov | VarManager::ObjTypes::AmbiMuon;
 constexpr static uint32_t gkTrackFillMapWithAmbi = VarManager::ObjTypes::Track | VarManager::ObjTypes::AmbiTrack;
 constexpr static uint32_t gkMFTFillMap = VarManager::ObjTypes::TrackMFT;
-
-struct TrackQA {
-  const char* SignalName = "eFromPromptJpsi";
-  MCSignal* sig;
-
-  HistogramRegistry registry{"registry"};
-
-  Filter barrelSelectedTracks = o2::aod::track::pt >= 0.15f && nabs(o2::aod::track::eta) <= 0.9f;
-  void init(o2::framework::InitContext&)
-  {
-    sig = o2::aod::dqmcsignals::GetMCSignal(SignalName);
-    registry.add("hTrackType", "Track type enum", HistType::kTH1I, {{4, 0, 4}});
-    registry.add("hTrackIUPt", "Pt of TrackIU", HistType::kTH1F, {{50, 0, 10}});
-    registry.add("hTrackPt", "Pt of Track", HistType::kTH1F, {{50, 0, 10}});
-    LOGP(info, "intialized track qa");
-  }
-
-  void process(MyEvents::iterator const& event, soa::Filtered<MyBarrelTracks> const& tracks, aod::McCollisions const& /*mcEvents*/, aod::McParticles_001 const& /*mcTracks*/) {
-    // if (!event.sel8()) {
-    //   return;
-    // }
-    for (auto& track : tracks) {
-      LOGP(info, "loop over tracks");
-      if (track.pt() < 0.15) {
-        continue;
-      }
-      if (abs(track.eta()) > 0.9) {
-        continue;
-      }
-      if (!track.has_mcParticle()) {
-        continue;
-        LOGP(info, "Not found MC particle");
-      }
-      auto mctrack = track.template mcParticle_as<aod::McParticles_001>();
-      LOGP(info, "found MC particle: {}", mctrack.pdgCode());
-      if (sig->CheckSignal(true, mctrack)) {
-        LOGP(info, "found non-prompt Jpsi signal");
-        if (track.trackType() == uint8_t(aod::track::TrackIU)) {
-          registry.fill(HIST("hTrackType"), 0);
-          registry.fill(HIST("hTrackIUPt"), track.pt());
-        } else if (track.trackType() == uint8_t(aod::track::Track)) {
-          registry.fill(HIST("hTrackType"), 1);
-          registry.fill(HIST("hTrackPt"), track.pt());
-        } else if (track.trackType() == uint8_t(aod::track::StrangeTrack)) {
-          registry.fill(HIST("hTrackType"), 2);
-        }
-        registry.fill(HIST("hTrackType"), 3);
-      }
-    }
-  }
-};
 
 struct TableMakerMC {
 
@@ -230,9 +184,6 @@ struct TableMakerMC {
 
   void init(o2::framework::InitContext& context)
   {
-    if (context.mOptions.get<bool>("processDummy")) {
-      return;
-    }
     fCCDB->setURL(fConfigCcdbUrl);
     fCCDB->setCaching(true);
     fCCDB->setLocalObjectValidityChecking();
@@ -515,7 +466,7 @@ struct TableMakerMC {
       // make an entry for this MC event only if it was not already added to the table
       if (!(fEventLabels.find(mcCollision.globalIndex()) != fEventLabels.end())) {
         eventMC(mcCollision.generatorsID(), mcCollision.posX(), mcCollision.posY(), mcCollision.posZ(),
-                mcCollision.t(), mcCollision.weight(), mcCollision.impactParameter());
+                mcCollision.t(), mcCollision.weight(), mcCollision.impactParameter(), 1, 1, 1, 1);
         fEventLabels[mcCollision.globalIndex()] = fCounters[1];
         fCounters[1]++;
       }
@@ -707,7 +658,7 @@ struct TableMakerMC {
                            track.c1PtY(), track.c1PtZ(), track.c1PtSnp(), track.c1PtTgl(), track.c1Pt21Pt2());
           }
         } // end loop over reconstructed tracks
-      }   // end if constexpr (static_cast<bool>(TTrackFillMap))
+      } // end if constexpr (static_cast<bool>(TTrackFillMap))
 
       // Maps for the MFT-muon matching index
       std::map<int, int> newMFTTableSize; // key : oldMFTIndex, value: size of the table-1 at step key
@@ -918,9 +869,9 @@ struct TableMakerMC {
               newMatchIndex[muon.index()] = newEntryNb[matchIdx];                                  // update the match for this muon to the updated entry of the match
               newMatchIndex[muon.index()] += muonBasic.lastIndex() + 1 - newEntryNb[muon.index()]; // adding the offset of muons, muonBasic.lastIndex() start at -1
 
-              if (static_cast<int>(muon.trackType()) == 0) {                                       // for now only do this to global tracks
-                newMatchIndex[matchIdx] = newEntryNb[muon.index()];                                // add the  updated index of this muon as a match to mch track
-                newMatchIndex[matchIdx] += muonBasic.lastIndex() + 1 - newEntryNb[muon.index()];   // adding the offset, muonBasic.lastIndex() start at -1
+              if (static_cast<int>(muon.trackType()) == 0) {                                     // for now only do this to global tracks
+                newMatchIndex[matchIdx] = newEntryNb[muon.index()];                              // add the  updated index of this muon as a match to mch track
+                newMatchIndex[matchIdx] += muonBasic.lastIndex() + 1 - newEntryNb[muon.index()]; // adding the offset, muonBasic.lastIndex() start at -1
               }
             } else {
               newMatchIndex[muon.index()] = -1;
@@ -969,7 +920,7 @@ struct TableMakerMC {
           muonLabels(fNewLabels.find(mctrack.index())->second, muon.mcMask(), mcflags);
         }
       } // end if constexpr (static_cast<bool>(TMuonFillMap))
-    }   // end loop over collisions
+    } // end loop over collisions
 
     // Loop over the label map, create the mother/daughter relationships if these exist and write the skimmed MC stack
     for (const auto& [newLabel, oldLabel] : fNewLabelsReversed) {
@@ -1150,7 +1101,7 @@ struct TableMakerMC {
       // make an entry for this MC event only if it was not already added to the table
       if (!(fEventLabels.find(mcCollision.globalIndex()) != fEventLabels.end())) {
         eventMC(mcCollision.generatorsID(), mcCollision.posX(), mcCollision.posY(), mcCollision.posZ(),
-                mcCollision.t(), mcCollision.weight(), mcCollision.impactParameter());
+                mcCollision.t(), mcCollision.weight(), mcCollision.impactParameter(), 1, 1, 1, 1);
         fEventLabels[mcCollision.globalIndex()] = fCounters[1];
         fCounters[1]++;
       }
@@ -1330,7 +1281,7 @@ struct TableMakerMC {
                            track.c1PtY(), track.c1PtZ(), track.c1PtSnp(), track.c1PtTgl(), track.c1Pt21Pt2());
           }
         } // end loop over reconstructed tracks
-      }   // end if constexpr (static_cast<bool>(TTrackFillMap))
+      } // end if constexpr (static_cast<bool>(TTrackFillMap))
 
       if constexpr (static_cast<bool>(TMuonFillMap)) {
         // build the muon tables
@@ -1508,7 +1459,7 @@ struct TableMakerMC {
           muonLabels(fNewLabels.find(mctrack.index())->second, muon.mcMask(), mcflags);
         }
       } // end if constexpr (static_cast<bool>(TMuonFillMap))
-    }   // end loop over collisions
+    } // end loop over collisions
 
     // Loop over the label map, create the mother/daughter relationships if these exist and write the skimmed MC stack
     for (const auto& [newLabel, oldLabel] : fNewLabelsReversed) {
@@ -1813,10 +1764,6 @@ struct TableMakerMC {
     (reinterpret_cast<TH2I*>(fStatsList->At(0)))->Fill(0.0, static_cast<float>(kNaliases));
   }
 
-  void processDummy(MyEvents&) {
-    // do nothing
-  }
-
   PROCESS_SWITCH(TableMakerMC, processFull, "Produce both barrel and muon skims", false);
   PROCESS_SWITCH(TableMakerMC, processFullWithCov, "Produce both barrel and muon skims, w/ track and fwdtrack cov tables", false);
   PROCESS_SWITCH(TableMakerMC, processBarrelOnly, "Produce barrel skims", false);
@@ -1838,7 +1785,6 @@ struct TableMakerMC {
   PROCESS_SWITCH(TableMakerMC, processAmbiguousMuonOnly, "Build muon-only DQ skimmed data model with QA plots for ambiguous muons", false);
   PROCESS_SWITCH(TableMakerMC, processAmbiguousMuonOnlyWithCov, "Build muon-only with cov DQ skimmed data model with QA plots for ambiguous muons", false);
   PROCESS_SWITCH(TableMakerMC, processAmbiguousBarrelOnly, "Build barrel-only DQ skimmed data model with QA plots for ambiguous tracks", false);
-  PROCESS_SWITCH(TableMakerMC, processDummy, "DummyFunction", true);
 };
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
@@ -1846,6 +1792,5 @@ WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
   // TODO: For now TableMakerMC works just for PbPb (cent table is present)
   //      Implement workflow arguments for pp/PbPb and possibly merge the task with tableMaker.cxx
   return WorkflowSpec{
-    adaptAnalysisTask<TrackQA>(cfgc),
     adaptAnalysisTask<TableMakerMC>(cfgc)};
 }

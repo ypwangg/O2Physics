@@ -48,6 +48,7 @@ std::map<VarManager::CalibObjects, TObject*> VarManager::fgCalibs;
 bool VarManager::fgRunTPCPostCalibration[4] = {false, false, false, false};
 int VarManager::fgCalibrationType = 0;                // 0 - no calibration, 1 - calibration vs (TPCncls,pIN,eta) typically for pp, 2 - calibration vs (eta,nPV,nLong,tLong) typically for PbPb
 bool VarManager::fgUseInterpolatedCalibration = true; // use interpolated calibration histograms (default: true)
+double VarManager::fRandomPhi = 0.;
 
 //__________________________________________________________________
 VarManager::VarManager() : TObject()
@@ -446,6 +447,9 @@ void VarManager::SetDefaultVarNames()
   fgVariableNames[kMCEventWeight] = "MC event weight";
   fgVariableNames[kMCEventImpParam] = "MC impact parameter";
   fgVariableNames[kMCEventCentrFT0C] = "MC Centrality FT0C";
+  fgVariableNames[kMultMCNParticlesEta05] = "MC Multiplicity Central Barrel for |eta| < 0.5";
+  fgVariableNames[kMultMCNParticlesEta08] = "MC Multiplicity Central Barrel for |eta| < 0.8";
+  fgVariableNames[kMultMCNParticlesEta10] = "MC Multiplicity Central Barrel for |eta| < 1.0";
   fgVariableUnits[kMCEventGeneratorId] = "";
   fgVariableUnits[kMCEventSubGeneratorId] = "";
   fgVariableUnits[kMCVtxX] = "cm";
@@ -455,6 +459,9 @@ void VarManager::SetDefaultVarNames()
   fgVariableUnits[kMCEventWeight] = "";
   fgVariableUnits[kMCEventImpParam] = "b";
   fgVariableUnits[kMCEventCentrFT0C] = "%";
+  fgVariableUnits[kMultMCNParticlesEta05] = "Multiplicity_eta05";
+  fgVariableUnits[kMultMCNParticlesEta08] = "Multiplicity_eta08";
+  fgVariableUnits[kMultMCNParticlesEta10] = "Multiplicity_eta10";
   fgVariableNames[kTwoEvPosZ1] = "vtx-z_{1}";
   fgVariableUnits[kTwoEvPosZ1] = "cm";
   fgVariableNames[kTwoEvPosZ2] = "vtx-z_{2}";
@@ -778,6 +785,10 @@ void VarManager::SetDefaultVarNames()
   fgVariableUnits[kCandidateId] = "";
   fgVariableNames[kPairType] = "Pair type";
   fgVariableUnits[kPairType] = "";
+  fgVariableNames[kPairDCAxy] = "DCA_{xy}";
+  fgVariableUnits[kPairDCAxy] = "cm";
+  fgVariableNames[kPairDCAz] = "DCA_{z}";
+  fgVariableUnits[kPairDCAz] = "cm";
   fgVariableNames[kVertexingLxy] = "Pair Lxy";
   fgVariableUnits[kVertexingLxy] = "cm";
   fgVariableNames[kVertexingLz] = "Pair Lz";
@@ -1262,8 +1273,6 @@ void VarManager::SetDefaultVarNames()
   fgVariableUnits[kDeltaR2] = "";
   fgVariableNames[kDeltaR] = "angular distance";
   fgVariableUnits[kDeltaR] = "";
-  fgVariableNames[kPtOverPairPt] = "p_{T}^{Quad}/p_{T}^{dilepton}";
-  fgVariableUnits[kPtOverPairPt] = "";
   fgVariableNames[kV22m] = "v_{2}(2)_{#mu^{-}}";
   fgVariableUnits[kV22m] = "";
   fgVariableNames[kV24m] = "v_{2}(4)_{#mu^{-}}";
@@ -1718,6 +1727,8 @@ void VarManager::SetDefaultVarNames()
   fgVarNamesMap["kMCMotherPdgCode"] = kMCMotherPdgCode;
   fgVarNamesMap["kCandidateId"] = kCandidateId;
   fgVarNamesMap["kPairType"] = kPairType;
+  fgVarNamesMap["kPairDCAxy"] = kPairDCAxy;
+  fgVarNamesMap["kPairDCAz"] = kPairDCAz;
   fgVarNamesMap["kVertexingLxy"] = kVertexingLxy;
   fgVarNamesMap["kVertexingLxyErr"] = kVertexingLxyErr;
   fgVarNamesMap["kVertexingPseudoCTau"] = kVertexingPseudoCTau;
@@ -1909,7 +1920,7 @@ void VarManager::SetDefaultVarNames()
   fgVarNamesMap["kQ"] = kQ;
   fgVarNamesMap["kDeltaR1"] = kDeltaR1;
   fgVarNamesMap["kDeltaR2"] = kDeltaR2;
-  fgVarNamesMap["kPtOverPairPt"] = kPtOverPairPt;
+  fgVarNamesMap["kDeltaR"] = kDeltaR;
   fgVarNamesMap["kMassCharmHadron"] = kMassCharmHadron;
   fgVarNamesMap["kPtCharmHadron"] = kPtCharmHadron;
   fgVarNamesMap["kRapCharmHadron"] = kRapCharmHadron;

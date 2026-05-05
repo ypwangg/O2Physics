@@ -1514,8 +1514,6 @@ struct AnalysisSameEventPairing {
       constexpr bool trackHasCov = ((TTrackFillMap & VarManager::ObjTypes::TrackCov) > 0 || (TTrackFillMap & VarManager::ObjTypes::ReducedTrackBarrelCov) > 0);
       if constexpr ((TPairType == pairTypeEE) && trackHasCov && (TTwoProngFitter == true)) {
         dielectronExtraList(t1.globalIndex(), t2.globalIndex(), VarManager::fgValues[VarManager::kVertexingTauz], VarManager::fgValues[VarManager::kVertexingLz], VarManager::fgValues[VarManager::kVertexingLxy]);
-      } else {
-        dielectronExtraList(t1.globalIndex(), t2.globalIndex(), -999.f, -999.f, -999.f);
       }
       if constexpr ((TPairType == pairTypeMuMu) && (TTwoProngFitter == true)) {
         // LOGP(info, "mu1 collId = {}, mu2 collId = {}", t1.collisionId(), t2.collisionId());
@@ -2137,7 +2135,7 @@ struct AnalysisDileptonTrackTrack {
     fOutputList.setObject(fHistMan->GetMainHistogramList());
   }
   // Template function to run pair - track - track combinations
-  template <int NProng, int TCandidateType, uint32_t TEventFillMap, uint32_t TTrackFillMap, typename TEvent, typename TTracks>
+  template <int TCandidateType, uint32_t TEventFillMap, uint32_t TTrackFillMap, typename TEvent, typename TTracks>
   void runDileptonTrackTrack(TEvent const& event, TTracks const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
   {
     VarManager::ResetValues(0, VarManager::kNVars, fValuesQuadruplet);
@@ -2146,25 +2144,12 @@ struct AnalysisDileptonTrackTrack {
     // LOGF(info, "Number of dileptons: %d", dileptons.size());
 
     // set up KF or DCAfitter
-    // if (fConfigUseDCAVertexing) {
-    //   VarManager::SetupTwoProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
-    //   // VarManager::SetupThreeProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
-    //   VarManager::SetupFourProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
-    // } else if (fConfigUseKFVertexing) {
-    //   VarManager::SetupFourProngKFParticle(5.0f);
-    // }
-    if (NProng == 3) {
-      if (fConfigUseKFVertexing) {
-        VarManager::SetupThreeProngKFParticle(5.0f);
-      } else {
-        VarManager::SetupThreeProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
-      }
-    } else if (NProng == 4) {
-      if (fConfigUseKFVertexing) {
-        VarManager::SetupFourProngKFParticle(5.0f);
-      } else {
+    if (fConfigUseDCAVertexing) {
+      VarManager::SetupTwoProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
+      // VarManager::SetupThreeProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
       VarManager::SetupFourProngDCAFitter(5.0f, true, 200.0f, 4.0f, 1.0e-3f, 0.9f, false); // TODO: get these parameters from Configurables
-      }
+    } else if (fConfigUseKFVertexing) {
+      VarManager::SetupFourProngKFParticle(5.0f);
     }
 
     int indexOffset = -999;
@@ -2219,7 +2204,7 @@ struct AnalysisDileptonTrackTrack {
         // fill variables
         VarManager::FillDileptonTrackTrack<TCandidateType>(dilepton, t1, t2, fValuesQuadruplet);
         // reconstruct the secondary vertex
-        if constexpr (NProng > 0) {
+        if (fConfigUseDCAVertexing || fConfigUseKFVertexing) {
           VarManager::FillDileptonTrackTrackVertexing<TCandidateType, TEventFillMap, TTrackFillMap>(event, lepton1, lepton2, t1, t2, fValuesQuadruplet);
         }
 
@@ -2259,24 +2244,20 @@ struct AnalysisDileptonTrackTrack {
                                 fValuesQuadruplet[VarManager::kDitrackMass], fValuesQuadruplet[VarManager::kDitrackPt], t1.pt(), t2.pt(), t1.eta(), t2.eta(), t1.phi(), t2.phi(), t1.sign(), t2.sign(), t1.tpcNSigmaPi(), t2.tpcNSigmaPi(), t1.tpcNSigmaKa(), t2.tpcNSigmaKa(), t1.tpcNSigmaPr(), t1.tpcNSigmaPr(), t1.tpcNClsFound(), t2.tpcNClsFound(),
                                 fValuesQuadruplet[VarManager::kKFMass], fValuesQuadruplet[VarManager::kVertexingProcCode], fValuesQuadruplet[VarManager::kVertexingChi2PCA], fValuesQuadruplet[VarManager::kCosPointingAngle], fValuesQuadruplet[VarManager::kKFDCAxyzBetweenProngs], fValuesQuadruplet[VarManager::kKFChi2OverNDFGeo],
                                 fValuesQuadruplet[VarManager::kVertexingLz], fValuesQuadruplet[VarManager::kVertexingLxy], fValuesQuadruplet[VarManager::kVertexingLxyz], fValuesQuadruplet[VarManager::kVertexingTauz], fValuesQuadruplet[VarManager::kVertexingTauxy], fValuesQuadruplet[VarManager::kVertexingLzErr], fValuesQuadruplet[VarManager::kVertexingLxyzErr],
-                                fValuesQuadruplet[VarManager::kVertexingTauzErr], fValuesQuadruplet[VarManager::kVertexingLzProjected], fValuesQuadruplet[VarManager::kVertexingLxyProjected], fValuesQuadruplet[VarManager::kVertexingLxyzProjected], fValuesQuadruplet[VarManager::kVertexingTauzProjected], fValuesQuadruplet[VarManager::kVertexingTauxyProjected]);
+                                fValuesQuadruplet[VarManager::kVertexingTauzErr], fValuesQuadruplet[VarManager::kVertexingLzProjected], fValuesQuadruplet[VarManager::kVertexingLxyProjected], fValuesQuadruplet[VarManager::kVertexingLxyzProjected], fValuesQuadruplet[VarManager::kVertexingTauzProjected], fValuesQuadruplet[VarManager::kVertexingTauxyProjected], 
+                                dilepton.filterMap_raw(), CutDecision);
       } // end loop over track-track pairs
     } // end loop over dileptons
   }
 
   void processChicToJpsiPiPi(soa::Filtered<MyEventsVtxCovSelected>::iterator const& event, MyBarrelTracksSelectedWithCov const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
   {
-    runDileptonTrackTrack<4, VarManager::kXtoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, tracks, dileptons);
+    runDileptonTrackTrack<VarManager::kXtoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, tracks, dileptons);
   }
 
   void processPsi2SToJpsiPiPi(soa::Filtered<MyEventsVtxCovSelected>::iterator const& event, MyBarrelTracksSelectedWithCov const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
   {
-    runDileptonTrackTrack<4, VarManager::kPsi2StoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, tracks, dileptons);
-  }
-
-  void processB0ToJpsiPiPi(soa::Filtered<MyEventsSelected>::iterator const& event, MyBarrelTracksSelected const& tracks, soa::Filtered<MyDielectronCandidates> const& dileptons)
-  {
-    runDileptonTrackTrack<0, VarManager::kB0toJpsiEEPiPi, gkEventFillMap, gkTrackFillMap>(event, tracks, dileptons);
+    runDileptonTrackTrack<VarManager::kPsi2StoJpsiPiPi, gkEventFillMapWithCov, gkTrackFillMapWithCov>(event, tracks, dileptons);
   }
 
   void processDummy(MyEvents&)
@@ -2286,7 +2267,6 @@ struct AnalysisDileptonTrackTrack {
 
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processChicToJpsiPiPi, "Run dilepton-dihadron pairing to study X(3872), using skimmed data", false);
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processPsi2SToJpsiPiPi, "Run dilepton-dihadron pairing to study Psi(2S), using skimmed data", false);
-  PROCESS_SWITCH(AnalysisDileptonTrackTrack, processB0ToJpsiPiPi, "Run dilepton-dihadron pairing to study B0->Jpsi+Pi+Pi, using skimmed data", false);
   PROCESS_SWITCH(AnalysisDileptonTrackTrack, processDummy, "Dummy function", false);
 };
 

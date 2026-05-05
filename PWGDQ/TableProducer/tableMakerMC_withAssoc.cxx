@@ -34,7 +34,8 @@
 #include "Common/DataModel/FwdTrackReAlignTables.h"
 #include "Common/DataModel/McCollisionExtra.h"
 #include "Common/DataModel/Multiplicity.h"
-#include "Common/DataModel/PIDResponse.h"
+#include "Common/DataModel/PIDResponseTOF.h"
+#include "Common/DataModel/PIDResponseTPC.h"
 #include "Common/DataModel/TrackSelectionTables.h"
 
 #include "CCDB/BasicCCDBManager.h"
@@ -89,12 +90,6 @@ using MyBarrelTracksWithCov = soa::Join<aod::Tracks, aod::TracksExtra, aod::Trac
                                         aod::pidTOFFullEl, aod::pidTOFFullMu, aod::pidTOFFullPi,
                                         aod::pidTOFFullKa, aod::pidTOFFullPr, aod::pidTOFbeta,
                                         aod::McTrackLabels>;
-using MyBarrelTracksTunedWithCov = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov, aod::TracksDCA, aod::TrackSelection,
-                                             aod::pidTPCFullEl, aod::pidTPCFullMu, aod::pidTPCFullPi,
-                                             aod::pidTPCFullKa, aod::pidTPCFullPr, aod::mcTPCTuneOnData,
-                                             aod::pidTOFFullEl, aod::pidTOFFullMu, aod::pidTOFFullPi,
-                                              aod::pidTOFFullKa, aod::pidTOFFullPr, aod::pidTOFbeta,
-                                             aod::McTrackLabels>;
 using MyMuons = soa::Join<aod::FwdTracks, aod::McFwdTrackLabels, aod::FwdTracksDCA>;
 using MyMuonsWithCov = soa::Join<aod::FwdTracks, aod::FwdTracksCov, aod::McFwdTrackLabels, aod::FwdTracksDCA>;
 using MyMuonsRealignWithCov = soa::Join<aod::FwdTracksReAlign, aod::FwdTrksCovReAlign, aod::McFwdTrackLabels, aod::FwdTracksDCA>;
@@ -105,7 +100,7 @@ using MyEventsWithMultsAndRapidityGapFilter = soa::Join<aod::Collisions, aod::Ev
 using MyEventsWithCent = soa::Join<aod::Collisions, aod::EvSels, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::McCollisionLabels>;
 using MyEventsWithCentAndMults = soa::Join<aod::Collisions, aod::EvSels, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::Mults, aod::MultsExtra, aod::McCollisionLabels>;
 using MFTTrackLabeled = soa::Join<o2::aod::MFTTracks, aod::McMFTTrackLabels>;
-using MyEventsMcWithMults = soa::Join<aod::McCollisions, aod::McCollsExtra>;
+using MyEventsMcWithMults = soa::Join<aod::McCollisions, aod::McCollsExtra, aod::MultMCExtras_001>;
 
 // Declare bit maps containing information on the table joins content (used as argument in templated functions)
 constexpr static uint32_t gkEventFillMap = VarManager::ObjTypes::BC | VarManager::ObjTypes::Collision;
@@ -117,7 +112,6 @@ constexpr static uint32_t gkEventMcFillMap = VarManager::ObjTypes::CollisionMC;
 constexpr static uint32_t gkEventMcFillMapWithCent = VarManager::ObjTypes::CollisionMC | VarManager::ObjTypes::CollisionCent;
 // constexpr static uint32_t gkTrackFillMap = VarManager::ObjTypes::Track | VarManager::ObjTypes::TrackExtra | VarManager::ObjTypes::TrackDCA | VarManager::ObjTypes::TrackSelection | VarManager::ObjTypes::TrackPID;
 constexpr static uint32_t gkTrackFillMapWithCov = VarManager::ObjTypes::Track | VarManager::ObjTypes::TrackExtra | VarManager::ObjTypes::TrackDCA | VarManager::ObjTypes::TrackSelection | VarManager::ObjTypes::TrackCov | VarManager::ObjTypes::TrackPID;
-constexpr static uint32_t gkTrackFillMapTunedWithCov = VarManager::ObjTypes::Track | VarManager::ObjTypes::TrackExtra | VarManager::ObjTypes::TrackDCA | VarManager::ObjTypes::TrackSelection | VarManager::ObjTypes::TrackCov | VarManager::ObjTypes::TrackPID | VarManager::ObjTypes::MCTPCtuneOnData;
 // constexpr static uint32_t gkTrackFillMapWithDalitzBits = gkTrackFillMap | VarManager::ObjTypes::DalitzBits;
 // constexpr static uint32_t gkMuonFillMap = VarManager::ObjTypes::Muon;
 constexpr static uint32_t gkMuonFillMapWithCov = VarManager::ObjTypes::Muon | VarManager::ObjTypes::MuonCov;
@@ -270,7 +264,7 @@ struct TableMakerMC {
   {
     // Check whether barrel or muon are enabled
     bool isProcessBCenabled = context.mOptions.get<bool>("processPP");
-    bool isBarrelEnabled = (context.mOptions.get<bool>("processPP") || context.mOptions.get<bool>("processPPBarrelOnly") || context.mOptions.get<bool>("processPPBarrelOnlyMcTuned") || context.mOptions.get<bool>("processPbPbBarrelOnly") || context.mOptions.get<bool>("processPbPbWithFilterBarrelOnly"));
+    bool isBarrelEnabled = (context.mOptions.get<bool>("processPP") || context.mOptions.get<bool>("processPPBarrelOnly") || context.mOptions.get<bool>("processPbPbBarrelOnly") || context.mOptions.get<bool>("processPbPbWithFilterBarrelOnly"));
     bool isMuonEnabled = (context.mOptions.get<bool>("processPP") || context.mOptions.get<bool>("processPPMuonOnlyBasic") || context.mOptions.get<bool>("processPPMuonOnly") || context.mOptions.get<bool>("processPPRealignedMuonOnly") || context.mOptions.get<bool>("processPbPbMuonOnly") || context.mOptions.get<bool>("processPbPbRealignedMuonOnly")) || context.mOptions.get<bool>("processPPMuonRefit");
     // Make sure at least one process function is enabled
     if (!(isProcessBCenabled || isBarrelEnabled || isMuonEnabled)) {
@@ -461,8 +455,7 @@ struct TableMakerMC {
   Preslice<aod::FwdTrackAssoc> fwdtrackIndicesPerCollision = aod::track_association::collisionId;
   Preslice<aod::MFTTrackAssoc> mfttrackIndicesPerCollision = aod::track_association::collisionId;
 
-  template <uint32_t TEventMcFillMap, typename TEventsMC>
-  void skimMCCollisions(TEventsMC const& mcCollisions)
+  void skimMCCollisions(MyEventsMcWithMults const& mcCollisions)
   {
     // skim MC collisions
     // NOTE: So far, all MC collisions are skimmed. In case there will be filtering based on MC collisions,
@@ -472,17 +465,17 @@ struct TableMakerMC {
     // Loop over MC collisions
     for (auto& mcCollision : mcCollisions) {
       // Get MC collision information into the VarManager
-      VarManager::FillEvent<TEventMcFillMap>(mcCollision);
+      VarManager::FillEvent<gkEventMcFillMapWithCent>(mcCollision);
       // Fill histograms
       fHistMan->FillHistClass("Event_MCTruth", VarManager::fgValues);
       // Create the skimmed table entry for this collision
       eventMC(mcCollision.generatorsID(), mcCollision.posX(), mcCollision.posY(), mcCollision.posZ(),
-              mcCollision.t(), mcCollision.weight(), mcCollision.impactParameter());
+              mcCollision.t(), mcCollision.weight(), mcCollision.impactParameter(), mcCollision.bestCollisionCentFT0C(),
+              mcCollision.multMCNParticlesEta05(), mcCollision.multMCNParticlesEta08(), mcCollision.multMCNParticlesEta10());
     }
   }
 
-  template <uint32_t TEventMcFillMap, typename TEventsMC>
-  void skimMCParticles(aod::McParticles const& mcTracks, TEventsMC const&)
+  void skimMCParticles(aod::McParticles const& mcTracks, MyEventsMcWithMults const&)
   {
     // Select MC particles which fulfill at least one of the user specified MC signals
     // In this function we just fill a map with the labels of selected particles, not creating the tables themselves.
@@ -560,7 +553,7 @@ struct TableMakerMC {
         if (fConfigHistOutput.fConfigQA) {
           VarManager::FillTrackMC(mcTracks, mctrack);
           auto mcCollision = mctrack.template mcCollision_as<MyEventsMcWithMults>();
-          VarManager::FillEvent<TEventMcFillMap>(mcCollision);
+          VarManager::FillEvent<gkEventMcFillMapWithCent>(mcCollision);
           int j = 0;
           for (auto signal = fMCSignals.begin(); signal != fMCSignals.end(); signal++, j++) {
             if (mcflags & (static_cast<uint16_t>(1) << j)) {
@@ -572,7 +565,7 @@ struct TableMakerMC {
     } // end loop over mc stack
   }
 
-  template <uint32_t TEventFillMap, uint32_t TEventMcFillMap, typename TEvents>
+  template <uint32_t TEventFillMap, typename TEvents>
   void skimCollisions(TEvents const& collisions, BCsWithTimestamps const& /*bcs*/)
   {
     // Skim reconstructed collisions which are selected by the user specified cuts
@@ -632,7 +625,7 @@ struct TableMakerMC {
       VarManager::FillEvent<TEventFillMap>(collision); // extract event information and place it in the fValues array
       if (collision.has_mcCollision()) {
         auto mcCollision = collision.template mcCollision_as<MyEventsMcWithMults>();
-        VarManager::FillEvent<TEventMcFillMap>(mcCollision);
+        VarManager::FillEvent<gkEventMcFillMapWithCent>(mcCollision);
       }
       if (fDoDetailedQA) {
         fHistMan->FillHistClass("Event_BeforeCuts", VarManager::fgValues);
@@ -1187,11 +1180,11 @@ struct TableMakerMC {
   } // end skimMuons
 
   template <uint32_t TEventFillMap, uint32_t TTrackFillMap, uint32_t TMuonFillMap, uint32_t TMFTFillMap, uint32_t TEventMcFillMap, typename TEvents, typename TTracks,
-            typename TMuons, typename TMFTTracks, typename TTrackAssoc, typename TFwdTrackAssoc, typename TMFTTrackAssoc, typename TMFTCov, typename TEventsMC>
+            typename TMuons, typename TMFTTracks, typename TTrackAssoc, typename TFwdTrackAssoc, typename TMFTTrackAssoc, typename TMFTCov, typename MyEventsMcWithMults>
   void fullSkimming(TEvents const& collisions, BCsWithTimestamps const& bcs,
                     TTracks const& tracksBarrel, TMuons const& muons, TMFTTracks const& mftTracks,
                     TTrackAssoc const& trackAssocs, TFwdTrackAssoc const& fwdTrackAssocs, TMFTTrackAssoc const& mftAssocs,
-                    TEventsMC const& mcCollisions, aod::McParticles const& mcParticles, TMFTCov const& mftCovs)
+                    MyEventsMcWithMults const& mcCollisions, aod::McParticles const& mcParticles, TMFTCov const& mftCovs)
   {
     // Check whether the run changed and update CCDB if it did
     if (bcs.size() > 0 && fCurrentRun != bcs.begin().runNumber()) {
@@ -1221,11 +1214,7 @@ struct TableMakerMC {
 
     // skim MC Collisions
     eventMC.reserve(mcCollisions.size());
-    skimMCCollisions<TEventMcFillMap>(mcCollisions);
-
-    // select MC particles to be written using the specified MC signals
-    // NOTE: tables are not written at this point, only label maps are being created
-    skimMCParticles<TEventMcFillMap>(mcParticles, mcCollisions);
+    skimMCCollisions(mcCollisions);
 
     // skim collisions
     event.reserve(collisions.size());
@@ -1233,10 +1222,16 @@ struct TableMakerMC {
     eventVtxCov.reserve(collisions.size());
     eventMClabels.reserve(collisions.size());
     eventInfo.reserve(collisions.size());
-    skimCollisions<TEventFillMap, TEventMcFillMap>(collisions, bcs);
+    skimCollisions<TEventFillMap>(collisions, bcs);
     if (fCollIndexMap.size() == 0) {
       return;
     }
+
+    // select MC particles to be written using the specified MC signals
+    // NOTE: tables are not written at this point, only label maps are being created
+    //       Only skim MC particles when the MC collision is reconstructed
+    //       Because in the first five DFs of each run, the MC collisions are not reconstructed
+    skimMCParticles(mcParticles, mcCollisions);
 
     // Clear index map and reserve memory for barrel tables
     if constexpr (static_cast<bool>(TTrackFillMap)) {
@@ -1470,13 +1465,6 @@ struct TableMakerMC {
     fullSkimming<gkEventFillMapWithMults, gkTrackFillMapWithCov, 0u, 0u, gkEventMcFillMap>(collisions, bcs, tracksBarrel, nullptr, nullptr, trackAssocs, nullptr, nullptr, mcCollisions, mcParticles, nullptr);
   }
 
-  void processPPBarrelOnlyMcTuned(MyEventsWithMults const& collisions, aod::BCsWithTimestamps const& bcs,
-                                   MyBarrelTracksTunedWithCov const& tracksBarrel, aod::TrackAssoc const& trackAssocs,
-                                   aod::McCollisions const& mcCollisions, aod::McParticles const& mcParticles)
-  {
-    fullSkimming<gkEventFillMapWithMults, gkTrackFillMapTunedWithCov, 0u, 0u>(collisions, bcs, tracksBarrel, nullptr, nullptr, trackAssocs, nullptr, nullptr, mcCollisions, mcParticles, nullptr);
-  }
-
   void processPPMuonOnlyBasic(MyEvents const& collisions, aod::BCsWithTimestamps const& bcs,
                               MyMuonsWithCov const& tracksMuon, MFTTrackLabeled const& mftTracks,
                               aod::FwdTrackAssoc const& fwdTrackAssocs, aod::MFTTrackAssoc const& mftAssocs,
@@ -1576,7 +1564,6 @@ struct TableMakerMC {
 
   PROCESS_SWITCH(TableMakerMC, processPP, "Produce both barrel and muon skims, pp settings", false);
   PROCESS_SWITCH(TableMakerMC, processPPBarrelOnly, "Produce only barrel skims, pp settings ", false);
-  PROCESS_SWITCH(TableMakerMC, processPPBarrelOnlyMcTuned, "Produce only barrel skims, pp settings, with MC-tuned tracking efficiency", false);
   PROCESS_SWITCH(TableMakerMC, processPPMuonOnlyBasic, "Produce only muon skims, pp settings, no multiplicity", false);
   PROCESS_SWITCH(TableMakerMC, processPPMuonOnly, "Produce only muon skims, pp settings", false);
   PROCESS_SWITCH(TableMakerMC, processPPMuonRefit, "Produce only muon skims, pp settings", false);
