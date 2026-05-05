@@ -1,0 +1,45 @@
+{
+  "eventStandardSel8PbPbMultCorr_yiping": {
+    "type": "AnalysisCut",
+    "title": "eventStandardSel8PbPbMultCorr_yiping",
+    "AddCut1": {
+      "var": "kVtxNcontribReal",
+      "cutLow": {
+        "funcName": "fMultPVCutLow",
+        "funcBody": "2847.08 + -93.6193*x + 1.21282*x*x + -0.00772674*x*x*x + 2.16316e-05*x*x*x*x - 3.5*(271.96 + -9.92607*x + 0.19313*x*x + -0.0020768*x*x*x + 8.94278e-06*x*x*x*x)",
+        "xLow": 0.0,
+        "xHigh": 100.0
+      },
+      "cutHigh": {
+        "funcName": "fMultPVCutHigh",
+        "funcBody": "3468.49 + -122.533*x + 1.90952*x*x + -0.0161701*x*x*x + 6.03709e-05*x*x*x*x + 3.5*(215.098 + -2.05638*x + -0.0490136*x*x + 0.000931417*x*x*x + -4.62954e-06*x*x*x*x)",
+        "xLow": 0.0,
+        "xHigh": 100.0
+      },
+      "dependentVar": "kCentFT0C",
+      "depCutLow": 0.0,
+      "depCutHigh": 100.0,
+      "exclude": false
+    },
+    "AddCut2": {
+      "var": "kVtxZ",
+      "cutLow": -10.0,
+      "cutHigh": 10.0
+    },
+    "AddCut3": {
+      "var": "kIsSel8",
+      "cutLow": 0.5,
+      "cutHigh": 1.5
+    },
+    "AddCut4": {
+      "var": "kIsNoSameBunch",
+      "cutLow": 0.5,
+      "cutHigh": 1.5
+    },
+    "AddCut5": {
+      "var": "kIsGoodZvtxFT0vsPV",
+      "cutLow": 0.5,
+      "cutHigh": 1.5
+    }
+  }
+}

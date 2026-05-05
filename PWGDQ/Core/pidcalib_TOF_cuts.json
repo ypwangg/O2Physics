@@ -1,0 +1,525 @@
+{
+  "PIDCalibElectron_TOF": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibElectron"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTOFnSigmaPr",
+        "cutLow": -3.0,
+        "cutHigh": 3.0,
+        "exclude": true,
+        "dependentVar": "kHasTOF",
+        "depCutLow": 0.5,
+        "depCutHigh": 1.5
+      }
+    }
+  },
+
+  "PIDCalibPion_TOF": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibPion"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTOFnSigmaPr",
+        "cutLow": -3.0,
+        "cutHigh": 3.0,
+        "exclude": true,
+        "dependentVar": "kHasTOF",
+        "depCutLow": 0.5,
+        "depCutHigh": 1.5
+      }
+    }
+  },
+
+  "PIDCalibProton_TOF": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibProton"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTOFnSigmaPr",
+        "cutLow": -3.0,
+        "cutHigh": 3.0,
+        "exclude": true,
+        "dependentVar": "kHasTOF",
+        "depCutLow": 0.5,
+        "depCutHigh": 1.5
+      }
+    }
+  }
+,
+  "kine_cut_only": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCut",
+      "library": "jpsiStandardKine"
+    }
+  },
+
+  "kine_cut_TOF": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCut",
+      "library": "jpsiStandardKine"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "library": "hasTOF"
+    }
+  },
+
+  "pid_TPConly_ele1": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibElectron"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTPCnSigmaEl",
+        "cutLow": -1.5,
+        "cutHigh": 4.0
+      }
+    }
+  },
+  "pid_TPConly_pion1": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibPion"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTPCnSigmaEl",
+        "cutLow": -1.5,
+        "cutHigh": 4.0
+      }
+    }
+  },
+  "pid_TPConly_proton1": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibProton"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTPCnSigmaEl",
+        "cutLow": -1.5,
+        "cutHigh": 4.0
+      }
+    }
+  },
+  "pid_TOFonly_ele": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibElectron"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTOFnSigmaEl",
+        "cutLow": -4.0,
+        "cutHigh": 4.0,
+        "dependentVar": "kHasTOF",
+        "depCutLow": 0.5,
+        "depCutHigh": 1.5
+      }
+    }
+  },
+  "pid_TOFonly_pion": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibPion"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTOFnSigmaEl",
+        "cutLow": -4.0,
+        "cutHigh": 4.0,
+        "dependentVar": "kHasTOF",
+        "depCutLow": 0.5,
+        "depCutHigh": 1.5
+      }
+    }
+  },
+  "pid_TOFonly_proton": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibProton"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTOFnSigmaEl",
+        "cutLow": -4.0,
+        "cutHigh": 4.0,
+        "dependentVar": "kHasTOF",
+        "depCutLow": 0.5,
+        "depCutHigh": 1.5
+      }
+    }
+  },
+  "pid_TPCpion_ele": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibElectron"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "library": "pidJpsi_magnus_pion2"
+    }
+  },
+  "pid_TPCpion_pion": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibPion"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "library": "pidJpsi_magnus_pion2"
+    }
+  },
+  "pid_TPCpion_proton": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibProton"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "library": "pidJpsi_magnus_pion2"
+    }
+  }
+
+  ,
+  "pid_TPCprot_ele": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibElectron"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "library": "pidJpsi_magnus_prot2"
+    }
+  },
+
+  "pid_TPCprot_pion": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibPion"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "library": "pidJpsi_magnus_prot2"
+    }
+  },
+
+  "pid_TPCprot_proton": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibProton"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "library": "pidJpsi_magnus_prot2"
+    }
+  }
+
+  ,
+  "PIDCalibElectron_piGT4": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibElectron"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTPCnSigmaPi",
+        "cutLow": 4.0,
+        "cutHigh": 1000.0
+      }
+    }
+  },
+
+  "PIDCalibPion_piGT4": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibPion"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTPCnSigmaPi",
+        "cutLow": 4.0,
+        "cutHigh": 1000.0
+      }
+    }
+  },
+
+  "PIDCalibProton_piGT4": {
+    "type": "AnalysisCompositeCut",
+    "useAND": true,
+    "AddCut1": {
+      "type": "AnalysisCompositeCut",
+      "library": "PIDCalibProton"
+    },
+    "AddCut2": {
+      "type": "AnalysisCut",
+      "AddCut1": {
+        "var": "kTPCnSigmaPi",
+        "cutLow": 4.0,
+        "cutHigh": 1000.0
+      }
+    }
+  }
+
+
+}
+
+{
+"Jpsi_debug_TPCTOF0_rejBadTOF": {
+"type": "AnalysisCompositeCut",
+"useAND": true,
+"AddCut1": {
+"type": "AnalysisCut",
+"AddCut1": { "var": "kP", "cutLow": 1.0, "cutHigh": 1000.0 }
+},
+"AddCut2": {
+"type": "AnalysisCut",
+"AddCut1": { "var": "kEta", "cutLow": -0.9, "cutHigh": 0.9 }
+},
+"AddCut3": {
+"type": "AnalysisCut",
+"AddCut1": { "var": "kTPCchi2", "cutLow": 0.0, "cutHigh": 4.0 }
+},
+"AddCut4": {
+"type": "AnalysisCut",
+"AddCut1": { "var": "kTPCncls", "cutLow": 70, "cutHigh": 161.0 }
+},
+"AddCut5": {
+"type": "AnalysisCut",
+"AddCut1": { "var": "kIsSPDfirst", "cutLow": 0.5, "cutHigh": 1.5 }
+},
+"AddCut6": {
+  "type": "AnalysisCut",
+  "AddCut1": {
+    "var": "kTrackDCAxy",
+    "cutLowFuncExpr": "-0.0105 - 0.035/pow(x, 1.1)",
+    "cutHighFuncExpr": "0.0105 + 0.035/pow(x, 1.1)"
+  }
+},
+"AddCut7": {
+  "type": "AnalysisCut",
+  "AddCut1": { "var": "kTrackDCAz", "cutLow": -0.5, "cutHigh": 0.5 }
+},
+"AddCut8": {
+  "type": "AnalysisCut",
+  "AddCut1": { "var": "kTPCnSigmaEl", "cutLow": -2.0, "cutHigh": 4.0 }
+},
+"AddCut9": {
+  "type": "AnalysisCut",
+  "AddCut1": { "var": "kTOFbeta", "cutLow": 0.95, "cutHigh": 1.05 }
+},
+"AddCut10": {
+  "type": "AnalysisCut",
+  "AddCut1": {
+    "var": "kTPCnSigmaPr",
+    "cutLow": 3.3,
+    "cutHigh": 1000.0,
+    "exclude": false,
+    "dependentVar": "kHasTOF",
+    "depCutLow": -0.5,
+    "depCutHigh": 0.5
+  }
+}
+},
+
+"Jpsi_debug_TPCTOF1_rejBadTOF": {
+"type": "AnalysisCompositeCut",
+"useAND": true,
+"AddCut1": { "type": "AnalysisCut", "AddCut1": { "var": "kP", "cutLow": 1.0, "cutHigh": 1000.0 } },
+"AddCut2": { "type": "AnalysisCut", "AddCut1": { "var": "kEta", "cutLow": -0.9, "cutHigh": 0.9 } },
+"AddCut3": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCchi2", "cutLow": 0.0, "cutHigh": 4.0 } },
+"AddCut4": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCncls", "cutLow": 70, "cutHigh": 161.0 } },
+"AddCut5": { "type": "AnalysisCut", "AddCut1": { "var": "kIsSPDfirst", "cutLow": 0.5, "cutHigh": 1.5 } },
+"AddCut6": {
+  "type": "AnalysisCut",
+  "AddCut1": {
+    "var": "kTrackDCAxy",
+    "cutLowFuncExpr": "-0.0105 - 0.035/pow(x, 1.1)",
+    "cutHighFuncExpr": "0.0105 + 0.035/pow(x, 1.1)"
+  }
+},
+"AddCut7": {
+  "type": "AnalysisCut",
+  "AddCut1": { "var": "kTrackDCAz", "cutLow": -0.5, "cutHigh": 0.5 }
+},
+"AddCut8": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCnSigmaEl", "cutLow": -1.5, "cutHigh": 4.0 } },
+"AddCut9": { "type": "AnalysisCut", "AddCut1": { "var": "kTOFbeta", "cutLow": 0.95, "cutHigh": 1.05 } },
+"AddCut10": {
+"type": "AnalysisCut",
+"AddCut1": {
+"var": "kTPCnSigmaPr",
+"cutLow": 3.3,
+"cutHigh": 1000.0,
+"exclude": false,
+"dependentVar": "kHasTOF",
+"depCutLow": -0.5,
+"depCutHigh": 0.5
+}
+}
+},
+
+"Jpsi_debug_TPCTOF2_rejBadTOF": {
+"type": "AnalysisCompositeCut",
+"useAND": true,
+"AddCut1": { "type": "AnalysisCut", "AddCut1": { "var": "kP", "cutLow": 1.0, "cutHigh": 1000.0 } },
+"AddCut2": { "type": "AnalysisCut", "AddCut1": { "var": "kEta", "cutLow": -0.9, "cutHigh": 0.9 } },
+"AddCut3": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCchi2", "cutLow": 0.0, "cutHigh": 4.0 } },
+"AddCut4": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCncls", "cutLow": 70, "cutHigh": 161.0 } },
+"AddCut5": { "type": "AnalysisCut", "AddCut1": { "var": "kIsSPDfirst", "cutLow": 0.5, "cutHigh": 1.5 } },
+"AddCut6": {
+  "type": "AnalysisCut",
+  "AddCut1": {
+    "var": "kTrackDCAxy",
+    "cutLowFuncExpr": "-0.0105 - 0.035/pow(x, 1.1)",
+    "cutHighFuncExpr": "0.0105 + 0.035/pow(x, 1.1)"
+  }
+},
+"AddCut7": {
+  "type": "AnalysisCut",
+  "AddCut1": { "var": "kTrackDCAz", "cutLow": -0.5, "cutHigh": 0.5 }
+},
+"AddCut8": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCnSigmaEl", "cutLow": -1.0, "cutHigh": 4.0 } },
+"AddCut9": { "type": "AnalysisCut", "AddCut1": { "var": "kTOFbeta", "cutLow": 0.95, "cutHigh": 1.05 } },
+"AddCut10": {
+"type": "AnalysisCut",
+"AddCut1": {
+"var": "kTPCnSigmaPr",
+"cutLow": 3.3,
+"cutHigh": 1000.0,
+"exclude": false,
+"dependentVar": "kHasTOF",
+"depCutLow": -0.5,
+"depCutHigh": 0.5
+}
+}
+},
+
+"jpsi_debug_TPCTOF3_rejBadTOF": {
+"type": "AnalysisCompositeCut",
+"useAND": true,
+"AddCut1": { "type": "AnalysisCut", "AddCut1": { "var": "kP", "cutLow": 1.0, "cutHigh": 1000.0 } },
+"AddCut2": { "type": "AnalysisCut", "AddCut1": { "var": "kEta", "cutLow": -0.9, "cutHigh": 0.9 } },
+"AddCut3": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCchi2", "cutLow": 0.0, "cutHigh": 4.0 } },
+"AddCut4": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCncls", "cutLow": 70, "cutHigh": 161.0 } },
+"AddCut5": { "type": "AnalysisCut", "AddCut1": { "var": "kIsSPDfirst", "cutLow": 0.5, "cutHigh": 1.5 } },
+"AddCut6": {
+  "type": "AnalysisCut",
+  "AddCut1": {
+    "var": "kTrackDCAxy",
+    "cutLowFuncExpr": "-0.0105 - 0.035/pow(x, 1.1)",
+    "cutHighFuncExpr": "0.0105 + 0.035/pow(x, 1.1)"
+  }
+},
+"AddCut7": {
+  "type": "AnalysisCut",
+  "AddCut1": { "var": "kTrackDCAz", "cutLow": -0.5, "cutHigh": 0.5 }
+},
+"AddCut8": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCnSigmaPi", "cutLow": 4.0, "cutHigh": 1000.0 } },
+"AddCut9": { "type": "AnalysisCut", "AddCut1": { "var": "kTOFbeta", "cutLow": 0.95, "cutHigh": 1.05 } },
+"AddCut10": {
+"type": "AnalysisCut",
+"AddCut1": {
+"var": "kTPCnSigmaPr",
+"cutLow": 3.3,
+"cutHigh": 1000.0,
+"exclude": false,
+"dependentVar": "kHasTOF",
+"depCutLow": -0.5,
+"depCutHigh": 0.5
+}
+}
+},
+
+"jpsi_debug_TPCTOF4_rejBadTOF": {
+"type": "AnalysisCompositeCut",
+"useAND": true,
+"AddCut1": { "type": "AnalysisCut", "AddCut1": { "var": "kP", "cutLow": 1.0, "cutHigh": 1000.0 } },
+"AddCut2": { "type": "AnalysisCut", "AddCut1": { "var": "kEta", "cutLow": -0.9, "cutHigh": 0.9 } },
+"AddCut3": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCchi2", "cutLow": 0.0, "cutHigh": 4.0 } },
+"AddCut4": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCncls", "cutLow": 70, "cutHigh": 161.0 } },
+"AddCut5": { "type": "AnalysisCut", "AddCut1": { "var": "kIsSPDfirst", "cutLow": 0.5, "cutHigh": 1.5 } },
+"AddCut6": {
+  "type": "AnalysisCut",
+  "AddCut1": {
+    "var": "kTrackDCAxy",
+    "cutLowFuncExpr": "-0.0105 - 0.035/pow(x, 1.1)",
+    "cutHighFuncExpr": "0.0105 + 0.035/pow(x, 1.1)"
+  }
+},
+"AddCut7": {
+  "type": "AnalysisCut",
+  "AddCut1": { "var": "kTrackDCAz", "cutLow": -0.5, "cutHigh": 0.5 }
+},
+"AddCut8": { "type": "AnalysisCut", "AddCut1": { "var": "kTPCnSigmaPi", "cutLow": 3.5, "cutHigh": 1000.0 } },
+"AddCut9": { "type": "AnalysisCut", "AddCut1": { "var": "kTOFbeta", "cutLow": 0.95, "cutHigh": 1.05 } },
+"AddCut10": {
+"type": "AnalysisCut",
+"AddCut1": {
+"var": "kTPCnSigmaPr",
+"cutLow": 3.3,
+"cutHigh": 1000.0,
+"exclude": false,
+"dependentVar": "kHasTOF",
+"depCutLow": -0.5,
+"depCutHigh": 0.5
+}
+}
+}
+}
