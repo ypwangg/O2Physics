@@ -5861,10 +5861,10 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     return;
   }
   
-  Q2X0A = nNorm > 0 ? Q2X0A/nNorm : -999.;
-  Q2Y0A = nNorm > 0 ? Q2Y0A/nNorm : -999.;
-  Q3X0A = nNorm > 0 ? Q3X0A/nNorm : -999.;
-  Q3Y0A = nNorm > 0 ? Q3Y0A/nNorm : -999.;
+  Q2X0A = nNorm > 0 ? Q2X0A/nNorm : NAN;
+  Q2Y0A = nNorm > 0 ? Q2Y0A/nNorm : NAN;
+  Q3X0A = nNorm > 0 ? Q3X0A/nNorm : NAN;
+  Q3Y0A = nNorm > 0 ? Q3Y0A/nNorm : NAN;
   values[kU2Q2] = Q2X0A * TMath::Cos(2 * v12.Phi()) + Q2Y0A * TMath::Sin(2 * v12.Phi());
   values[kU3Q3] = Q3X0A * TMath::Cos(3 * v12.Phi()) + Q3Y0A * TMath::Sin(3 * v12.Phi());
   values[kR2SP_AB] = (Q2X0A * values[kQ2X0B] + Q2Y0A * values[kQ2Y0B]);
