@@ -4098,8 +4098,13 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
     float nNorm2 = values[kMultA2];
 
     auto checkTrack = [&](auto const& t) {
-      bool trackSelected = true;
-      if constexpr (pairType == kDecayToEE) {
+      bool trackSelected = false;
+      if constexpr (requires {t.hasTPC();}) {
+        trackSelected = true;
+        if (!t.hasTPC()) {
+          trackSelected = false;
+          return trackSelected;
+        }
         if (std::abs(t.eta()) > 0.8) {
           trackSelected = false;
           return trackSelected;
@@ -4131,20 +4136,43 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
       }
       return trackSelected;
     };
-    if (checkTrack(t1)) {
+    if (checkTrack(t1) && values[kAmbi1] > 0) {
       Q2X0A1 -= t1.pt() * TMath::Cos(2 * t1.phi());
       Q2Y0A1 -= t1.pt() * TMath::Sin(2 * t1.phi());
       nNorm1 -= 1;
     }
-    if (checkTrack(t2)) {
+    if (checkTrack(t2) && values[kAmbi2] > 0) {
       Q2X0A2 -= t2.pt() * TMath::Cos(2 * t2.phi());
       Q2Y0A2 -= t2.pt() * TMath::Sin(2 * t2.phi());
       nNorm2 -= 1;
     }
-    Q2X0A1 = nNorm1 > 0 ? Q2X0A1 / nNorm1 : 0;
-    Q2Y0A1 = nNorm1 > 0 ? Q2Y0A1 / nNorm1 : 0;
-    Q2X0A2 = nNorm2 > 0 ? Q2X0A2 / nNorm2 : 0;
-    Q2Y0A2 = nNorm2 > 0 ? Q2Y0A2 / nNorm2 : 0;
+    if (nNorm1 <=0 || nNorm2 <= 0) {
+      values[kCos2DeltaPhi] = -999;
+      values[kCos2DeltaPhiEv1] = -999;
+      values[kCos2DeltaPhiEv2] = -999;
+      values[kU2Q2] = -999;
+      values[kU2Q2Ev1] = -999;
+      values[kU2Q2Ev2] = -999;
+      values[kCos2DeltaPhiMu1] = -999;
+      values[kCos2DeltaPhiMu2] = -999;
+      values[kV2SP1] = -999;
+      values[kV2SP2] = -999;
+      values[kV2EP1] = -999;
+      values[kV2EP2] = -999;
+      values[kV2ME_SP] = -999;
+      values[kWV2ME_SP] = -999;
+      values[kV2ME_EP] = -999;
+      values[kWV2ME_EP] = -999;
+      values[kV22ME] = -999;
+      values[kWV22ME] = -999;
+      values[kV24ME] = -999;
+      values[kWV24ME] = -999;
+      return;
+    }
+    Q2X0A1 = nNorm1 > 0 ? Q2X0A1 / nNorm1 : NAN;
+    Q2Y0A1 = nNorm1 > 0 ? Q2Y0A1 / nNorm1 : NAN;
+    Q2X0A2 = nNorm2 > 0 ? Q2X0A2 / nNorm2 : NAN;
+    Q2Y0A2 = nNorm2 > 0 ? Q2Y0A2 / nNorm2 : NAN;
 
     float Psi2A1 = getEventPlane(2, Q2X0A1, Q2Y0A1);
     float Psi2A2 = getEventPlane(2, Q2X0A2, Q2Y0A2);
@@ -4180,15 +4208,16 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
 
     bool useCoherentJpsiA2 = fgUsedVars[kA2ME_EP_TPC] || fgUsedVars[kA2ME_EP_FT0A] || fgUsedVars[kA2ME_EP_FT0C];
     if (useCoherentJpsiA2) {
-      ROOT::Math::PtEtaPhiMVector v_daughter = t1.sign() > 0 ? v1 - v2 : v2 - v1; // using the positive track as reference
-      values[kA2EP1_TPC] = 2. * values[kV2EP1];
-      values[kA2EP2_TPC] = 2. * values[kV2EP2];
+      // ROOT::Math::PtEtaPhiMVector v_daughter = t1.sign() > 0 ? v1 - v2 : v2 - v1; // using the positive track as reference
+      ROOT::TMath::Boost boostv12{v12.BoostToCM()};
+      ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
+      float Psi2A = t1.sign() > 0 ? Psi2A1 : Psi2A2; // using the event plane of the track with positive charge as reference
+      values[kCos2DeltaPhi] = TMath::Cos(2 * (v12.Phi() - Psi2A));
+      values[kA2ME_EP_TPC] = t1.sign() > 0 ? 2. * values[kCos2DeltaPhi] / values[kTwoR2EP1] : 2. * values[kCos2DeltaPhi] / values[kTwoR2EP2]; // using the event plane of the track with positive charge as reference
 
-      values[kCos2DeltaPhiE1] = TMath::Cos(2 * (v1.Phi() - v_daughter.Phi()));
-      values[kCos2DeltaPhiE2] = TMath::Cos(2 * (v2.Phi() - v_daughter.Phi()));
-
-      float A2ME_EP = values[kA2EP1_TPC] * values[kCos2DeltaPhiE1] + values[kA2EP2_TPC] * values[kCos2DeltaPhiE2];
-      values[kA2ME_EP_TPC] = std::isnan(A2ME_EP) || std::isinf(A2ME_EP) ? 0. : A2ME_EP;
+      // under developing
+      values[kA2ME_EP_FT0A] = -999; // to be implemented
+      values[kA2ME_EP_FT0C] = -999; // to be implemented
     }
 
     if constexpr ((fillMap & ReducedEventQvectorExtra) > 0) {
@@ -5753,11 +5782,15 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   float Q3X0A = values[kQ3X0A]*values[kMultA];
   float Q3Y0A = values[kQ3Y0A]*values[kMultA];
   float nNorm = values[kMultA];
-  // bool trackSelected = true;
 
   auto checkTrack = [&](auto const& t) {
-    bool trackSelected = true;
-    if constexpr (pairType == kDecayToEE) {
+    bool trackSelected = false;
+    if constexpr (requires {t.hasTPC();}) {
+      trackSelected = true;
+      if (!t.hasTPC()) {
+        trackSelected = false;
+        return trackSelected;
+      }
       if (std::abs(t.eta()) > 0.8) {
         trackSelected = false;
         return trackSelected;
@@ -5787,10 +5820,6 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
         return trackSelected;
       }
     }
-    if constexpr (pairType == kDecayToMuMu) {
-      trackSelected = false; 
-      return trackSelected;
-    }
     return trackSelected;
   };
 
@@ -5811,10 +5840,31 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     nNorm = nNorm - 1.;
   }
   values[kNnorm] = nNorm;
-  Q2X0A = nNorm > 0 ? Q2X0A/nNorm : 0.;
-  Q2Y0A = nNorm > 0 ? Q2Y0A/nNorm : 0.;
-  Q3X0A = nNorm > 0 ? Q3X0A/nNorm : 0.;
-  Q3Y0A = nNorm > 0 ? Q3Y0A/nNorm : 0.;
+  if (nNorm <= 0) {
+    values[kU2Q2] = -999.;
+    values[kU3Q3] = -999.;
+    values[kR2SP_AB] = -999.;
+    values[kR2SP_AC] = -999.;
+    values[kR2SP_BC] = -999.;
+    values[kR3SP] = -999.;
+    values[kPsi2A] = -999.;
+    values[kCos2DeltaPhi] = -999.;
+    values[kCos3DeltaPhi] = -999.;
+    values[kR2EP_AB] = -999.;
+    values[kR2EP_AC] = -999.;
+    values[kR2EP_BC] = -999.;
+    values[kR3EP] = -999.;
+    values[kV2SP] = -999.;
+    values[kWV2SP] = -999.;
+    values[kV2EP] = -999.;
+    values[kWV2EP] = -999.;
+    return;
+  }
+  
+  Q2X0A = nNorm > 0 ? Q2X0A/nNorm : -999.;
+  Q2Y0A = nNorm > 0 ? Q2Y0A/nNorm : -999.;
+  Q3X0A = nNorm > 0 ? Q3X0A/nNorm : -999.;
+  Q3Y0A = nNorm > 0 ? Q3Y0A/nNorm : -999.;
   values[kU2Q2] = Q2X0A * TMath::Cos(2 * v12.Phi()) + Q2Y0A * TMath::Sin(2 * v12.Phi());
   values[kU3Q3] = Q3X0A * TMath::Cos(3 * v12.Phi()) + Q3Y0A * TMath::Sin(3 * v12.Phi());
   values[kR2SP_AB] = (Q2X0A * values[kQ2X0B] + Q2Y0A * values[kQ2Y0B]);
@@ -5822,22 +5872,9 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   values[kR2SP_BC] = (values[kQ2X0B] * values[kQ2X0C] + values[kQ2Y0B] * values[kQ2Y0C]);
   values[kR3SP] = (values[kQ3X0B] * values[kQ3X0C] + values[kQ3Y0B] * values[kQ3Y0C]);
 
-  // cout << values[kMultA] << " " << nNorm << endl;
-  if (values[kCentFT0C] > 80 && values[kCentFT0C] <= 90) {
-    cout << values[kCentFT0C] << " " << values[kMultA] << " " << nNorm << endl;
-  }
-
   float Psi2A = getEventPlane(2, Q2X0A, Q2Y0A);
   values[kPsi2A] = Psi2A;
-  if (Q2X0A == 0. && Q2Y0A == 0.) {
-    // set Psi2A to null and values [kPsi2A] to -999.
-    values[kPsi2A] = -999.;
-    return;
-  }
   float Psi3A = getEventPlane(3, Q3X0A, Q3Y0A);
-  if (Q3X0A == 0. && Q3Y0A == 0.) {
-    Psi3A = NAN;
-  }
   float Psi2B = getEventPlane(2, values[kQ2X0B], values[kQ2Y0B]);
   float Psi3B = getEventPlane(3, values[kQ3X0B], values[kQ3Y0B]);
   float Psi2C = getEventPlane(2, values[kQ2X0C], values[kQ2Y0C]);
