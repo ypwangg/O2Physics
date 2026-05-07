@@ -4209,7 +4209,7 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
     bool useCoherentJpsiA2 = fgUsedVars[kA2ME_EP_TPC] || fgUsedVars[kA2ME_EP_FT0A] || fgUsedVars[kA2ME_EP_FT0C];
     if (useCoherentJpsiA2) {
       // ROOT::Math::PtEtaPhiMVector v_daughter = t1.sign() > 0 ? v1 - v2 : v2 - v1; // using the positive track as reference
-      ROOT::TMath::Boost boostv12{v12.BoostToCM()};
+      ROOT::Math::Boost boostv12{v12.BoostToCM()};
       ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
       float Psi2A = t1.sign() > 0 ? Psi2A1 : Psi2A2; // using the event plane of the track with positive charge as reference
       values[kCos2DeltaPhi] = TMath::Cos(2 * (v12.Phi() - Psi2A));
