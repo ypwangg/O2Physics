@@ -3001,7 +3001,7 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
     }
     if (!nameStr.compare(Form("Jpsi_debug_TPCTOF%d_rejBadTOF", i))) {
       cut->AddCut(GetAnalysisCut("jpsiStandardKine5"));
-      cut->AddCut(GetAnalysisCut("electronStandardQualityTPCOnly"));
+      cut->AddCut(GetAnalysisCut("electronStandardQualityTPCOnly3"));
       cut->AddCut(GetAnalysisCut("SPDfirst"));
       cut->AddCut(GetAnalysisCut("dcaCut1_yiping"));
       cut->AddCut(GetAnalysisCut(Form("pidJpsiTPConly%d", i)));
@@ -3013,7 +3013,7 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
 
   if (!nameStr.compare("jpsi_debug_TPCTOF3_rejBadTOF")) {
     cut->AddCut(GetAnalysisCut("jpsiStandardKine5"));
-    cut->AddCut(GetAnalysisCut("electronStandardQualityTPCOnly"));
+    cut->AddCut(GetAnalysisCut("electronStandardQualityTPCOnly3"));
     cut->AddCut(GetAnalysisCut("SPDfirst"));
     cut->AddCut(GetAnalysisCut("dcaCut1_yiping"));
     cut->AddCut(GetAnalysisCut("pidJpsi_TPCpion0"));
@@ -3024,7 +3024,7 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
 
   if (!nameStr.compare("jpsi_debug_TPCTOF4_rejBadTOF")) {
     cut->AddCut(GetAnalysisCut("jpsiStandardKine5"));
-    cut->AddCut(GetAnalysisCut("electronStandardQualityTPCOnly"));
+    cut->AddCut(GetAnalysisCut("electronStandardQualityTPCOnly3"));
     cut->AddCut(GetAnalysisCut("SPDfirst"));
     cut->AddCut(GetAnalysisCut("dcaCut1_yiping"));
     cut->AddCut(GetAnalysisCut("pidJpsi_TPCpion1"));
@@ -5122,6 +5122,12 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
   if (!nameStr.compare("electronStandardQualityTPCOnly2")) {
     cut->AddCut(VarManager::kTPCchi2, 0.0, 4.0);
     cut->AddCut(VarManager::kTPCncls, 100, 161.);
+    return cut;
+  }
+
+  if (!nameStr.compare("electronStandardQualityTPCOnly3")) {
+    cut->AddCut(VarManager::kTPCchi2, 0.0, 4.0);
+    cut->AddCut(VarManager::kTPCncls, 120, 161.);
     return cut;
   }
 

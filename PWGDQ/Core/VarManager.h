@@ -5943,8 +5943,11 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     ROOT::Math::Boost boostv12{v12.BoostToCM()};
     ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
     values[kDeltaPhiA2_TPC] = v_daughter.Phi() > Psi2A ? v_daughter.Phi() - Psi2A : Psi2A - v_daughter.Phi();
+    values[kDeltaPhiA2_TPC]  = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
     values[kDeltaPhiA2_FT0A] = v_daughter.Phi() > Psi2B ? v_daughter.Phi() - Psi2B : Psi2B - v_daughter.Phi();
+    values[kDeltaPhiA2_FT0A]  = values[kDeltaPhiA2_FT0A] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0A] : values[kDeltaPhiA2_FT0A];
     values[kDeltaPhiA2_FT0C] = v_daughter.Phi() > Psi2C ? v_daughter.Phi() - Psi2C : Psi2C - v_daughter.Phi();
+    values[kDeltaPhiA2_FT0C]  = values[kDeltaPhiA2_FT0C] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0C] : values[kDeltaPhiA2_FT0C];
     values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2 * (v_daughter.Phi() - Psi2A));
     values[kCos2DeltaPhiA2_FT0A] = TMath::Cos(2 * (v_daughter.Phi() - Psi2B));
     values[kCos2DeltaPhiA2_FT0C] = TMath::Cos(2 * (v_daughter.Phi() - Psi2C));
