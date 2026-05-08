@@ -5942,15 +5942,33 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     // boost to Jpsi rest frame, then calculate the angle with respect to the event plane
     ROOT::Math::Boost boostv12{v12.BoostToCM()};
     ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
-    values[kDeltaPhiA2_TPC] = v_daughter.Phi() > Psi2A ? v_daughter.Phi() - Psi2A : Psi2A - v_daughter.Phi();
+
+    ROOT::Math::XYZVectorF zAxis_RF{(v12.Vect()).Unit()};
+    ROOT::Math::XYZVectorF zAxis{fgBeamA.Vect().Unit()};
+    ROOT::Math::XYZVectorF yAxis_RF = zAxis_RF.Cross(zAxis).Unit();
+    ROOT::Math::XYZVectorF xAxis_RF = yAxis_RF.Cross(zAxis_RF).Unit();
+    ROOT::Math::XYZVectorF daughterVec_RF{(v_daughter.Vect()).Unit()};
+    float cosPhi = yAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
+    float sinPhi = -1. * xAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
+    float phi = sinPhi > 0 ? TMath::ACos(cosPhi) : 2 * TMath::Pi() - TMath::ACos(cosPhi);
+    values[kDeltaPhiA2_TPC] = phi > Psi2A ? phi - Psi2A : Psi2A - phi;
     values[kDeltaPhiA2_TPC]  = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
-    values[kDeltaPhiA2_FT0A] = v_daughter.Phi() > Psi2B ? v_daughter.Phi() - Psi2B : Psi2B - v_daughter.Phi();
+    values[kDeltaPhiA2_FT0A] = phi > Psi2B ? phi - Psi2B : Psi2B - phi;
     values[kDeltaPhiA2_FT0A]  = values[kDeltaPhiA2_FT0A] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0A] : values[kDeltaPhiA2_FT0A];
-    values[kDeltaPhiA2_FT0C] = v_daughter.Phi() > Psi2C ? v_daughter.Phi() - Psi2C : Psi2C - v_daughter.Phi();
+    values[kDeltaPhiA2_FT0C] = phi > Psi2C ? phi - Psi2C : Psi2C - phi;
     values[kDeltaPhiA2_FT0C]  = values[kDeltaPhiA2_FT0C] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0C] : values[kDeltaPhiA2_FT0C];
-    values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2 * (v_daughter.Phi() - Psi2A));
-    values[kCos2DeltaPhiA2_FT0A] = TMath::Cos(2 * (v_daughter.Phi() - Psi2B));
-    values[kCos2DeltaPhiA2_FT0C] = TMath::Cos(2 * (v_daughter.Phi() - Psi2C));
+    values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2 * (phi - Psi2A));
+    values[kCos2DeltaPhiA2_FT0A] = TMath::Cos(2 * (phi - Psi2B));
+    values[kCos2DeltaPhiA2_FT0C] = TMath::Cos(2 * (phi - Psi2C));
+    // values[kDeltaPhiA2_TPC] = v_daughter.Phi() > Psi2A ? v_daughter.Phi() - Psi2A : Psi2A - v_daughter.Phi();
+    // values[kDeltaPhiA2_TPC]  = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
+    // values[kDeltaPhiA2_FT0A] = v_daughter.Phi() > Psi2B ? v_daughter.Phi() - Psi2B : Psi2B - v_daughter.Phi();
+    // values[kDeltaPhiA2_FT0A]  = values[kDeltaPhiA2_FT0A] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0A] : values[kDeltaPhiA2_FT0A];
+    // values[kDeltaPhiA2_FT0C] = v_daughter.Phi() > Psi2C ? v_daughter.Phi() - Psi2C : Psi2C - v_daughter.Phi();
+    // values[kDeltaPhiA2_FT0C]  = values[kDeltaPhiA2_FT0C] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0C] : values[kDeltaPhiA2_FT0C];
+    // values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2 * (v_daughter.Phi() - Psi2A));
+    // values[kCos2DeltaPhiA2_FT0A] = TMath::Cos(2 * (v_daughter.Phi() - Psi2B));
+    // values[kCos2DeltaPhiA2_FT0C] = TMath::Cos(2 * (v_daughter.Phi() - Psi2C));
 
     float A2_TPC = values[kCos2DeltaPhiA2_TPC] / values[kR2EP];
     float A2_FT0A = values[kCos2DeltaPhiA2_FT0A] / values[kR2EP];

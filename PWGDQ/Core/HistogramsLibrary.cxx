@@ -1331,7 +1331,7 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
         int varA2_FT0A[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_FT0A, VarManager::kDeltaPhiA2_FT0A};
 
         int bins[6] = {50, 20, 20, 9, 400, 40};
-        double minBins[6] = {2.0, 0.0, -1., 0.0, -10.0, -2.0};
+        double minBins[6] = {2.0, 0.0, -1., 0.0, -10.0, 0.0};
         double maxBins[6] = {4.0, 2.0, 1.0, 90.0, 10.0, 2.0};
         TString labels[6] = {"kMass", "kPt", "kRapidity", "kCentFT0C", "kA2EP", "kDeltaPhiA2"};
         if (subGroupStr.Contains("tpc")) {
