@@ -5953,7 +5953,7 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     ROOT::Math::XYZVectorF daughterVec_RF{(v_daughter.Vect()).Unit()};
     float cosPhi = yAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
     float sinPhi = -1. * xAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
-    float phi = sinPhi > 0 ? TMath::ACos(cosPhi) : 2 * TMath::Pi() - TMath::ACos(cosPhi);
+    float phi = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
     values[kDeltaPhiA2_TPC] = phi > Psi2A ? phi - Psi2A : Psi2A - phi;
     values[kDeltaPhiA2_TPC]  = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
     values[kDeltaPhiA2_FT0A] = phi > Psi2B ? phi - Psi2B : Psi2B - phi;
