@@ -268,9 +268,8 @@ struct QvectorShiftTask {
                    sFT0A, sFT0C, sFT0M, sFV0A, nBPos, nBNeg, cfgHarmonic.value);
     }
   }
-};
 
-void processDummy(MyCollisions const& collisions) {
+  void processDummy(MyCollisions const& collisions) {
     Produces<aod::ReducedEventsQvectorCentr_001> qVectorCentr;
     for (auto& ev : collisions) {
       qVectorCentr(ev.qvecFT0ARe(), ev.qvecFT0AIm(), ev.qvecFT0CRe(), ev.qvecFT0CIm(), ev.qvecFT0MRe(), ev.qvecFT0MIm(), ev.qvecFV0ARe(), ev.qvecFV0AIm(),
@@ -278,7 +277,11 @@ void processDummy(MyCollisions const& collisions) {
                    ev.sumAmplFT0A(), ev.sumAmplFT0C(), ev.sumAmplFT0M(), ev.sumAmplFV0A(),
                    ev.nTrkBPos(), ev.nTrkBNeg(), -1);
     }
-}
+   }
+};
+
+PROCESS_SWITCH(QvectorShiftTask, processSkimmed, "Process skimmed data", true);
+PROCESS_SWITCH(QvectorShiftTask, processDummy, "Process dummy data", false);
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
 {
