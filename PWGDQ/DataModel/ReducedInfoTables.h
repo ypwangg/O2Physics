@@ -207,7 +207,7 @@ DECLARE_SOA_TABLE(ReducedEventsQvectorExtra, "AOD", "REQVECTOREXTRA", //!    Eve
                   reducedevent::Q42XA, reducedevent::Q42YA, reducedevent::Q23XA, reducedevent::Q23YA,
                   reducedevent::S11A, reducedevent::S12A, reducedevent::S13A, reducedevent::S31A);
 
-DECLARE_SOA_TABLE(ReducedEventsQvectorCentr, "AOD", "REQVECTORCTR", //!    Event Q-vector information from central framework
+DECLARE_SOA_TABLE(ReducedEventsQvectorCentr_000, "AOD", "REQVECTORCTR", //!    Event Q-vector information from central framework
                   qvec::QvecFT0ARe, qvec::QvecFT0AIm, qvec::QvecFT0CRe, qvec::QvecFT0CIm, qvec::QvecFT0MRe, qvec::QvecFT0MIm, qvec::QvecFV0ARe, qvec::QvecFV0AIm, reducedevent::QvecBPosRe, reducedevent::QvecBPosIm, reducedevent::QvecBNegRe, reducedevent::QvecBNegIm,
                   qvec::SumAmplFT0A, qvec::SumAmplFT0C, qvec::SumAmplFT0M, qvec::SumAmplFV0A, reducedevent::NTrkBPos, reducedevent::NTrkBNeg);
 
