@@ -5877,6 +5877,7 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   // values[kPsi2A] = Psi2A;
   // float Psi3A = getEventPlane(3, Q3X0A, Q3Y0A);
   float Psi2A = getEventPlane(2, values[kQ2X0A], values[kQ2Y0A]);
+  values[kPsi2A] = Psi2A; // tmp
   float Psi3A = getEventPlane(3, values[kQ3X0A], values[kQ3Y0A]);
   float Psi2B = getEventPlane(2, values[kQ2X0B], values[kQ2Y0B]);
   float Psi3B = getEventPlane(3, values[kQ3X0B], values[kQ3Y0B]);
