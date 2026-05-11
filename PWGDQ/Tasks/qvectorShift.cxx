@@ -278,10 +278,11 @@ struct QvectorShiftTask {
                    ev.nTrkBPos(), ev.nTrkBNeg(), -1);
     }
    }
-};
 
-PROCESS_SWITCH(QvectorShiftTask, processSkimmed, "Process skimmed data", true);
-PROCESS_SWITCH(QvectorShiftTask, processDummy, "Process dummy data", false);
+   
+    PROCESS_SWITCH(QvectorShiftTask, processSkimmed, "Process skimmed data", true);
+    PROCESS_SWITCH(QvectorShiftTask, processDummy, "Process dummy data", false);
+};
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
 {
