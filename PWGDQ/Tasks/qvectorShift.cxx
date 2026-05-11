@@ -43,28 +43,36 @@
 
 // ------------------------------------------------------------------------------------
 // This task produces the SAME table type (ReducedEventsQvectorCentr) as the upstream
-// skimming task.  In a data-processing workflow, replace the producer of
-// ReducedEventsQvectorCentr (e.g. dqFlow) with this task so that downstream
-// consumers automatically receive shift-corrected Q-vectors without any code change.
+// producer (dqFlow).  In a data-processing workflow you replace dqFlow with this
+// task so that downstream consumers automatically receive shift-corrected Q-vectors
+// without any code change.
+//
+// Input:  ReducedEvents + ReducedEventsExtended + central Q-vector tables
+//         (QvectorFT0Cs, QvectorFT0As, QvectorFT0Ms, QvectorFV0As,
+//          QvectorTPCposs, QvectorTPCnegs)
+// Output: ReducedEventsQvectorCentr (same schema as upstream)
 // ------------------------------------------------------------------------------------
 
 using namespace o2;
 using namespace o2::framework;
 
-// Detector index mapping (must match qVectorsTable.cxx)
-// Shift profile y-axis uses 2*detIdx (Re) and 2*detIdx+1 (Im).
+// Detector-index constants (must match qVectorsTable.cxx)
+// The shift profile TProfile3D stores coefficients at y-bin 2*detIdx (cos) and 2*detIdx+1 (sin).
 enum DetectorIdx {
   kFT0C = 0,
   kFT0A = 1,
   kFT0M = 2,
   kFV0A = 3,
-  kTPCpos = 4, // maps to BPos (deprecated)
-  kTPCneg = 5, // maps to BNeg (deprecated)
+  kTPCpos = 4,   // → BPos column
+  kTPCneg = 5,   // → BNeg column
   kNdets = 6
 };
 
-// Convenience alias for the joined input event table
-using MyCollisions = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended, aod::ReducedEventsQvectorCentr>;
+// Read raw central Q-vector tables + event info, then produce
+// shift-corrected ReducedEventsQvectorCentr.
+using MyCollisions = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended,
+                               aod::QvectorFT0Cs, aod::QvectorFT0As, aod::QvectorFT0Ms, aod::QvectorFV0As,
+                               aod::QvectorTPCposs, aod::QvectorTPCnegs>;
 
 struct QvectorShiftTask {
 
@@ -102,8 +110,8 @@ struct QvectorShiftTask {
   TProfile3D* mShiftProfile = nullptr;
   int mCurrentRun = -1;
 
-  // --- Output table ---
-  Produces<aod::ReducedEventsQvectorCentr> qVectorShifted;
+  // --- Produces the standard ReducedEventsQvectorCentr (same schema as dqFlow) ---
+  Produces<aod::ReducedEventsQvectorCentr> qVectorCentr;
 
   // --- QA histograms ---
   HistogramRegistry mQA{"qaQvectorShift", {}, OutputObjHandlingPolicy::AnalysisObject, false, false};
@@ -119,181 +127,147 @@ struct QvectorShiftTask {
     // QA histograms
     AxisSpec axisCent{20, 0., 100., "Centrality (%)"};
     AxisSpec axisDeltaPsi{100, -TMath::Pi(), TMath::Pi(), "#Delta#psi (rad)"};
-    AxisSpec axisDetIdx{kNdets, -0.5, kNdets - 0.5, "Detector index"};
+    AxisSpec axisDetIdx{kNdets, -0.5, kNdets - 0.5, "Detector"};
 
-    mQA.add("deltaPsi", "Shift correction angle;Detector index;#Delta#psi",
+    mQA.add("deltaPsi", ";Detector;#Delta#psi",
             {HistType::kTH2F, {axisDetIdx, axisDeltaPsi}});
-    mQA.add("centVsPsi", "Centrality vs event plane angle",
-            {HistType::kTH2F, {axisCent, {100, -TMath::Pi() / 2., TMath::Pi() / 2.}}});
-    mQA.add("qvecBefore", "Input Q-vector components;Re;Im",
+    mQA.add("qvecBefore", ";Re;Im",
             {HistType::kTH2F, {{200, -2., 2.}, {200, -2., 2.}}});
-    mQA.add("qvecAfter", "Shift-corrected Q-vector components;Re;Im",
+    mQA.add("qvecAfter", ";Re;Im",
             {HistType::kTH2F, {{200, -2., 2.}, {200, -2., 2.}}});
   }
 
-  /// Load the shift correction profile for the given timestamp / run
+  /// Load the shift correction profile for the given timestamp / run.
+  /// Path: cfgShiftPath/v<N>  (N = cfgHarmonic)
   void initCCDB(uint64_t timestamp, int runNumber)
   {
-    std::string fullPath = cfgShiftPath.value;
-    if (fullPath.back() != '/') {
-      fullPath += '/';
-    }
-    fullPath += "v";
-    fullPath += std::to_string(cfgHarmonic.value);
+    std::string path = cfgShiftPath.value;
+    if (path.back() != '/')
+      path += '/';
+    path += "v" + std::to_string(cfgHarmonic.value);
 
-    mShiftProfile = ccdb->getForTimeStamp<TProfile3D>(fullPath, timestamp);
-    if (!mShiftProfile) {
-      // Fallback to run-number-based lookup
-      mShiftProfile = ccdb->getForRun<TProfile3D>(fullPath, runNumber);
-    }
+    mShiftProfile = ccdb->getForTimeStamp<TProfile3D>(path, timestamp);
+    if (!mShiftProfile)
+      mShiftProfile = ccdb->getForRun<TProfile3D>(path, runNumber);
 
-    if (mShiftProfile) {
-      LOGF(info, "Loaded shift correction profile from %s", fullPath.data());
-    } else {
-      LOGF(warning, "Shift correction profile NOT found at %s. Correction will be a no-op.",
-           fullPath.data());
-    }
+    if (mShiftProfile)
+      LOGF(info, "Loaded shift profile from %s", path.data());
+    else
+      LOGF(warning, "No shift profile at %s – no correction applied", path.data());
   }
 
-  /// Apply the Fourier-series shift correction to a Q-vector.
-  ///
-  /// Formula (from qVectorsTable.cxx):
-  ///   psi = atan2(Qy, Qx) / n
-  ///   deltapsi = sum_{k=1}^{N} (2/k) * (-c_k * cos(k*n*psi) + d_k * sin(k*n*psi)) / n
-  ///   Q'_{Re} = Q_{Re} * cos(deltapsi * n) - Q_{Im} * sin(deltapsi * n)
-  ///   Q'_{Im} = Q_{Re} * sin(deltapsi * n) + Q_{Im} * cos(deltapsi * n)
-  ///
-  void applyShiftCorrection(float& qvecRe, float& qvecIm,
+  /// Apply the Fourier-series shift correction.
+  void applyShiftCorrection(float& qRe, float& qIm,
                             float cent, int detIdx) const
   {
-    if (!mShiftProfile) {
+    if (!mShiftProfile)
       return;
-    }
-
     int n = cfgHarmonic.value;
 
-    // Event plane angle in the n-th harmonic
-    float psi = TMath::ATan2(qvecIm, qvecRe) / static_cast<float>(n);
-
-    // Accumulate deltapsi (in the original formula this is /n, then later multiplied back by n)
-    float deltapsiOverN = 0.f;
+    float psi = TMath::ATan2(qIm, qRe) / static_cast<float>(n);
+    float sum = 0.f;
     for (int k = 1; k <= cfgNShiftMax.value; ++k) {
-      float coeffShiftX = mShiftProfile->GetBinContent(
+      float cx = mShiftProfile->GetBinContent(
         mShiftProfile->FindBin(cent, 2 * detIdx, k - 0.5));
-      float coeffShiftY = mShiftProfile->GetBinContent(
+      float cy = mShiftProfile->GetBinContent(
         mShiftProfile->FindBin(cent, 2 * detIdx + 1, k - 0.5));
-
-      float angle = static_cast<float>(k) * static_cast<float>(n) * psi;
-      deltapsiOverN += (2.f / static_cast<float>(k)) *
-                       (-coeffShiftX * TMath::Cos(angle) + coeffShiftY * TMath::Sin(angle));
+      float ang = static_cast<float>(k) * static_cast<float>(n) * psi;
+      sum += (2.f / static_cast<float>(k)) *
+             (-cx * TMath::Cos(ang) + cy * TMath::Sin(ang));
     }
-    // The total rotation in Q-vector space (= deltapsi * n) is simply deltapsiOverN * n
-    float rotAngle = deltapsiOverN; // = deltapsi * n  (because deltapsiOverN already had /n inside)
-
-    // Rotate the Q-vector
-    float cosRot = TMath::Cos(rotAngle);
-    float sinRot = TMath::Sin(rotAngle);
-    float qvecReNew = qvecRe * cosRot - qvecIm * sinRot;
-    float qvecImNew = qvecRe * sinRot + qvecIm * cosRot;
-
-    qvecRe = qvecReNew;
-    qvecIm = qvecImNew;
+    // rotAngle = sum  (which already contains the /n factor,
+    // so the actual rotation = sum * n = Δψ · n)
+    float c = TMath::Cos(sum);
+    float s = TMath::Sin(sum);
+    float qReNew = qRe * c - qIm * s;
+    float qImNew = qRe * s + qIm * c;
+    qRe = qReNew;
+    qIm = qImNew;
   }
 
-  /// Process events with joined ReducedEvents + ReducedEventsExtended + ReducedEventsQvectorCentr.
+  /// Process — read central Q-vector tables, apply shift, produce
+  /// ReducedEventsQvectorCentr (same table type that dqFlow produces).
+  ///
+  /// Column translation:
+  ///   Central table | ReducedEventsQvectorCentr column
+  ///   --------------+----------------------------------
+  ///   qvecFT0ARe/Im | QvecFT0ARe/Im
+  ///   qvecFT0CRe/Im | QvecFT0CRe/Im
+  ///   qvecFT0MRe/Im | QvecFT0MRe/Im
+  ///   qvecFV0ARe/Im | QvecFV0ARe/Im
+  ///   qvecTPCposRe/Im | QvecBPosRe/Im
+  ///   qvecTPCnegRe/Im | QvecBNegRe/Im
+  ///   sumAmplFT0A/C/M | SumAmplFT0A/C/M
+  ///   sumAmplFV0A  | SumAmplFV0A
+  ///   nTrkTPCpos   | NTrkBPos
+  ///   nTrkTPCneg   | NTrkBNeg
   void process(MyCollisions const& collisions)
   {
-    // Run-by-run calibration loading (use the first event's info)
-    if (!collisions.empty()) {
-      auto& first = collisions.begin();
-      uint64_t timestamp = first.timestamp();
-      int runNumber = first.runNumber();
-      if (runNumber != mCurrentRun) {
-        initCCDB(timestamp, runNumber);
-        mCurrentRun = runNumber;
-      }
+    if (collisions.empty())
+      return;
+
+    // Run-by-run CCDB loading
+    auto& first = collisions.begin();
+    int run = first.runNumber();
+    if (run != mCurrentRun) {
+      initCCDB(first.timestamp(), run);
+      mCurrentRun = run;
     }
 
-    int n = cfgHarmonic.value;
-    auto isValid = [](float re, float im) { return re > -900.f && im > -900.f; };
+    auto valid = [](float x, float y) { return x > -900.f && y > -900.f; };
 
-    for (auto& coll : collisions) {
-      // Centrality
-      float cent = 110.f; // flag for "outside range"
-      if (cfgCentEsti.value == 0) {
-        cent = coll.centFT0M();
-      } else if (cfgCentEsti.value == 1) {
-        cent = coll.centFT0A();
-      } else if (cfgCentEsti.value == 2) {
-        cent = coll.centFT0C();
-      } else if (cfgCentEsti.value == 3) {
-        cent = coll.centFV0A();
+    for (auto& ev : collisions) {
+      // Get centrality
+      float cent = 110.f;
+      if (cfgCentEsti.value == 0)
+        cent = ev.centFT0M();
+      else if (cfgCentEsti.value == 1)
+        cent = ev.centFT0A();
+      else if (cfgCentEsti.value == 2)
+        cent = ev.centFT0C();
+
+      // Read Q-vector components from central tables
+      float rFT0A = ev.qvecFT0ARe(), iFT0A = ev.qvecFT0AIm();
+      float rFT0C = ev.qvecFT0CRe(), iFT0C = ev.qvecFT0CIm();
+      float rFT0M = ev.qvecFT0MRe(), iFT0M = ev.qvecFT0MIm();
+      float rFV0A = ev.qvecFV0ARe(), iFV0A = ev.qvecFV0AIm();
+      float rBPos = ev.qvecTPCposRe(), iBPos = ev.qvecTPCposIm();
+      float rBNeg = ev.qvecTPCnegRe(), iBNeg = ev.qvecTPCnegIm();
+
+      // Metadata (pass through unchanged)
+      float sFT0A = ev.sumAmplFT0A(), sFT0C = ev.sumAmplFT0C();
+      float sFT0M = ev.sumAmplFT0M(), sFV0A = ev.sumAmplFV0A();
+      int nBPos = ev.nTrkTPCpos(), nBNeg = ev.nTrkTPCneg();
+
+      // QA before
+      if (valid(rFT0A, iFT0A))
+        mQA.fill(HIST("qvecBefore"), rFT0A, iFT0A);
+
+      // Apply shift correction
+      bool doCorr = (cent >= 0.f && cent < cfgMaxCentrality.value);
+      if (doCorr) {
+        if (valid(rFT0A, iFT0A))
+          applyShiftCorrection(rFT0A, iFT0A, cent, kFT0A);
+        if (valid(rFT0C, iFT0C))
+          applyShiftCorrection(rFT0C, iFT0C, cent, kFT0C);
+        if (valid(rFT0M, iFT0M))
+          applyShiftCorrection(rFT0M, iFT0M, cent, kFT0M);
+        if (valid(rFV0A, iFV0A))
+          applyShiftCorrection(rFV0A, iFV0A, cent, kFV0A);
+        if (valid(rBPos, iBPos))
+          applyShiftCorrection(rBPos, iBPos, cent, kTPCpos);
+        if (valid(rBNeg, iBNeg))
+          applyShiftCorrection(rBNeg, iBNeg, cent, kTPCneg);
       }
 
-      // Read Q-vectors
-      float qvecFT0ARe = coll.qvecFT0ARe();
-      float qvecFT0AIm = coll.qvecFT0AIm();
-      float qvecFT0CRe = coll.qvecFT0CRe();
-      float qvecFT0CIm = coll.qvecFT0CIm();
-      float qvecFT0MRe = coll.qvecFT0MRe();
-      float qvecFT0MIm = coll.qvecFT0MIm();
-      float qvecFV0ARe = coll.qvecFV0ARe();
-      float qvecFV0AIm = coll.qvecFV0AIm();
-      float qvecBPosRe = coll.qvecBPosRe();
-      float qvecBPosIm = coll.qvecBPosIm();
-      float qvecBNegRe = coll.qvecBNegRe();
-      float qvecBNegIm = coll.qvecBNegIm();
+      // QA after
+      if (valid(rFT0A, iFT0A))
+        mQA.fill(HIST("qvecAfter"), rFT0A, iFT0A);
 
-      // Sum amplitudes / track counts (passed through unchanged)
-      float sumAmplFT0A = coll.sumAmplFT0A();
-      float sumAmplFT0C = coll.sumAmplFT0C();
-      float sumAmplFT0M = coll.sumAmplFT0M();
-      float sumAmplFV0A = coll.sumAmplFV0A();
-      int nTrkBPos = coll.nTrkBPos();
-      int nTrkBNeg = coll.nTrkBNeg();
-
-      // QA: fill before-correction Q-vectors
-      if (isValid(qvecFT0ARe, qvecFT0AIm))
-        mQA.fill(HIST("qvecBefore"), qvecFT0ARe, qvecFT0AIm);
-      if (isValid(qvecFT0CRe, qvecFT0CIm))
-        mQA.fill(HIST("qvecBefore"), qvecFT0CRe, qvecFT0CIm);
-      if (isValid(qvecFT0MRe, qvecFT0MIm))
-        mQA.fill(HIST("qvecBefore"), qvecFT0MRe, qvecFT0MIm);
-
-      // Apply shift correction (only if centrality is within range)
-      if (cent >= 0.f && cent < cfgMaxCentrality.value) {
-        if (isValid(qvecFT0ARe, qvecFT0AIm))
-          applyShiftCorrection(qvecFT0ARe, qvecFT0AIm, cent, kFT0A);
-        if (isValid(qvecFT0CRe, qvecFT0CIm))
-          applyShiftCorrection(qvecFT0CRe, qvecFT0CIm, cent, kFT0C);
-        if (isValid(qvecFT0MRe, qvecFT0MIm))
-          applyShiftCorrection(qvecFT0MRe, qvecFT0MIm, cent, kFT0M);
-        if (isValid(qvecFV0ARe, qvecFV0AIm))
-          applyShiftCorrection(qvecFV0ARe, qvecFV0AIm, cent, kFV0A);
-        if (isValid(qvecBPosRe, qvecBPosIm))
-          applyShiftCorrection(qvecBPosRe, qvecBPosIm, cent, kTPCpos);
-        if (isValid(qvecBNegRe, qvecBNegIm))
-          applyShiftCorrection(qvecBNegRe, qvecBNegIm, cent, kTPCneg);
-      }
-
-      // QA: fill after-correction Q-vectors
-      if (isValid(qvecFT0ARe, qvecFT0AIm))
-        mQA.fill(HIST("qvecAfter"), qvecFT0ARe, qvecFT0AIm);
-      if (isValid(qvecFT0CRe, qvecFT0CIm))
-        mQA.fill(HIST("qvecAfter"), qvecFT0CRe, qvecFT0CIm);
-      if (isValid(qvecFT0MRe, qvecFT0MIm))
-        mQA.fill(HIST("qvecAfter"), qvecFT0MRe, qvecFT0MIm);
-
-      // Fill output table (same structure as ReducedEventsQvectorCentr)
-      qVectorShifted(
-        qvecFT0ARe, qvecFT0AIm,
-        qvecFT0CRe, qvecFT0CIm,
-        qvecFT0MRe, qvecFT0MIm,
-        qvecFV0ARe, qvecFV0AIm,
-        qvecBPosRe, qvecBPosIm,
-        qvecBNegRe, qvecBNegIm,
-        sumAmplFT0A, sumAmplFT0C, sumAmplFT0M, sumAmplFV0A,
-        nTrkBPos, nTrkBNeg);
+      // Produce standard ReducedEventsQvectorCentr
+      qVectorCentr(rFT0A, iFT0A, rFT0C, iFT0C, rFT0M, iFT0M,
+                   rFV0A, iFV0A, rBPos, iBPos, rBNeg, iBNeg,
+                   sFT0A, sFT0C, sFT0M, sFV0A, nBPos, nBNeg);
     }
   }
 };
