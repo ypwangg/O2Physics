@@ -203,11 +203,11 @@ struct QvectorShiftTask {
   ///   nTrkTPCneg   | NTrkBNeg
   void process(MyCollisions const& collisions)
   {
-    if (collisions.empty())
+    if (collisions.size() == 0)
       return;
 
     // Run-by-run CCDB loading
-    auto& first = collisions.begin();
+    auto first = collisions.begin();
     int run = first.runNumber();
     if (run != mCurrentRun) {
       initCCDB(first.timestamp(), run);
