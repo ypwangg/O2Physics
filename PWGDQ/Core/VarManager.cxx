@@ -49,6 +49,8 @@ o2::vertexing::FwdDCAFitterN<2> VarManager::fgFitterTwoProngFwd;
 o2::vertexing::FwdDCAFitterN<3> VarManager::fgFitterThreeProngFwd;
 o2::globaltracking::MatchGlobalFwd VarManager::mMatching;
 std::map<VarManager::CalibObjects, TObject*> VarManager::fgCalibs;
+std::vector<TProfile3D*> VarManager::fgShiftProfiles;
+bool VarManager::fgApplyShiftCorrection = false;
 bool VarManager::fgRunTPCPostCalibration[4] = {false, false, false, false};
 int VarManager::fgCalibrationType = 0;                // 0 - no calibration, 1 - calibration vs (TPCncls,pIN,eta) typically for pp, 2 - calibration vs (eta,nPV,nLong,tLong) typically for PbPb
 bool VarManager::fgUseInterpolatedCalibration = true; // use interpolated calibration histograms (default: true)
@@ -543,6 +545,45 @@ std::tuple<float, float, float, float, float, int> VarManager::BimodalityCoeffic
   float kurtosis = m4 / (m2 * m2); // Pearson's kurtosis, not excess
 
   return std::make_tuple((skewness * skewness + 1.0) / kurtosis, mean, stddev, skewness, kurtosis, nPeaks);
+}
+
+//__________________________________________________________________
+void VarManager::ApplyShiftCorrection(float& qRe, float& qIm, int harmonic, float cent, int detectorIndex)
+{
+  // Apply shift correction to q-vector components
+  if (fgShiftProfiles.empty() || harmonic < 2 || harmonic > 4) {
+    return; // No shift profiles loaded or invalid harmonic
+  }
+
+  int profileIndex = harmonic - 2; // harmonics 2,3,4 correspond to indices 0,1,2
+  if (profileIndex >= (int)fgShiftProfiles.size()) {
+    return; // No profile for this harmonic
+  }
+
+  TProfile3D* shiftProfile = fgShiftProfiles[profileIndex];
+  if (!shiftProfile) {
+    return; // Profile not loaded
+  }
+
+  // Calculate psidef = atan2(qIm, qRe) / harmonic
+  float psidef = TMath::ATan2(qIm, qRe) / static_cast<float>(harmonic);
+
+  float deltapsi = 0.0f;
+  for (int ishift = 1; ishift <= 10; ishift++) {
+    float coeffshiftx = shiftProfile->GetBinContent(shiftProfile->FindBin(cent, 2 * detectorIndex, ishift - 0.5f));
+    float coeffshifty = shiftProfile->GetBinContent(shiftProfile->FindBin(cent, 2 * detectorIndex + 1, ishift - 0.5f));
+
+    deltapsi += ((2.0f / static_cast<float>(ishift)) * (-coeffshiftx * TMath::Cos(ishift * static_cast<float>(harmonic) * psidef) + coeffshifty * TMath::Sin(ishift * static_cast<float>(harmonic) * psidef))) / static_cast<float>(harmonic);
+  }
+
+  deltapsi *= static_cast<float>(harmonic);
+
+  // Apply rotation
+  float qReShifted = qRe * TMath::Cos(deltapsi) - qIm * TMath::Sin(deltapsi);
+  float qImShifted = qRe * TMath::Sin(deltapsi) + qIm * TMath::Cos(deltapsi);
+
+  qRe = qReShifted;
+  qIm = qImShifted;
 }
 
 //__________________________________________________________________

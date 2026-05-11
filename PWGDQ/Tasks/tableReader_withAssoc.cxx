@@ -296,6 +296,10 @@ struct AnalysisEventSelection {
   Configurable<std::string> fConfigCcdbUrl{"ccdb-url", "http://alice-ccdb.cern.ch", "url of the ccdb repository"};
   Configurable<int64_t> fConfigNoLaterThan{"ccdb-no-later-than", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), "latest acceptable timestamp of creation for the object"};
 
+  Configurable<bool> fConfigShiftCorr{"cfgShiftCorr", false, "If true, apply the correction"};
+  Configurable<std::string> fConfigShiftPath{"cfgShiftPath", "Users/j/junlee/Qvector/Pass5/QvecShift/", "Path to the JSON file containing the shift correction data"};
+  Configurable<std::vector<int>> fConfignModes{"cfgnModes", {2}, "Modulation of interest"};
+
   HistogramManager* fHistMan = nullptr;
   MixingHandler* fMixHandler = nullptr;
   AnalysisCompositeCut* fEventCut;
@@ -374,6 +378,11 @@ struct AnalysisEventSelection {
     fCCDB->setLocalObjectValidityChecking();
     fCCDB->setCreatedNotAfter(fConfigNoLaterThan.value);
     fCCDBApi.init(fConfigCcdbUrl.value);
+
+    std::string fullPath;
+    if (fConfigShiftCorr) {
+      VarManager::initShiftCorrection(fConfignModes);
+    }
   }
 
   template <uint32_t TEventFillMap, typename TEvents>
@@ -392,6 +401,17 @@ struct AnalysisEventSelection {
       int itsROFrameEndBorderMargin = fConfigITSROFrameEndBorderMargin < 0 ? par->fITSROFrameEndBorderMargin : fConfigITSROFrameEndBorderMargin;
       VarManager::SetITSROFBorderselection(alppar->roFrameBiasInBC, alppar->roFrameLengthInBC, itsROFrameStartBorderMargin, itsROFrameEndBorderMargin);
       fCurrentRun = events.begin().runNumber();
+      if (fConfigShiftCorr) {
+        VarManager::ResetShiftProfiles();
+        for (std::size_t i = 0; i < fConfignModes->size(); i++) {
+          int ind = fConfignModes->at(i);
+          fullPath = fConfigShiftPath.value;
+          fullPath += "/v";
+          fullPath += std::to_string(ind);
+          auto shiftProfile = fCCDB->getForRun<TProfile3D>(fullPath, fCurrentRun);
+          VarManager::SetShiftProfiles(shiftProfile);
+        }
+      }
     }
 
     fSelMap.clear();
@@ -1646,6 +1666,17 @@ struct AnalysisSameEventPairing {
       VarManager::SetUseVars(fHistMan->GetUsedVars());                                                          // provide the list of required variables so that VarManager knows what to fill
       fOutputList.setObject(fHistMan->GetMainHistogramList());
     }
+
+    bool fConfigShiftCorr;
+    getTaskOptionValue<bool>(context, "analysis-event-selection", "cfgShiftCorr", fConfigShiftCorr, false);
+    std::string fConfigShiftPath;
+    getTaskOptionValue<std::string>(context, "analysis-event-selection", "cfgShiftPath", fConfigShiftPath, false);
+    std::vector<std::vector<int>> fConfignModes;
+    getTaskOptionValue<std::vector<std::vector<int>>>(context, "analysis-event-selection", "cfgnModes", fConfignModes, false);
+    std::string fullPath;
+    if (fConfigShiftCorr) {
+      VarManager::initShiftCorrection(fConfignModes);
+    }
   }
 
   void initParamsFromCCDB(uint64_t timestamp, int runNumber, bool withTwoProngFitter = true)
@@ -1713,6 +1744,17 @@ struct AnalysisSameEventPairing {
       fileFlow->GetObject("EventPlane", ResoFlowEP);
       if (ResoFlowSP == nullptr || ResoFlowEP == nullptr) {
         LOGF(fatal, "Flow resolution histograms not available in file %s", pathFlow.Data());
+      }
+      if (fConfigShiftCorr) {
+        VarManager::ResetShiftProfiles();
+        for (std::size_t i = 0; i < fConfignModes->size(); i++) {
+          int ind = fConfignModes->at(i);
+          fullPath = fConfigShiftPath.value;
+          fullPath += "/v";
+          fullPath += std::to_string(ind);
+          auto shiftProfile = fCCDB->getForRun<TProfile3D>(fullPath, events.begin().runNumber());
+          VarManager::SetShiftProfiles(shiftProfile);
+        }
       }
     }
   }

@@ -55,6 +55,7 @@
 #include <TH3F.h>
 #include <THn.h>
 #include <TObject.h>
+#include <TProfile3D.h>
 #include <TRandom.h>
 #include <TString.h>
 
@@ -1499,6 +1500,18 @@ class VarManager : public TObject
     fgEOR = eor;
   }
 
+  // Apply shift correction to q-vector
+  static void ApplyShiftCorrection(float& qRe, float& qIm, int harmonic, float cent, int detectorIndex);
+  // Set shift correction profiles
+  static void SetShiftProfiles(TProfile3D*) { fgShiftProfiles.push_back(shiftProfile); }
+  static void initShiftCorrection(std::vector<int> harmonics) { 
+    fgHarmonics = harmonics; 
+    fgApplyShiftCorrection = true; 
+  }
+  static void ResetShiftProfiles() { 
+    fgShiftProfiles.clear(); 
+  }
+
  public:
   VarManager();
   ~VarManager() override;
@@ -1551,6 +1564,9 @@ class VarManager : public TObject
   static o2::globaltracking::MatchGlobalFwd mMatching;
 
   static std::map<CalibObjects, TObject*> fgCalibs; // map of calibration histograms
+  static std::vector<TProfile3D*> fgShiftProfiles;   // shift correction profiles for q-vectors
+  static bool fgApplyShiftCorrection;               // flag to apply shift correction
+  static std::vector<int> fgHarmonics;              // vector of harmonics to apply shift correction
   static bool fgRunTPCPostCalibration[4];           // 0-electron, 1-pion, 2-kaon, 3-proton
   static int fgCalibrationType;                     // 0 - no calibration, 1 - calibration vs (TPCncls,pIN,eta) typically for pp, 2 - calibration vs (eta,nPV,nLong,tLong) typically for PbPb
   static bool fgUseInterpolatedCalibration;         // use interpolated calibration histograms (default: true)
@@ -2278,6 +2294,14 @@ void VarManager::FillEvent(T const& event, float* values)
     values[kQ4Y0B] = -999;
     values[kQ4X0C] = -999;
     values[kQ4Y0C] = -999;
+
+    if (fgApplyShiftCorrection) {
+      ApplyShiftCorrection(values[kQ2X0A], values[kQ2Y0A], 2, values[kCentFT0C], 6);
+      ApplyShiftCorrection(values[kQ2X0APOS], values[kQ2Y0APOS], 2, values[kCentFT0C], 4);
+      ApplyShiftCorrection(values[kQ2X0ANEG], values[kQ2Y0ANEG], 2, values[kCentFT0C], 5);
+      ApplyShiftCorrection(values[kQ2X0B], values[kQ2Y0B], 2, values[kCentFT0C], 1);
+      ApplyShiftCorrection(values[kQ2X0C], values[kQ2Y0C], 2, values[kCentFT0C], 0);
+    }
 
     EventPlaneHelper epHelper;
     float Psi2A = epHelper.GetEventPlane(values[kQ2X0A], values[kQ2Y0A], 2);
