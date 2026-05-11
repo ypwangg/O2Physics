@@ -271,6 +271,7 @@ struct QvectorShiftTask {
 };
 
 void processDummy(MyCollisions const& collisions) {
+    Produces<aod::ReducedEventsQvectorCentr_001> qVectorCentr;
     for (auto& ev : collisions) {
       qVectorCentr(ev.qvecFT0ARe(), ev.qvecFT0AIm(), ev.qvecFT0CRe(), ev.qvecFT0CIm(), ev.qvecFT0MRe(), ev.qvecFT0MIm(), ev.qvecFV0ARe(), ev.qvecFV0AIm(),
                    ev.qvecBPosRe(), ev.qvecBPosIm(), ev.qvecBNegRe(), ev.qvecBNegIm(),
