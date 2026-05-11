@@ -70,9 +70,7 @@ enum DetectorIdx {
 
 // Read raw central Q-vector tables + event info, then produce
 // shift-corrected ReducedEventsQvectorCentr.
-using MyCollisions = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended,
-                               aod::QvectorFT0Cs, aod::QvectorFT0As, aod::QvectorFT0Ms, aod::QvectorFV0As,
-                               aod::QvectorTPCposs, aod::QvectorTPCnegs>;
+using MyCollisions = soa::Join<aod::ReducedEvents, aod::ReducedEventsExtended,aod::ReducedEventsQvectorCentr>;
 
 struct QvectorShiftTask {
 
@@ -111,7 +109,7 @@ struct QvectorShiftTask {
   int mCurrentRun = -1;
 
   // --- Produces the standard ReducedEventsQvectorCentr (same schema as dqFlow) ---
-  Produces<aod::ReducedEventsQvectorCentr> qVectorCentr;
+  Produces<aod::ReducedEventsQvectorCentr_001> qVectorCentr;
 
   // --- QA histograms ---
   HistogramRegistry mQA{"qaQvectorShift", {}, OutputObjHandlingPolicy::AnalysisObject, false, false};
@@ -201,7 +199,7 @@ struct QvectorShiftTask {
   ///   sumAmplFV0A  | SumAmplFV0A
   ///   nTrkTPCpos   | NTrkBPos
   ///   nTrkTPCneg   | NTrkBNeg
-  void process(MyCollisions const& collisions)
+  void processSkimmed(MyCollisions const& collisions)
   {
     if (collisions.size() == 0)
       return;
@@ -271,6 +269,15 @@ struct QvectorShiftTask {
     }
   }
 };
+
+void processDummy(MyCollisions const& collisions) {
+    for (auto& ev : collisions) {
+      qVectorCentr(ev.qvecFT0ARe(), ev.qvecFT0AIm(), ev.qvecFT0CRe(), ev.qvecFT0CIm(), ev.qvecFT0MRe(), ev.qvecFT0MIm(), ev.qvecFV0ARe(), ev.qvecFV0AIm(),
+                   ev.qvecTPCposRe(), ev.qvecTPCposIm(), ev.qvecTPCnegRe(), ev.qvecTPCnegIm(),
+                   ev.sumAmplFT0A(), ev.sumAmplFT0C(), ev.sumAmplFT0M(), ev.sumAmplFV0A(),
+                   ev.nTrkTPCpos(), ev.nTrkTPCneg());
+    }
+}
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
 {

@@ -211,6 +211,12 @@ DECLARE_SOA_TABLE(ReducedEventsQvectorCentr, "AOD", "REQVECTORCTR", //!    Event
                   qvec::QvecFT0ARe, qvec::QvecFT0AIm, qvec::QvecFT0CRe, qvec::QvecFT0CIm, qvec::QvecFT0MRe, qvec::QvecFT0MIm, qvec::QvecFV0ARe, qvec::QvecFV0AIm, reducedevent::QvecBPosRe, reducedevent::QvecBPosIm, reducedevent::QvecBNegRe, reducedevent::QvecBNegIm,
                   qvec::SumAmplFT0A, qvec::SumAmplFT0C, qvec::SumAmplFT0M, qvec::SumAmplFV0A, reducedevent::NTrkBPos, reducedevent::NTrkBNeg);
 
+DECLARE_SOA_TABLE(ReducedEventsQvectorCentr_001, "AOD", "REQVECTORCTR", 1, //!    Event Q-vector information from central framework
+                  qvec::QvecFT0ARe, qvec::QvecFT0AIm, qvec::QvecFT0CRe, qvec::QvecFT0CIm, qvec::QvecFT0MRe, qvec::QvecFT0MIm, qvec::QvecFV0ARe, qvec::QvecFV0AIm, reducedevent::QvecBPosRe, reducedevent::QvecBPosIm, reducedevent::QvecBNegRe, reducedevent::QvecBNegIm,
+                  qvec::SumAmplFT0A, qvec::SumAmplFT0C, qvec::SumAmplFT0M, qvec::SumAmplFV0A, reducedevent::NTrkBPos, reducedevent::NTrkBNeg);
+
+using ReducedEventsQvectorCentr = ReducedEventsQvectorCentr_001;
+
 DECLARE_SOA_TABLE(ReducedEventsQvectorCentrExtra, "AOD", "REQVECCTREXTA", //!    Event Q-vector information from central framework with TPC all
                   reducedevent::QvecBAllRe, reducedevent::QvecBAllIm, reducedevent::NTrkBAll);
 
