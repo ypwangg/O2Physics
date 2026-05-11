@@ -1343,6 +1343,7 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
         if (subGroupStr.Contains("ft0a")) {
           hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2_FT0A", "", 6, varA2_FT0A, bins, minBins, maxBins, 0, -1, kTRUE);
         }
+        hm->AddHistogram(histClass, "Cos2Phi_TPC", "", false, 100, -2, 2.0, VarManager::kCos2DeltaPhiA2_TPC);
         hm->AddHistogram(histClass, "DeltaPhiA2_TPC", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_TPC);
         hm->AddHistogram(histClass, "DeltaPhiA2_FT0C", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_FT0C);
         hm->AddHistogram(histClass, "DeltaPhiA2_FT0A", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_FT0A);
