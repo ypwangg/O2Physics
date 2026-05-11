@@ -379,7 +379,6 @@ struct AnalysisEventSelection {
     fCCDB->setCreatedNotAfter(fConfigNoLaterThan.value);
     fCCDBApi.init(fConfigCcdbUrl.value);
 
-    std::string fullPath;
     if (fConfigShiftCorr) {
       VarManager::initShiftCorrection(fConfignModes);
     }
@@ -405,7 +404,7 @@ struct AnalysisEventSelection {
         VarManager::ResetShiftProfiles();
         for (std::size_t i = 0; i < fConfignModes->size(); i++) {
           int ind = fConfignModes->at(i);
-          fullPath = fConfigShiftPath.value;
+          std::string fullPath = fConfigShiftPath.value;
           fullPath += "/v";
           fullPath += std::to_string(ind);
           auto shiftProfile = fCCDB->getForRun<TProfile3D>(fullPath, fCurrentRun);
@@ -1355,6 +1354,10 @@ struct AnalysisSameEventPairing {
   bool fEnableBarrelMuonHistos;
   // bool fEnableBarrelMuonMixingHistos;
 
+  bool fConfigShiftCorr;
+  std::vector<int> fConfignModes;
+  std::string fConfigShiftPath;
+
   NoBinningPolicy<aod::dqanalysisflags::MixingHash> hashBin;
 
   Preslice<soa::Join<aod::ReducedTracksAssoc, aod::BarrelTrackCuts, aod::Prefilter>> trackAssocsPerCollision = aod::reducedtrack_association::reducedeventId;
@@ -1667,13 +1670,9 @@ struct AnalysisSameEventPairing {
       fOutputList.setObject(fHistMan->GetMainHistogramList());
     }
 
-    bool fConfigShiftCorr;
     getTaskOptionValue<bool>(context, "analysis-event-selection", "cfgShiftCorr", fConfigShiftCorr, false);
-    std::string fConfigShiftPath;
     getTaskOptionValue<std::string>(context, "analysis-event-selection", "cfgShiftPath", fConfigShiftPath, false);
-    std::vector<std::vector<int>> fConfignModes;
     getTaskOptionValue<std::vector<std::vector<int>>>(context, "analysis-event-selection", "cfgnModes", fConfignModes, false);
-    std::string fullPath;
     if (fConfigShiftCorr) {
       VarManager::initShiftCorrection(fConfignModes);
     }
@@ -1746,6 +1745,7 @@ struct AnalysisSameEventPairing {
         LOGF(fatal, "Flow resolution histograms not available in file %s", pathFlow.Data());
       }
       if (fConfigShiftCorr) {
+        std::string fullPath;
         VarManager::ResetShiftProfiles();
         for (std::size_t i = 0; i < fConfignModes->size(); i++) {
           int ind = fConfignModes->at(i);
