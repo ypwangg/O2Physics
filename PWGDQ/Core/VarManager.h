@@ -5824,60 +5824,59 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     return trackSelected;
   };
 
-  // // checkTrack(t1);
-  // if (checkTrack(t1) && values[kAmbi1] > 0) {
-  //   Q2X0A = Q2X0A - t1.pt()*TMath::Cos(2 * t1.phi());
-  //   Q2Y0A = Q2Y0A - t1.pt()*TMath::Sin(2 * t1.phi());
-  //   Q3X0A = Q3X0A - t1.pt()*TMath::Cos(3 * t1.phi());
-  //   Q3Y0A = Q3Y0A - t1.pt()*TMath::Sin(3 * t1.phi());
-  //   nNorm = nNorm - 1.;
-  // }
-  // // checkTrack(t2);
-  // if (checkTrack(t2) && values[kAmbi2] > 0) {
-  //   Q2X0A = Q2X0A - t2.pt()*TMath::Cos(2 * t2.phi());
-  //   Q2Y0A = Q2Y0A - t2.pt()*TMath::Sin(2 * t2.phi());
-  //   Q3X0A = Q3X0A - t2.pt()*TMath::Cos(3 * t2.phi());
-  //   Q3Y0A = Q3Y0A - t2.pt()*TMath::Sin(3 * t2.phi());
-  //   nNorm = nNorm - 1.;
-  // }
-  // values[kNnorm] = nNorm;
-  // if (nNorm <= 0) {
-  //   values[kU2Q2] = -999.;
-  //   values[kU3Q3] = -999.;
-  //   values[kR2SP_AB] = -999.;
-  //   values[kR2SP_AC] = -999.;
-  //   values[kR2SP_BC] = -999.;
-  //   values[kR3SP] = -999.;
-  //   values[kPsi2A] = -999.;
-  //   values[kCos2DeltaPhi] = -999.;
-  //   values[kCos3DeltaPhi] = -999.;
-  //   values[kR2EP_AB] = -999.;
-  //   values[kR2EP_AC] = -999.;
-  //   values[kR2EP_BC] = -999.;
-  //   values[kR3EP] = -999.;
-  //   values[kV2SP] = -999.;
-  //   values[kWV2SP] = -999.;
-  //   values[kV2EP] = -999.;
-  //   values[kWV2EP] = -999.;
-  //   return;
-  // }
+  // checkTrack(t1);
+  if (checkTrack(t1) && values[kAmbi1] > 0) {
+    Q2X0A = Q2X0A - t1.pt()*TMath::Cos(2 * t1.phi());
+    Q2Y0A = Q2Y0A - t1.pt()*TMath::Sin(2 * t1.phi());
+    Q3X0A = Q3X0A - t1.pt()*TMath::Cos(3 * t1.phi());
+    Q3Y0A = Q3Y0A - t1.pt()*TMath::Sin(3 * t1.phi());
+    nNorm = nNorm - 1.;
+  }
+  // checkTrack(t2);
+  if (checkTrack(t2) && values[kAmbi2] > 0) {
+    Q2X0A = Q2X0A - t2.pt()*TMath::Cos(2 * t2.phi());
+    Q2Y0A = Q2Y0A - t2.pt()*TMath::Sin(2 * t2.phi());
+    Q3X0A = Q3X0A - t2.pt()*TMath::Cos(3 * t2.phi());
+    Q3Y0A = Q3Y0A - t2.pt()*TMath::Sin(3 * t2.phi());
+    nNorm = nNorm - 1.;
+  }
+  values[kNnorm] = nNorm;
+  if (nNorm <= 0) {
+    values[kU2Q2] = -999.;
+    values[kU3Q3] = -999.;
+    values[kR2SP_AB] = -999.;
+    values[kR2SP_AC] = -999.;
+    values[kR2SP_BC] = -999.;
+    values[kR3SP] = -999.;
+    values[kPsi2A] = -999.;
+    values[kCos2DeltaPhi] = -999.;
+    values[kCos3DeltaPhi] = -999.;
+    values[kR2EP_AB] = -999.;
+    values[kR2EP_AC] = -999.;
+    values[kR2EP_BC] = -999.;
+    values[kR3EP] = -999.;
+    values[kV2SP] = -999.;
+    values[kWV2SP] = -999.;
+    values[kV2EP] = -999.;
+    values[kWV2EP] = -999.;
+    return;
+  }
   
-  // Q2X0A = nNorm > 0 ? Q2X0A/nNorm : NAN;
-  // Q2Y0A = nNorm > 0 ? Q2Y0A/nNorm : NAN;
-  // Q3X0A = nNorm > 0 ? Q3X0A/nNorm : NAN;
-  // Q3Y0A = nNorm > 0 ? Q3Y0A/nNorm : NAN;
-  // values[kU2Q2] = Q2X0A * TMath::Cos(2 * v12.Phi()) + Q2Y0A * TMath::Sin(2 * v12.Phi());
-  // values[kU3Q3] = Q3X0A * TMath::Cos(3 * v12.Phi()) + Q3Y0A * TMath::Sin(3 * v12.Phi());
-  // values[kR2SP_AB] = (Q2X0A * values[kQ2X0B] + Q2Y0A * values[kQ2Y0B]);
-  // values[kR2SP_AC] = (Q2X0A * values[kQ2X0C] + Q2Y0A * values[kQ2Y0C]);
+  Q2X0A = nNorm > 0 ? Q2X0A/nNorm : NAN;
+  Q2Y0A = nNorm > 0 ? Q2Y0A/nNorm : NAN;
+  Q3X0A = nNorm > 0 ? Q3X0A/nNorm : NAN;
+  Q3Y0A = nNorm > 0 ? Q3Y0A/nNorm : NAN;
+  values[kU2Q2] = Q2X0A * TMath::Cos(2 * v12.Phi()) + Q2Y0A * TMath::Sin(2 * v12.Phi());
+  values[kU3Q3] = Q3X0A * TMath::Cos(3 * v12.Phi()) + Q3Y0A * TMath::Sin(3 * v12.Phi());
+  values[kR2SP_AB] = (Q2X0A * values[kQ2X0B] + Q2Y0A * values[kQ2Y0B]);
+  values[kR2SP_AC] = (Q2X0A * values[kQ2X0C] + Q2Y0A * values[kQ2Y0C]);
   values[kR2SP_BC] = (values[kQ2X0B] * values[kQ2X0C] + values[kQ2Y0B] * values[kQ2Y0C]);
   values[kR3SP] = (values[kQ3X0B] * values[kQ3X0C] + values[kQ3Y0B] * values[kQ3Y0C]);
 
-  // float Psi2A = getEventPlane(2, Q2X0A, Q2Y0A);
-  // values[kPsi2A] = Psi2A;
-  // float Psi3A = getEventPlane(3, Q3X0A, Q3Y0A);
+  float Psi2A = getEventPlane(2, Q2X0A, Q2Y0A);
+  values[kPsi2A] = Psi2A;
+  float Psi3A = getEventPlane(3, Q3X0A, Q3Y0A);
   float Psi2A = getEventPlane(2, values[kQ2X0A], values[kQ2Y0A]);
-  values[kPsi2A] = Psi2A; // tmp
   float Psi3A = getEventPlane(3, values[kQ3X0A], values[kQ3Y0A]);
   float Psi2B = getEventPlane(2, values[kQ2X0B], values[kQ2Y0B]);
   float Psi3B = getEventPlane(3, values[kQ3X0B], values[kQ3Y0B]);
