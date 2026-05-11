@@ -1672,7 +1672,7 @@ struct AnalysisSameEventPairing {
 
     getTaskOptionValue<bool>(context, "analysis-event-selection", "cfgShiftCorr", fConfigShiftCorr, false);
     getTaskOptionValue<std::string>(context, "analysis-event-selection", "cfgShiftPath", fConfigShiftPath, false);
-    getTaskOptionValue<std::vector<std::vector<int>>>(context, "analysis-event-selection", "cfgnModes", fConfignModes, false);
+    getTaskOptionValue<std::vector<int>>(context, "analysis-event-selection", "cfgnModes", fConfignModes, false);
     if (fConfigShiftCorr) {
       VarManager::initShiftCorrection(fConfignModes);
     }
@@ -1747,9 +1747,9 @@ struct AnalysisSameEventPairing {
       if (fConfigShiftCorr) {
         std::string fullPath;
         VarManager::ResetShiftProfiles();
-        for (std::size_t i = 0; i < fConfignModes->size(); i++) {
-          int ind = fConfignModes->at(i);
-          fullPath = fConfigShiftPath.value;
+        for (std::size_t i = 0; i < fConfignModes.size(); i++) {
+          int ind = fConfignModes.at(i);
+          fullPath = fConfigShiftPath;
           fullPath += "/v";
           fullPath += std::to_string(ind);
           auto shiftProfile = fCCDB->getForRun<TProfile3D>(fullPath, events.begin().runNumber());
