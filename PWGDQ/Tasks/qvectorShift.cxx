@@ -265,7 +265,7 @@ struct QvectorShiftTask {
       // Produce standard ReducedEventsQvectorCentr
       qVectorCentr(rFT0A, iFT0A, rFT0C, iFT0C, rFT0M, iFT0M,
                    rFV0A, iFV0A, rBPos, iBPos, rBNeg, iBNeg,
-                   sFT0A, sFT0C, sFT0M, sFV0A, nBPos, nBNeg);
+                   sFT0A, sFT0C, sFT0M, sFV0A, nBPos, nBNeg, cfgHarmonic.value);
     }
   }
 };
@@ -275,7 +275,7 @@ void processDummy(MyCollisions const& collisions) {
       qVectorCentr(ev.qvecFT0ARe(), ev.qvecFT0AIm(), ev.qvecFT0CRe(), ev.qvecFT0CIm(), ev.qvecFT0MRe(), ev.qvecFT0MIm(), ev.qvecFV0ARe(), ev.qvecFV0AIm(),
                    ev.qvecTPCposRe(), ev.qvecTPCposIm(), ev.qvecTPCnegRe(), ev.qvecTPCnegIm(),
                    ev.sumAmplFT0A(), ev.sumAmplFT0C(), ev.sumAmplFT0M(), ev.sumAmplFV0A(),
-                   ev.nTrkTPCpos(), ev.nTrkTPCneg());
+                   ev.nTrkTPCpos(), ev.nTrkTPCneg(), -1);
     }
 }
 

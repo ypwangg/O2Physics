@@ -149,6 +149,7 @@ DECLARE_SOA_COLUMN(CORR4REF, corr4ref, float);             //!  Ref Flow correla
 DECLARE_SOA_COLUMN(M11REF, m11ref, float);                 //!  Weighted multiplicity of <<2>> for reference flow
 DECLARE_SOA_COLUMN(M1111REF, m1111ref, float);             //!  Weighted multiplicity of <<4>> for reference flow
 DECLARE_SOA_COLUMN(M11REFetagap, m11refetagap, float);     //!  Weighted multiplicity of <<2>>  etagap for reference flow
+DECLARE_SOA_COLUMN(CorrOder, corrOrder, int);                   //!  shift correction order (e.g. 2 for <2>, 4 for <4>)
 } // namespace reducedevent
 
 DECLARE_SOA_TABLE_STAGED(ReducedEvents, "REDUCEDEVENT", //!   Main event information table
@@ -213,7 +214,7 @@ DECLARE_SOA_TABLE(ReducedEventsQvectorCentr_000, "AOD", "REQVECTORCTR", //!    E
 
 DECLARE_SOA_TABLE(ReducedEventsQvectorCentr_001, "AOD", "REQVECTORCTR", 1, //!    Event Q-vector information from central framework
                   qvec::QvecFT0ARe, qvec::QvecFT0AIm, qvec::QvecFT0CRe, qvec::QvecFT0CIm, qvec::QvecFT0MRe, qvec::QvecFT0MIm, qvec::QvecFV0ARe, qvec::QvecFV0AIm, reducedevent::QvecBPosRe, reducedevent::QvecBPosIm, reducedevent::QvecBNegRe, reducedevent::QvecBNegIm,
-                  qvec::SumAmplFT0A, qvec::SumAmplFT0C, qvec::SumAmplFT0M, qvec::SumAmplFV0A, reducedevent::NTrkBPos, reducedevent::NTrkBNeg);
+                  qvec::SumAmplFT0A, qvec::SumAmplFT0C, qvec::SumAmplFT0M, qvec::SumAmplFV0A, reducedevent::NTrkBPos, reducedevent::NTrkBNeg, reducedevent::CorrOrder);
 
 using ReducedEventsQvectorCentr = ReducedEventsQvectorCentr_001;
 
