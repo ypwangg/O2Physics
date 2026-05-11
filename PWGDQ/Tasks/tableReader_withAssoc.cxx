@@ -1752,7 +1752,7 @@ struct AnalysisSameEventPairing {
           fullPath = fConfigShiftPath;
           fullPath += "/v";
           fullPath += std::to_string(ind);
-          auto shiftProfile = fCCDB->getForRun<TProfile3D>(fullPath, events.begin().runNumber());
+          auto shiftProfile = fCCDB->getForRun<TProfile3D>(fullPath, runNumber);
           VarManager::SetShiftProfiles(shiftProfile);
         }
       }
