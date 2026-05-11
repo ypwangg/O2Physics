@@ -1286,6 +1286,10 @@ struct AnalysisSameEventPairing {
   Configurable<bool> fConfigQA{"cfgQA", true, "If true, fill output histograms"};
   Configurable<bool> fConfigAmbiguousMuonHistograms{"cfgAmbiguousMuonHistograms", true, "If true, fill ambiguous histograms"};
 
+  Configurable<bool> fConfigShiftCorr{"cfgShiftCorr", false, "If true, apply the correction"};
+  Configurable<std::string> fConfigShiftPath{"cfgShiftPath", "Users/j/junlee/Qvector/Pass5/QvecShift/", "Path to the JSON file containing the shift correction data"};
+  Configurable<std::vector<int>> fConfignModes{"cfgnModes", {2}, "Modulation of interest"};
+
   struct : ConfigurableGroup {
     Configurable<std::string> url{"ccdb-url", "http://alice-ccdb.cern.ch", "url of the ccdb repository"};
     Configurable<std::string> grpMagPath{"grpmagPath", "GLO/Config/GRPMagField", "CCDB path of the GRPMagField object"};
@@ -1354,9 +1358,9 @@ struct AnalysisSameEventPairing {
   bool fEnableBarrelMuonHistos;
   // bool fEnableBarrelMuonMixingHistos;
 
-  bool fConfigShiftCorr;
-  std::vector<int> fConfignModes;
-  std::string fConfigShiftPath;
+  // bool fConfigShiftCorr;
+  // std::vector<int> fConfignModes;
+  // std::string fConfigShiftPath;
 
   NoBinningPolicy<aod::dqanalysisflags::MixingHash> hashBin;
 
@@ -1670,9 +1674,9 @@ struct AnalysisSameEventPairing {
       fOutputList.setObject(fHistMan->GetMainHistogramList());
     }
 
-    getTaskOptionValue<bool>(context, "analysis-event-selection", "cfgShiftCorr", fConfigShiftCorr, false);
-    getTaskOptionValue<std::string>(context, "analysis-event-selection", "cfgShiftPath", fConfigShiftPath, false);
-    getTaskOptionValue<std::vector<int>>(context, "analysis-event-selection", "cfgnModes", fConfignModes, false);
+    // getTaskOptionValue<bool>(context, "analysis-event-selection", "cfgShiftCorr", fConfigShiftCorr, false);
+    // getTaskOptionValue<std::string>(context, "analysis-event-selection", "cfgShiftPath", fConfigShiftPath, false);
+    // getTaskOptionValue<std::vector<int>>(context, "analysis-event-selection", "cfgnModes", fConfignModes, false);
     if (fConfigShiftCorr) {
       VarManager::initShiftCorrection(fConfignModes);
     }
@@ -1747,8 +1751,8 @@ struct AnalysisSameEventPairing {
       if (fConfigShiftCorr) {
         std::string fullPath;
         VarManager::ResetShiftProfiles();
-        for (std::size_t i = 0; i < fConfignModes.size(); i++) {
-          int ind = fConfignModes.at(i);
+        for (std::size_t i = 0; i < fConfignModes->size(); i++) {
+          int ind = fConfignModes->at(i);
           fullPath = fConfigShiftPath;
           fullPath += "/v";
           fullPath += std::to_string(ind);
