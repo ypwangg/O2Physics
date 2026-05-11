@@ -229,8 +229,8 @@ struct QvectorShiftTask {
       float rFT0C = ev.qvecFT0CRe(), iFT0C = ev.qvecFT0CIm();
       float rFT0M = ev.qvecFT0MRe(), iFT0M = ev.qvecFT0MIm();
       float rFV0A = ev.qvecFV0ARe(), iFV0A = ev.qvecFV0AIm();
-      float rBPos = ev.qvecTPCposRe(), iBPos = ev.qvecTPCposIm();
-      float rBNeg = ev.qvecTPCnegRe(), iBNeg = ev.qvecTPCnegIm();
+      float rBPos = ev.qvecBPosRe(), iBPos = ev.qvecBPosIm();
+      float rBNeg = ev.qvecBNegRe(), iBNeg = ev.qvecBNegIm();
 
       // Metadata (pass through unchanged)
       float sFT0A = ev.sumAmplFT0A(), sFT0C = ev.sumAmplFT0C();
@@ -273,7 +273,7 @@ struct QvectorShiftTask {
 void processDummy(MyCollisions const& collisions) {
     for (auto& ev : collisions) {
       qVectorCentr(ev.qvecFT0ARe(), ev.qvecFT0AIm(), ev.qvecFT0CRe(), ev.qvecFT0CIm(), ev.qvecFT0MRe(), ev.qvecFT0MIm(), ev.qvecFV0ARe(), ev.qvecFV0AIm(),
-                   ev.qvecTPCposRe(), ev.qvecTPCposIm(), ev.qvecTPCnegRe(), ev.qvecTPCnegIm(),
+                   ev.qvecBPosRe(), ev.qvecBPosIm(), ev.qvecBNegRe(), ev.qvecBNegIm(),
                    ev.sumAmplFT0A(), ev.sumAmplFT0C(), ev.sumAmplFT0M(), ev.sumAmplFV0A(),
                    ev.nTrkTPCpos(), ev.nTrkTPCneg(), -1);
     }
