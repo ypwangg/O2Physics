@@ -1503,7 +1503,7 @@ class VarManager : public TObject
   // Apply shift correction to q-vector
   static void ApplyShiftCorrection(float& qRe, float& qIm, int harmonic, float cent, int detectorIndex);
   // Set shift correction profiles
-  static void SetShiftProfiles(TProfile3D*) { fgShiftProfiles.push_back(shiftProfile); }
+  static void SetShiftProfiles(TProfile3D* shiftProfile) { fgShiftProfiles.push_back(shiftProfile); }
   static void initShiftCorrection(std::vector<int> harmonics) { 
     fgHarmonics = harmonics; 
     fgApplyShiftCorrection = true; 
