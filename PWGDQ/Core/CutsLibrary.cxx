@@ -3033,6 +3033,17 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
     return cut;
   }
 
+  if (!nameStr.compare("pidJpsiBetaRej")) {
+    cut->AddCut(GetAnalysisCut("pidJpsi_beta"));
+    return cut;
+  }
+
+  if (!nameStr.compare("protRej")) {
+    cut->AddCut(GetAnalysisCut("pidJpsi_beta"));
+    cut->AddCut(GetAnalysisCut("pidJpsi_noTOF_prot"));
+    return cut;
+  }
+
 
   // -------------------------------------------------------------------------------------------------
   // lmee pair cuts

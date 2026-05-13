@@ -1555,6 +1555,8 @@ class VarManager : public TObject
   static float calculatePhiV(const T1& t1, const T2& t2);
   template <typename T1, typename T2>
   static float LorentzTransformJpsihadroncosChi(TString Option, const T1& v1, const T2& v2);
+  template <typename T>
+  static bool isSelectedinTPC(const T& t);
 
   static o2::vertexing::DCAFitterN<2> fgFitterTwoProngBarrel;
   static o2::vertexing::DCAFitterN<3> fgFitterThreeProngBarrel;
@@ -4122,51 +4124,12 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
     float nNorm1 = values[kMultA1];
     float nNorm2 = values[kMultA2];
 
-    auto checkTrack = [&](auto const& t) {
-      bool trackSelected = false;
-      if constexpr (requires {t.hasTPC();}) {
-        trackSelected = true;
-        if (!t.hasTPC()) {
-          trackSelected = false;
-          return trackSelected;
-        }
-        if (std::abs(t.eta()) > 0.8) {
-          trackSelected = false;
-          return trackSelected;
-        }
-        if (t.pt() < 0.15 || t.pt() > 5.) {
-          trackSelected = false;
-          return trackSelected;
-        }
-        if (t.tpcNClsCrossedRows() / t.tpcNClsFound() < 0.8 || t.tpcChi2NCl() > 4.) {
-          trackSelected = false;
-          return trackSelected;
-        }
-        if (!((t.itsClusterMap() & (1 << uint8_t(0))) > 0 || (t.itsClusterMap() & (1 << uint8_t(1))) > 0 || (t.itsClusterMap() & (1 << uint8_t(2))) > 0)) {
-          trackSelected = false;
-          return trackSelected;
-        }
-        if (t.itsChi2NCl() > 36.) {
-          trackSelected = false;
-          return trackSelected;
-        }
-        if (t.dcaZ() > 2) {
-          trackSelected = false;
-          return trackSelected;
-        }
-        if (t.dcaXY() > 0.0105+0.0350 / std::pow(t.pt(), 1.1)) {
-          trackSelected = false;
-          return trackSelected;
-        }
-      }
-      return trackSelected;
-    };
-    if (checkTrack(t1) && values[kAmbi1] > 0) {
+    if (isSelectedinTPC(t1) && values[kAmbi1] > 0) {
       Q2X0A1 -= t1.pt() * TMath::Cos(2 * t1.phi());
       Q2Y0A1 -= t1.pt() * TMath::Sin(2 * t1.phi());
       nNorm1 -= 1;
     }
-    if (checkTrack(t2) && values[kAmbi2] > 0) {
+    if (isSelectedinTPC(t2) && values[kAmbi2] > 0) {
       Q2X0A2 -= t2.pt() * TMath::Cos(2 * t2.phi());
       Q2Y0A2 -= t2.pt() * TMath::Sin(2 * t2.phi());
       nNorm2 -= 1;
@@ -4237,8 +4200,22 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
       ROOT::Math::Boost boostv12{v12.BoostToCM()};
       ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
       float Psi2A = t1.sign() > 0 ? Psi2A1 : Psi2A2; // using the event plane of the track with positive charge as reference
-      values[kCos2DeltaPhi] = TMath::Cos(2 * (v_daughter.Phi() - Psi2A));
-      values[kA2ME_EP_TPC] = t1.sign() > 0 ? values[kCos2DeltaPhi] / values[kTwoR2EP1] : values[kCos2DeltaPhi] / values[kTwoR2EP2]; // using the event plane of the track with positive charge as reference
+
+      ROOT::Math::XYZVector zAxis_RF{(v12.Vect()).Unit()};
+      ROOT::Math::XYZVector zAxis{(fgBeamA.Vect()).Unit()};
+      ROOT::Math::XYZVector yAxis_RF = zAxis_RF.Cross(zAxis).Unit();
+      ROOT::Math::XYZVector xAxis_RF = yAxis_RF.Cross(zAxis_RF).Unit();
+      ROOT::Math::XYZVector daughterVec_RF{(v_daughter.Vect()).Unit()};
+      float cosPhi = (zAxis_RF.Cross(daughterVec_RF)).Dot(yAxis_RF);
+      float sinPhi = -1. * (zAxis_RF.Cross(daughterVec_RF)).Dot(xAxis_RF);
+      float phi = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
+
+      values[kDeltaPhiA2_TPC] = phi > Psi2A ? phi - Psi2A : Psi2A - phi;
+      values[kDeltaPhiA2_TPC] = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
+      values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2. * (phi - Psi2A));
+      
+      float A2_TPC = t1.sign() > 0 ? values[kCos2DeltaPhiA2_TPC] / values[kTwoR2EP1] : values[kCos2DeltaPhiA2_TPC] / values[kTwoR2EP2]; // using the event plane resolution of the track with positive charge as reference
+      values[kA2EP_TPC] = std::isnan(A2_TPC) || std::isinf(A2_TPC) ? -999. : A2_TPC;
 
       // under developing
       values[kA2ME_EP_FT0A] = -999; // to be implemented
@@ -5808,48 +5785,48 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   float Q3Y0A = values[kQ3Y0A]*values[kMultA];
   float nNorm = values[kMultA];
 
-  auto checkTrack = [&](auto const& t) {
-    bool trackSelected = false;
-    if constexpr (requires {t.hasTPC();}) {
-      trackSelected = true;
-      if (!t.hasTPC()) {
-        trackSelected = false;
-        return trackSelected;
-      }
-      if (std::abs(t.eta()) > 0.8) {
-        trackSelected = false;
-        return trackSelected;
-      }
-      if (t.pt() < 0.15 || t.pt() > 5.) {
-        trackSelected = false;
-        return trackSelected;
-      }
-      if (t.tpcNClsCrossedRows() / t.tpcNClsFound() < 0.8 || t.tpcChi2NCl() > 4.) {
-        trackSelected = false;
-        return trackSelected;
-      }
-      if (!((t.itsClusterMap() & (1 << uint8_t(0))) > 0 || (t.itsClusterMap() & (1 << uint8_t(1))) > 0 || (t.itsClusterMap() & (1 << uint8_t(2))) > 0)) {
-        trackSelected = false;
-        return trackSelected;
-      }
-      if (t.itsChi2NCl() > 36.) {
-        trackSelected = false;
-        return trackSelected;
-      }
-      if (t.dcaZ() > 2) {
-        trackSelected = false;
-        return trackSelected;
-      }
-      if (t.dcaXY() > 0.0105+0.0350 / std::pow(t.pt(), 1.1)) {
-        trackSelected = false;
-        return trackSelected;
-      }
-    }
-    return trackSelected;
-  };
+  // auto checkTrack = [&](auto const& t) {
+  //   bool trackSelected = false;
+  //   if constexpr (requires {t.hasTPC();}) {
+  //     trackSelected = true;
+  //     if (!t.hasTPC()) {
+  //       trackSelected = false;
+  //       return trackSelected;
+  //     }
+  //     if (std::abs(t.eta()) > 0.8) {
+  //       trackSelected = false;
+  //       return trackSelected;
+  //     }
+  //     if (t.pt() < 0.15 || t.pt() > 5.) {
+  //       trackSelected = false;
+  //       return trackSelected;
+  //     }
+  //     if (t.tpcNClsCrossedRows() / t.tpcNClsFound() < 0.8 || t.tpcChi2NCl() > 4.) {
+  //       trackSelected = false;
+  //       return trackSelected;
+  //     }
+  //     if (!((t.itsClusterMap() & (1 << uint8_t(0))) > 0 || (t.itsClusterMap() & (1 << uint8_t(1))) > 0 || (t.itsClusterMap() & (1 << uint8_t(2))) > 0)) {
+  //       trackSelected = false;
+  //       return trackSelected;
+  //     }
+  //     if (t.itsChi2NCl() > 36.) {
+  //       trackSelected = false;
+  //       return trackSelected;
+  //     }
+  //     if (t.dcaZ() > 2) {
+  //       trackSelected = false;
+  //       return trackSelected;
+  //     }
+  //     if (t.dcaXY() > 0.0105+0.0350 / std::pow(t.pt(), 1.1)) {
+  //       trackSelected = false;
+  //       return trackSelected;
+  //     }
+  //   }
+  //   return trackSelected;
+  // };
 
   // checkTrack(t1);
-  if (checkTrack(t1) && values[kAmbi1] > 0) {
+  if (isSelectedinTPC(t1) && values[kAmbi1] > 0) {
     Q2X0A = Q2X0A - t1.pt()*TMath::Cos(2 * t1.phi());
     Q2Y0A = Q2Y0A - t1.pt()*TMath::Sin(2 * t1.phi());
     Q3X0A = Q3X0A - t1.pt()*TMath::Cos(3 * t1.phi());
@@ -5857,7 +5834,7 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     nNorm = nNorm - 1.;
   }
   // checkTrack(t2);
-  if (checkTrack(t2) && values[kAmbi2] > 0) {
+  if (isSelectedinTPC(t2) && values[kAmbi2] > 0) {
     Q2X0A = Q2X0A - t2.pt()*TMath::Cos(2 * t2.phi());
     Q2Y0A = Q2Y0A - t2.pt()*TMath::Sin(2 * t2.phi());
     Q3X0A = Q3X0A - t2.pt()*TMath::Cos(3 * t2.phi());
@@ -5979,23 +5956,14 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     float sinPhi = -1. * xAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
     float phi = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
     values[kDeltaPhiA2_TPC] = phi > Psi2A ? phi - Psi2A : Psi2A - phi;
-    values[kDeltaPhiA2_TPC]  = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
+    values[kDeltaPhiA2_TPC]  = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
     values[kDeltaPhiA2_FT0A] = phi > Psi2B ? phi - Psi2B : Psi2B - phi;
-    values[kDeltaPhiA2_FT0A]  = values[kDeltaPhiA2_FT0A] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0A] : values[kDeltaPhiA2_FT0A];
+    values[kDeltaPhiA2_FT0A]  = values[kDeltaPhiA2_FT0A] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiA2_FT0A] : values[kDeltaPhiA2_FT0A];
     values[kDeltaPhiA2_FT0C] = phi > Psi2C ? phi - Psi2C : Psi2C - phi;
-    values[kDeltaPhiA2_FT0C]  = values[kDeltaPhiA2_FT0C] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0C] : values[kDeltaPhiA2_FT0C];
-    values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2 * (phi - Psi2A));
-    values[kCos2DeltaPhiA2_FT0A] = TMath::Cos(2 * (phi - Psi2B));
-    values[kCos2DeltaPhiA2_FT0C] = TMath::Cos(2 * (phi - Psi2C));
-    // values[kDeltaPhiA2_TPC] = v_daughter.Phi() > Psi2A ? v_daughter.Phi() - Psi2A : Psi2A - v_daughter.Phi();
-    // values[kDeltaPhiA2_TPC]  = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
-    // values[kDeltaPhiA2_FT0A] = v_daughter.Phi() > Psi2B ? v_daughter.Phi() - Psi2B : Psi2B - v_daughter.Phi();
-    // values[kDeltaPhiA2_FT0A]  = values[kDeltaPhiA2_FT0A] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0A] : values[kDeltaPhiA2_FT0A];
-    // values[kDeltaPhiA2_FT0C] = v_daughter.Phi() > Psi2C ? v_daughter.Phi() - Psi2C : Psi2C - v_daughter.Phi();
-    // values[kDeltaPhiA2_FT0C]  = values[kDeltaPhiA2_FT0C] > TMath::Pi() ? 2 * TMath::Pi() - values[kDeltaPhiA2_FT0C] : values[kDeltaPhiA2_FT0C];
-    // values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2 * (v_daughter.Phi() - Psi2A));
-    // values[kCos2DeltaPhiA2_FT0A] = TMath::Cos(2 * (v_daughter.Phi() - Psi2B));
-    // values[kCos2DeltaPhiA2_FT0C] = TMath::Cos(2 * (v_daughter.Phi() - Psi2C));
+    values[kDeltaPhiA2_FT0C]  = values[kDeltaPhiA2_FT0C] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiA2_FT0C] : values[kDeltaPhiA2_FT0C];
+    values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2. * (phi - Psi2A));
+    values[kCos2DeltaPhiA2_FT0A] = TMath::Cos(2. * (phi - Psi2B));
+    values[kCos2DeltaPhiA2_FT0C] = TMath::Cos(2. * (phi - Psi2C));
 
     float A2_TPC = values[kCos2DeltaPhiA2_TPC] / values[kR2EP];
     float A2_FT0A = values[kCos2DeltaPhiA2_FT0A] / values[kR2EP];
@@ -6948,6 +6916,47 @@ void VarManager::FillFIT(T1 const& bc, T2 const& bcs, T3 const& ft0s, T4 const& 
   values[kBGFDDApf] = static_cast<float>(fitInfo.BGFDDApf);
   values[kBBFDDCpf] = static_cast<float>(fitInfo.BBFDDCpf);
   values[kBGFDDCpf] = static_cast<float>(fitInfo.BGFDDCpf);
+}
+
+template <typename T>
+bool VarManager::isSelectedinTPC(const T& t) {
+  bool trackSelected = false;
+  if constexpr (requires { t.hasTPC(); }) {
+    trackSelected = true;
+    if (!t.hasTPC()) {
+      trackSelected = false;
+      return trackSelected;
+    }
+    if (std::abs(t.eta()) > 0.8) { // eta cut used in q vector table. Todo: read from config
+      trackSelected = false;
+      return trackSelected;
+    }
+    if (t.pt() < 0.15 || t.pt() > 5.) { // pt cut used in q vector table. Todo: read from config
+      trackSelected = false;
+      return trackSelected;
+    }
+    if (t.tpcNClsCrossedRows() / t.tpcNClsFound() < 0.8 || t.tpcChi2NCl() > 4.) {
+      trackSelected = false;
+      return trackSelected;
+    }
+    if (!((t.itsClusterMap() & (1 << uint8_t(0))) > 0 || (t.itsClusterMap() & (1 << uint8_t(1))) > 0 || (t.itsClusterMap() & (1 << uint8_t(2))) > 0)) {
+      trackSelected = false;
+      return trackSelected;
+    }
+    if (t.itsChi2NCl() > 36.) {
+      trackSelected = false;
+      return trackSelected;
+    }
+    if (t.dcaZ() > 2) {
+      trackSelected = false;
+      return trackSelected;
+    }
+    if (t.dcaXY() > 0.0105 + 0.0350 / std::pow(t.pt(), 1.1)) {
+      trackSelected = false;
+      return trackSelected;
+    }
+  }
+  return trackSelected;
 }
 
 template <uint32_t fillMap, typename T>
