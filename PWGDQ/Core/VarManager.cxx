@@ -50,6 +50,7 @@ o2::vertexing::FwdDCAFitterN<3> VarManager::fgFitterThreeProngFwd;
 o2::globaltracking::MatchGlobalFwd VarManager::mMatching;
 std::map<VarManager::CalibObjects, TObject*> VarManager::fgCalibs;
 std::vector<TProfile3D*> VarManager::fgShiftProfiles;
+std::vector<int> VarManager::fgHarmonics;
 bool VarManager::fgApplyShiftCorrection = false;
 bool VarManager::fgRunTPCPostCalibration[4] = {false, false, false, false};
 int VarManager::fgCalibrationType = 0;                // 0 - no calibration, 1 - calibration vs (TPCncls,pIN,eta) typically for pp, 2 - calibration vs (eta,nPV,nLong,tLong) typically for PbPb
