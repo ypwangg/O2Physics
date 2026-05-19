@@ -474,10 +474,6 @@ class VarManager : public TObject
     kQ2Y0A2,
     kU2Q2Ev1,
     kU2Q2Ev2,
-    kCos2DeltaPhiEv1,
-    kCos2DeltaPhiEv2,
-    kCos2DeltaPhiA2Ev1_TPC,
-    kCos2DeltaPhiA2Ev2_TPC,
     kV2SP1,
     kV2SP2,
     kV2EP1,
@@ -486,15 +482,6 @@ class VarManager : public TObject
     kV2ME_EP,
     kWV2ME_SP,
     kWV2ME_EP,
-    kA2EP1_TPC,
-    kA2EP2_TPC,
-    kA2EP1_FT0A,
-    kA2EP2_FT0A,
-    kA2EP1_FT0C,
-    kA2EP2_FT0C,
-    kA2ME_EP_TPC,
-    kA2ME_EP_FT0A,
-    kA2ME_EP_FT0C,
     kTwoR2SP1, // Scalar product resolution of event1 for ME technique
     kTwoR2SP2, // Scalar product resolution of event2 for ME technique
     kTwoR2EP1, // Event plane resolution of event2 for ME technique
@@ -791,12 +778,18 @@ class VarManager : public TObject
     kDeltaPhiPair2,
     kDeltaEtaPair2,
     kPsiPair,
-    kDeltaPhiA2_TPC,
-    kDeltaPhiA2_FT0A,
-    kDeltaPhiA2_FT0C,
-    kCos2DeltaPhiA2_TPC,
-    kCos2DeltaPhiA2_FT0A,
-    kCos2DeltaPhiA2_FT0C,
+    kDeltaPhiRP_TPC,
+    kDeltaPhiRP_FT0A,
+    kDeltaPhiRP_FT0C,
+    kCos2DeltaPhiRP_TPC,
+    kCos2DeltaPhiRP_FT0A,
+    kCos2DeltaPhiRP_FT0C,
+    kDeltaPhiPP_TPC,
+    kDeltaPhiPP_FT0A,
+    kDeltaPhiPP_FT0C,
+    kCos2DeltaPhiPP_TPC,
+    kCos2DeltaPhiPP_FT0A,
+    kCos2DeltaPhiPP_FT0C,
     kNullA2,
     kInfA2,
     kAmbi1,
@@ -816,9 +809,12 @@ class VarManager : public TObject
     kDCATrackVtxProd,
     kV2SP,
     kV2EP,
-    kA2EP_TPC,
-    kA2EP_FT0A,
-    kA2EP_FT0C,
+    kA2EP_RP_TPC,
+    kA2EP_RP_FT0A,
+    kA2EP_RP_FT0C,
+    kA2EP_PP_TPC,
+    kA2EP_PP_FT0A,
+    kA2EP_PP_FT0C,
     kWV2SP,
     kWV2EP,
     kU2Q2,
@@ -4201,6 +4197,7 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
       ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
       float Psi2A = t1.sign() > 0 ? Psi2A1 : Psi2A2; // using the event plane of the track with positive charge as reference
 
+      // production plane
       ROOT::Math::XYZVector zAxis_RF{(v12.Vect()).Unit()};
       ROOT::Math::XYZVector zAxis{(fgBeamA.Vect()).Unit()};
       ROOT::Math::XYZVector yAxis_RF = zAxis_RF.Cross(zAxis).Unit();
@@ -4208,19 +4205,24 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
       ROOT::Math::XYZVector daughterVec_RF{(v_daughter.Vect()).Unit()};
       float cosPhi = (zAxis_RF.Cross(daughterVec_RF)).Dot(yAxis_RF);
       float sinPhi = -1. * (zAxis_RF.Cross(daughterVec_RF)).Dot(xAxis_RF);
-      float phi = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
-      phi = v_daughter.Phi() > TMath::Pi() ? 2. * TMath::Pi() - v_daughter.Phi() : v_daughter.Phi(); // ensure phi is in [0, 2pi]
+      float phi_PP = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
+      values[kDeltaPhiPP_TPC] = phi_PP > Psi2A ? phi_PP - Psi2A : Psi2A - phi_PP;
+      values[kDeltaPhiPP_TPC] = values[kDeltaPhiPP_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiPP_TPC] : values[kDeltaPhiPP_TPC];
+      values[kCos2DeltaPhiPP_TPC] = TMath::Cos(2. * (phi_PP - Psi2A));
 
-      values[kDeltaPhiA2_TPC] = phi > Psi2A ? phi - Psi2A : Psi2A - phi;
-      values[kDeltaPhiA2_TPC] = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
-      values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2. * (phi - Psi2A));
+      float A2_PP_TPC = t1.sign() > 0 ? values[kCos2DeltaPhiPP_TPC] / values[kTwoR2EP1] : values[kCos2DeltaPhiPP_TPC] / values[kTwoR2EP2]; // using the event plane resolution of the track with positive charge as reference
+      values[kA2EP_PP_TPC] = std::isnan(A2_PP_TPC) || std::isinf(A2_PP_TPC) ? -999. : A2_PP_TPC;
+
+      // reaction plane
+      float phi = v_daughter.Phi() > TMath::Pi() ? 2. * TMath::Pi() - v_daughter.Phi() : v_daughter.Phi(); // ensure phi is in [-pi, pi]
+      values[kDeltaPhiRP_TPC] = phi > Psi2A ? phi - Psi2A : Psi2A - phi;
+      values[kDeltaPhiRP_TPC] = values[kDeltaPhiRP_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiRP_TPC] : values[kDeltaPhiRP_TPC];
+      values[kCos2DeltaPhiRP_TPC] = TMath::Cos(2. * (phi - Psi2A));
       
-      float A2_TPC = t1.sign() > 0 ? values[kCos2DeltaPhiA2_TPC] / values[kTwoR2EP1] : values[kCos2DeltaPhiA2_TPC] / values[kTwoR2EP2]; // using the event plane resolution of the track with positive charge as reference
-      values[kA2EP_TPC] = std::isnan(A2_TPC) || std::isinf(A2_TPC) ? -999. : A2_TPC;
+      float A2_RP_TPC = t1.sign() > 0 ? values[kCos2DeltaPhiRP_TPC] / values[kTwoR2EP1] : values[kCos2DeltaPhiRP_TPC] / values[kTwoR2EP2]; // using the event plane resolution of the track with positive charge as reference
+      values[kA2EP_RP_TPC] = std::isnan(A2_RP_TPC) || std::isinf(A2_RP_TPC) ? -999. : A2_RP_TPC;
 
-      // under developing
-      values[kA2ME_EP_FT0A] = -999; // to be implemented
-      values[kA2ME_EP_FT0C] = -999; // to be implemented
+      // under developing: compute the A2 using FT0 event plane
     }
 
     if constexpr ((fillMap & ReducedEventQvectorExtra) > 0) {
@@ -5940,7 +5942,7 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   }
 
   // Coherent Jpsi A2
-  bool useCoherentJpsiA2 = fgUsedVars[kA2EP_TPC] || fgUsedVars[kA2EP_FT0A] || fgUsedVars[kA2EP_FT0C];
+  bool useCoherentJpsiA2 = fgUsedVars[kA2EP_RP_TPC] || fgUsedVars[kA2EP_RP_FT0A] || fgUsedVars[kA2EP_RP_FT0C];
   if (useCoherentJpsiA2) {
     // pT ~ 0.2, non-relativistic
     // ROOT::Math::PtEtaPhiMVector v_daughter = t1.sign() > 0 ? v1 - v2 : v2 - v1;
@@ -5948,6 +5950,7 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     ROOT::Math::Boost boostv12{v12.BoostToCM()};
     ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
 
+    // production plane
     ROOT::Math::XYZVectorF zAxis_RF{(v12.Vect()).Unit()};
     ROOT::Math::XYZVectorF zAxis{fgBeamA.Vect().Unit()};
     ROOT::Math::XYZVectorF yAxis_RF = zAxis_RF.Cross(zAxis).Unit();
@@ -5955,26 +5958,42 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     ROOT::Math::XYZVectorF daughterVec_RF{(v_daughter.Vect()).Unit()};
     float cosPhi = yAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
     float sinPhi = -1. * xAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
-    float phi = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
-    phi = v_daughter.Phi() > TMath::Pi() ? 2. * TMath::Pi() - v_daughter.Phi() : v_daughter.Phi();
-    values[kDeltaPhiA2_TPC] = phi > Psi2A ? phi - Psi2A : Psi2A - phi;
-    values[kDeltaPhiA2_TPC]  = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
-    values[kDeltaPhiA2_FT0A] = phi > Psi2B ? phi - Psi2B : Psi2B - phi;
-    values[kDeltaPhiA2_FT0A]  = values[kDeltaPhiA2_FT0A] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiA2_FT0A] : values[kDeltaPhiA2_FT0A];
-    values[kDeltaPhiA2_FT0C] = phi > Psi2C ? phi - Psi2C : Psi2C - phi;
-    values[kDeltaPhiA2_FT0C]  = values[kDeltaPhiA2_FT0C] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiA2_FT0C] : values[kDeltaPhiA2_FT0C];
-    values[kCos2DeltaPhiA2_TPC] = TMath::Cos(2. * (phi - Psi2A));
-    values[kCos2DeltaPhiA2_FT0A] = TMath::Cos(2. * (phi - Psi2B));
-    values[kCos2DeltaPhiA2_FT0C] = TMath::Cos(2. * (phi - Psi2C));
+    float phi_PP = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
+    values[kDeltaPhiPP_TPC] = phi_PP > Psi2A ? phi_PP - Psi2A : Psi2A - phi_PP;
+    values[kDeltaPhiPP_TPC]  = values[kDeltaPhiPP_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiPP_TPC] : values[kDeltaPhiPP_TPC];
+    values[kDeltaPhiPP_FT0A] = phi_PP > Psi2B ? phi_PP - Psi2B : Psi2B - phi_PP;
+    values[kDeltaPhiPP_FT0A]  = values[kDeltaPhiPP_FT0A] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiPP_FT0A] : values[kDeltaPhiPP_FT0A];
+    values[kDeltaPhiPP_FT0C] = phi_PP > Psi2C ? phi_PP - Psi2C : Psi2C - phi_PP;
+    values[kDeltaPhiPP_FT0C]  = values[kDeltaPhiPP_FT0C] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiPP_FT0C] : values[kDeltaPhiPP_FT0C];
+    values[kCos2DeltaPhiPP_TPC] = TMath::Cos(2. * (phi_PP - Psi2A));
+    values[kCos2DeltaPhiPP_FT0A] = TMath::Cos(2. * (phi_PP - Psi2B));
+    values[kCos2DeltaPhiPP_FT0C] = TMath::Cos(2. * (phi_PP - Psi2C));
 
-    float A2_TPC = values[kCos2DeltaPhiA2_TPC] / values[kR2EP];
-    float A2_FT0A = values[kCos2DeltaPhiA2_FT0A] / values[kR2EP];
-    float A2_FT0C = values[kCos2DeltaPhiA2_FT0C] / values[kR2EP];
-    values[kA2EP_TPC] = std::isnan(A2_TPC) || std::isinf(A2_TPC) ? -999. : A2_TPC;
-    values[kA2EP_FT0A] = std::isnan(A2_FT0A) || std::isinf(A2_FT0A) ? -999. : A2_FT0A;
-    values[kA2EP_FT0C] = std::isnan(A2_FT0C) || std::isinf(A2_FT0C) ? -999. : A2_FT0C;
-    values[kNullA2] = std::isnan(A2_TPC) ? 1 : 0;
-    values[kInfA2] = std::isinf(A2_TPC) ? 1 : 0;
+    float A2PP_TPC = values[kCos2DeltaPhiPP_TPC] / values[kR2EP];
+    float A2PP_FT0A = values[kCos2DeltaPhiPP_FT0A] / values[kR2EP];
+    float A2PP_FT0C = values[kCos2DeltaPhiPP_FT0C] / values[kR2EP];
+    values[kA2EP_PP_TPC] = std::isnan(A2PP_TPC) || std::isinf(A2PP_TPC) ? -999. : A2PP_TPC;
+    values[kA2EP_PP_FT0A] = std::isnan(A2PP_FT0A) || std::isinf(A2PP_FT0A) ? -999. : A2PP_FT0A;
+    values[kA2EP_PP_FT0C] = std::isnan(A2PP_FT0C) || std::isinf(A2PP_FT0C) ? -999. : A2PP_FT0C;
+
+    // reaction plane
+    float phi = v_daughter.Phi() > TMath::Pi() ? 2. * TMath::Pi() - v_daughter.Phi() : v_daughter.Phi();
+    values[kDeltaPhiRP_TPC] = phi > Psi2A ? phi - Psi2A : Psi2A - phi;
+    values[kDeltaPhiRP_TPC]  = values[kDeltaPhiRP_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiRP_TPC] : values[kDeltaPhiRP_TPC];
+    values[kDeltaPhiRP_FT0A] = phi > Psi2B ? phi - Psi2B : Psi2B - phi;
+    values[kDeltaPhiRP_FT0A]  = values[kDeltaPhiRP_FT0A] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiRP_FT0A] : values[kDeltaPhiRP_FT0A];
+    values[kDeltaPhiRP_FT0C] = phi > Psi2C ? phi - Psi2C : Psi2C - phi;
+    values[kDeltaPhiRP_FT0C]  = values[kDeltaPhiRP_FT0C] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiRP_FT0C] : values[kDeltaPhiRP_FT0C];
+    values[kCos2DeltaPhiRP_TPC] = TMath::Cos(2. * (phi - Psi2A));
+    values[kCos2DeltaPhiRP_FT0A] = TMath::Cos(2. * (phi - Psi2B));
+    values[kCos2DeltaPhiRP_FT0C] = TMath::Cos(2. * (phi - Psi2C));
+
+    float A2RP_TPC = values[kCos2DeltaPhiRP_TPC] / values[kR2EP];
+    float A2RP_FT0A = values[kCos2DeltaPhiRP_FT0A] / values[kR2EP];
+    float A2RP_FT0C = values[kCos2DeltaPhiRP_FT0C] / values[kR2EP];
+    values[kA2EP_RP_TPC] = std::isnan(A2RP_TPC) || std::isinf(A2RP_TPC) ? -999. : A2RP_TPC;
+    values[kA2EP_RP_FT0A] = std::isnan(A2RP_FT0A) || std::isinf(A2RP_FT0A) ? -999. : A2RP_FT0A;
+    values[kA2EP_RP_FT0C] = std::isnan(A2RP_FT0C) || std::isinf(A2RP_FT0C) ? -999. : A2RP_FT0C;
   }
 
   //  kV4, kC4POI, kC4REF etc.

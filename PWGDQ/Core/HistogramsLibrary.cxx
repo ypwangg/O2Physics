@@ -1326,22 +1326,28 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
         hm->AddHistogram(histClass, "CosThetaStarFT0C", "", false, 100, -1.0, 1.0, VarManager::kCosThetaStarFT0C);
       }
       if (subGroupStr.Contains("flow-jpsi-ep")) {
-        int varA2_TPC[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_TPC, VarManager::kDeltaPhiA2_TPC};
-        int varA2_FT0C[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_FT0C, VarManager::kDeltaPhiA2_FT0C};
-        int varA2_FT0A[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_FT0A, VarManager::kDeltaPhiA2_FT0A};
+        int varA2_TPC_PP[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_PP_TPC, VarManager::kDeltaPhiPP_TPC};
+        int varA2_FT0C_PP[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_PP_FT0C, VarManager::kDeltaPhiPP_FT0C};
+        int varA2_FT0A_PP[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_PP_FT0A, VarManager::kDeltaPhiPP_FT0A};
+        int varA2_TPC_RP[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_RP_TPC, VarManager::kDeltaPhiRP_TPC};
+        int varA2_FT0C_RP[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_RP_FT0C, VarManager::kDeltaPhiRP_FT0C};
+        int varA2_FT0A_RP[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2EP_RP_FT0A, VarManager::kDeltaPhiRP_FT0A};
 
-        int bins[6] = {50, 20, 20, 9, 400, 20};
+        int bins[6] = {50, 20, 20, 9, 200, 10};
         double minBins[6] = {2.0, 0.0, -1., 0.0, -10.0, 0.0};
         double maxBins[6] = {4.0, 2.0, 1.0, 90.0, 10.0, TMath::Pi()};
         TString labels[6] = {"kMass", "kPt", "kRapidity", "kCentFT0C", "kA2EP", "kDeltaPhiA2"};
         if (subGroupStr.Contains("tpc")) {
-          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2_TPC", "", 6, varA2_TPC, bins, minBins, maxBins, 0, -1, kTRUE);
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2PP_TPC", "", 6, varA2_TPC_PP, bins, minBins, maxBins, 0, -1, kTRUE);
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2RP_TPC", "", 6, varA2_TPC_RP, bins, minBins, maxBins, 0, -1, kTRUE);
         }
         if (subGroupStr.Contains("ft0c")) {
-          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2_FT0C", "", 6, varA2_FT0C, bins, minBins, maxBins, 0, -1, kTRUE);
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2PP_FT0C", "", 6, varA2_FT0C_PP, bins, minBins, maxBins, 0, -1, kTRUE);
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2RP_FT0C", "", 6, varA2_FT0C_RP, bins, minBins, maxBins, 0, -1, kTRUE);
         }
         if (subGroupStr.Contains("ft0a")) {
-          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2_FT0A", "", 6, varA2_FT0A, bins, minBins, maxBins, 0, -1, kTRUE);
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2PP_FT0A", "", 6, varA2_FT0A_PP, bins, minBins, maxBins, 0, -1, kTRUE);
+          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2RP_FT0A", "", 6, varA2_FT0A_RP, bins, minBins, maxBins, 0, -1, kTRUE);
         }
         hm->AddHistogram(histClass, "Cos2Phi_TPC", "", false, 100, -2, 2.0, VarManager::kCos2DeltaPhiA2_TPC);
         hm->AddHistogram(histClass, "DeltaPhiA2_TPC", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_TPC);
@@ -1351,18 +1357,18 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
         hm->AddHistogram(histClass, "A2_FT0C", "", false, 400, -10.0, 10.0, VarManager::kA2EP_FT0C);
         hm->AddHistogram(histClass, "A2_FT0A", "", false, 400, -10.0, 10.0, VarManager::kA2EP_FT0A);
 
-        hm->AddHistogram(histClass, "A2_TPC_CentFT0C", "", false, 400, -10.0, 10.0, VarManager::kA2EP_TPC, 20, 0.0, 100.0, VarManager::kCentFT0C);
-        hm->AddHistogram(histClass, "IsNumA2_TPC_CentFT0C", "", false, 2, -0.5, 1.5, VarManager::kNullA2, 20, 0.0, 100.0, VarManager::kCentFT0C);
-        hm->AddHistogram(histClass, "IsDenA2_TPC_CentFT0C", "", false, 2, -0.5, 1.5, VarManager::kInfA2, 20, 0.0, 100.0, VarManager::kCentFT0C);
+        hm->AddHistogram(histClass, "A2_TPC_CentFT0C", "", false, 400, -10.0, 10.0, VarManager::kA2EP_PP_TPC, 20, 0.0, 100.0, VarManager::kCentFT0C);
         hm->AddHistogram(histClass, "Psi2A_CentFT0C", "", false, 100, -TMath::Pi(), TMath::Pi(), VarManager::kPsi2A, 20, 0.0, 100.0, VarManager::kCentFT0C);
         hm->AddHistogram(histClass, "MultA_CentFT0C", "", false, 250, 0.0, 250.0, VarManager::kMultA, 20, 0.0, 100.0, VarManager::kCentFT0C);
         hm->AddHistogram(histClass, "Nnorm_CentFT0C", "", false, 102, -2.0, 100.0, VarManager::kNnorm, 20, 0.0, 100.0, VarManager::kCentFT0C);
         hm->AddHistogram(histClass, "Nnorm_MultA", "", false, 102, -2.0, 100.0, VarManager::kNnorm, 20, 0.0, 100.0, VarManager::kMultA);
-
-        if (subGroupStr.Contains("me")) {
-          int varA2_TPC[6] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kA2ME_EP_TPC, VarManager::kDeltaPhiA2_TPC};
-          hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_ME_A2_TPC", "", 6, varA2_TPC, bins, minBins, maxBins, 0, -1, kFALSE);
-        }
+      }
+      if (subGroupStr.Contains("flow-jpsi_hadronic-ep")) {
+        int varHadronic[5] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kV2EP};
+        int binsHadronic[5] = {50, 20, 20, 10, 10};
+        double minHadronic[5] = {2.0, 0.0, -1.0, 0.0, -5.0};
+        double maxHadronic[5] = {4.0, 1.0, 1.0, 100.0, 5.0};
+        hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_Hadronic", "", 5, varHadronic, binsHadronic, minHadronic, maxHadronic, 0, -1, kTRUE);
       }
       if (subGroupStr.Contains("coherent")) {
         hm->AddHistogram(histClass, "Mass_Pt_CentFT0C_Coherent", "", false, 50, 2.0, 4.0, VarManager::kMass, 20, 0.0, 1.0, VarManager::kPt, 10, 0.0, 100.0, VarManager::kCentFT0C);
