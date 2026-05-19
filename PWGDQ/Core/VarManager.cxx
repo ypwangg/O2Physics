@@ -2103,7 +2103,6 @@ void VarManager::SetDefaultVarNames()
   fgVarNamesMap["kV2ME_EP"] = kV2ME_EP;
   fgVarNamesMap["kWV2ME_SP"] = kWV2ME_SP;
   fgVarNamesMap["kWV2ME_EP"] = kWV2ME_EP;
-  fgVarNamesMap["kA2ME_EP_TPC"] = kA2ME_EP_TPC;
   fgVarNamesMap["kTwoR2SP1"] = kTwoR2SP1;
   fgVarNamesMap["kTwoR2SP2"] = kTwoR2SP2;
   fgVarNamesMap["kTwoR2EP1"] = kTwoR2EP1;
@@ -2375,9 +2374,12 @@ void VarManager::SetDefaultVarNames()
   fgVarNamesMap["kDCATrackVtxProd"] = kDCATrackVtxProd;
   fgVarNamesMap["kV2SP"] = kV2SP;
   fgVarNamesMap["kV2EP"] = kV2EP;
-  fgVarNamesMap["kA2EP_TPC"] = kA2EP_TPC;
-  fgVarNamesMap["kA2EP_FT0A"] = kA2EP_FT0A;
-  fgVarNamesMap["kA2EP_FT0C"] = kA2EP_FT0C;
+  fgVarNamesMap["kA2EP_PP_TPC"] = kA2EP_PP_TPC;
+  fgVarNamesMap["kA2EP_PP_FT0A"] = kA2EP_PP_FT0A;
+  fgVarNamesMap["kA2EP_PP_FT0C"] = kA2EP_PP_FT0C;
+  fgVarNamesMap["kA2EP_RP_TPC"] = kA2EP_RP_TPC;
+  fgVarNamesMap["kA2EP_RP_FT0A"] = kA2EP_RP_FT0A;
+  fgVarNamesMap["kA2EP_RP_FT0C"] = kA2EP_RP_FT0C;
   fgVarNamesMap["kWV2SP"] = kWV2SP;
   fgVarNamesMap["kWV2EP"] = kWV2EP;
   fgVarNamesMap["kU2Q2"] = kU2Q2;

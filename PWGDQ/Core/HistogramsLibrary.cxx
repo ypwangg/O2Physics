@@ -1349,13 +1349,6 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
           hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2PP_FT0A", "", 6, varA2_FT0A_PP, bins, minBins, maxBins, 0, -1, kTRUE);
           hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2RP_FT0A", "", 6, varA2_FT0A_RP, bins, minBins, maxBins, 0, -1, kTRUE);
         }
-        hm->AddHistogram(histClass, "Cos2Phi_TPC", "", false, 100, -2, 2.0, VarManager::kCos2DeltaPhiA2_TPC);
-        hm->AddHistogram(histClass, "DeltaPhiA2_TPC", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_TPC);
-        hm->AddHistogram(histClass, "DeltaPhiA2_FT0C", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_FT0C);
-        hm->AddHistogram(histClass, "DeltaPhiA2_FT0A", "", false, 100, 0, 2.*TMath::Pi(), VarManager::kDeltaPhiA2_FT0A);
-        hm->AddHistogram(histClass, "A2_TPC", "", false, 400, -10.0, 10.0, VarManager::kA2EP_TPC);
-        hm->AddHistogram(histClass, "A2_FT0C", "", false, 400, -10.0, 10.0, VarManager::kA2EP_FT0C);
-        hm->AddHistogram(histClass, "A2_FT0A", "", false, 400, -10.0, 10.0, VarManager::kA2EP_FT0A);
 
         hm->AddHistogram(histClass, "A2_TPC_CentFT0C", "", false, 400, -10.0, 10.0, VarManager::kA2EP_PP_TPC, 20, 0.0, 100.0, VarManager::kCentFT0C);
         hm->AddHistogram(histClass, "Psi2A_CentFT0C", "", false, 100, -TMath::Pi(), TMath::Pi(), VarManager::kPsi2A, 20, 0.0, 100.0, VarManager::kCentFT0C);
