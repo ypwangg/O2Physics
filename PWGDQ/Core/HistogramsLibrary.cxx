@@ -1358,9 +1358,9 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
       }
       if (subGroupStr.Contains("flow-jpsi_hadronic-ep")) {
         int varHadronic[5] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kV2EP};
-        int binsHadronic[5] = {50, 20, 20, 10, 10};
+        int binsHadronic[5] = {50, 10, 20, 10, 10};
         double minHadronic[5] = {2.0, 0.0, -1.0, 0.0, -5.0};
-        double maxHadronic[5] = {4.0, 1.0, 1.0, 100.0, 5.0};
+        double maxHadronic[5] = {4.0, 5.0, 1.0, 100.0, 5.0};
         hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_Hadronic", "", 5, varHadronic, binsHadronic, minHadronic, maxHadronic, 0, -1, kTRUE);
       }
       if (subGroupStr.Contains("coherent")) {
