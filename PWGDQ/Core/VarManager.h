@@ -4132,8 +4132,6 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
     }
     if (nNorm1 <=0 || nNorm2 <= 0) {
       values[kCos2DeltaPhi] = -999;
-      values[kCos2DeltaPhiEv1] = -999;
-      values[kCos2DeltaPhiEv2] = -999;
       values[kU2Q2] = -999;
       values[kU2Q2Ev1] = -999;
       values[kU2Q2Ev2] = -999;
@@ -4190,7 +4188,7 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
     values[kV24ME] = (std::isnan(V22ME) || std::isinf(V22ME) || std::isnan(V24ME) || std::isinf(V24ME)) ? 0. : V24ME;
     values[kWV24ME] = (std::isnan(V22ME) || std::isinf(V22ME) || std::isnan(V24ME) || std::isinf(V24ME)) ? 0. : 1.0;
 
-    bool useCoherentJpsiA2 = fgUsedVars[kA2ME_EP_TPC] || fgUsedVars[kA2ME_EP_FT0A] || fgUsedVars[kA2ME_EP_FT0C];
+    bool useCoherentJpsiA2 = fgUsedVars[kA2EP_RP_TPC] || fgUsedVars[kA2EP_RP_FT0A] || fgUsedVars[kA2EP_RP_FT0C];
     if (useCoherentJpsiA2) {
       // ROOT::Math::PtEtaPhiMVector v_daughter = t1.sign() > 0 ? v1 - v2 : v2 - v1; // using the positive track as reference
       ROOT::Math::Boost boostv12{v12.BoostToCM()};
