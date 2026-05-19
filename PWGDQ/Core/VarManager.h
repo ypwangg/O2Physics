@@ -474,6 +474,8 @@ class VarManager : public TObject
     kQ2Y0A2,
     kU2Q2Ev1,
     kU2Q2Ev2,
+    kCos2DeltaPhiEv1,
+    kCos2DeltaPhiEv2,
     kV2SP1,
     kV2SP2,
     kV2EP1,
