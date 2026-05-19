@@ -4209,6 +4209,7 @@ void VarManager::FillPairME(T1 const& t1, T2 const& t2, float* values)
       float cosPhi = (zAxis_RF.Cross(daughterVec_RF)).Dot(yAxis_RF);
       float sinPhi = -1. * (zAxis_RF.Cross(daughterVec_RF)).Dot(xAxis_RF);
       float phi = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
+      phi = v_daughter.Phi() > TMath::Pi() ? 2. * TMath::Pi() - v_daughter.Phi() : v_daughter.Phi(); // ensure phi is in [0, 2pi]
 
       values[kDeltaPhiA2_TPC] = phi > Psi2A ? phi - Psi2A : Psi2A - phi;
       values[kDeltaPhiA2_TPC] = values[kDeltaPhiA2_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiA2_TPC] : values[kDeltaPhiA2_TPC];
