@@ -205,11 +205,11 @@ DECLARE_SOA_TABLE(BmesonCandidates, "AOD", "DQBMESONS",
 
 // Using definitions (data-only)
 using MyEvents = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra>;
-using MyEventsQvectorCentr = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::QvectorFT0Cs, aod::QvectorFT0As, aod::QvectorFT0Ms, aod::QvectorFV0As, aod::QvectorTPCposs, aod::QvectorTPCnegs, aod::QvectorTPCalls>;
+using MyEventsQvectorCentr = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::ReducedEventsQvectorCentr>;
 using MyEventsSelected = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::EventCuts>;
-using MyEventsQvectorCentrSelected = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::QvectorFT0Cs, aod::QvectorFT0As, aod::QvectorFT0Ms, aod::QvectorFV0As, aod::QvectorTPCposs, aod::QvectorTPCnegs, aod::QvectorTPCalls, aod::EventCuts>;
+using MyEventsQvectorCentrSelected = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::ReducedEventsQvectorCentr, aod::EventCuts>;
 using MyEventsHashSelected = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::EventCuts, aod::MixingHashes>;
-using MyEventsHashSelectedQvectorCentr = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::QvectorFT0Cs, aod::QvectorFT0As, aod::QvectorFT0Ms, aod::QvectorFV0As, aod::QvectorTPCposs, aod::QvectorTPCnegs, aod::QvectorTPCalls, aod::EventCuts, aod::MixingHashes>;
+using MyEventsHashSelectedQvectorCentr = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::ReducedEventsQvectorCentr, aod::EventCuts, aod::MixingHashes>;
 
 using MyBarrelTracksWithCov = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov, aod::TracksDCA,
                                         aod::pidTPCFullEl, aod::pidTPCFullMu, aod::pidTPCFullPi,
