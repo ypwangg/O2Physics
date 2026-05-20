@@ -205,8 +205,11 @@ DECLARE_SOA_TABLE(BmesonCandidates, "AOD", "DQBMESONS",
 
 // Using definitions (data-only)
 using MyEvents = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra>;
+using MyEventsQvectorCentr = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::QvectorFT0Cs, aod::QvectorFT0As, aod::QvectorFT0Ms, aod::QvectorFV0As, aod::QvectorTPCposs, aod::QvectorTPCnegs, aod::QvectorTPCalls>;
 using MyEventsSelected = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::EventCuts>;
+using MyEventsQvectorCentrSelected = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::QvectorFT0Cs, aod::QvectorFT0As, aod::QvectorFT0Ms, aod::QvectorFV0As, aod::QvectorTPCposs, aod::QvectorTPCnegs, aod::QvectorTPCalls, aod::EventCuts>;
 using MyEventsHashSelected = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::EventCuts, aod::MixingHashes>;
+using MyEventsHashSelectedQvectorCentr = soa::Join<aod::Collisions, aod::EvSels, aod::Mults, aod::MultsExtra, aod::CentFT0Cs, aod::CentFT0As, aod::CentFT0Ms, aod::QvectorFT0Cs, aod::QvectorFT0As, aod::QvectorFT0Ms, aod::QvectorFV0As, aod::QvectorTPCposs, aod::QvectorTPCnegs, aod::QvectorTPCalls, aod::EventCuts, aod::MixingHashes>;
 
 using MyBarrelTracksWithCov = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov, aod::TracksDCA,
                                         aod::pidTPCFullEl, aod::pidTPCFullMu, aod::pidTPCFullPi,
@@ -219,11 +222,15 @@ using MyBarrelTracksWithCovNoTOF = soa::Join<aod::Tracks, aod::TracksExtra, aod:
 using MyBarrelTracksWithCovWithAmbiguities = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov, aod::TracksDCA,
                                                        aod::pidTPCFullEl, aod::pidTPCFullMu, aod::pidTPCFullPi,
                                                        aod::pidTPCFullKa, aod::pidTPCFullPr, aod::BarrelAmbiguities>;
+// using MyBarrelTracksWithAmbiguities = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksDCA,
+//                                   aod::pidTPCFullEl, aod::pidTPCFullMu, aod::pidTPCFullPi,
+//                                   aod::pidTPCFullKa, aod::pidTPCFullPr, aod::BarrelAmbiguities>;
 
 using MyDielectronCandidates = soa::Join<aod::Dielectrons, aod::DielectronsExtra>;
 
 // bit maps used for the Fill functions of the VarManager
 constexpr static uint32_t gkEventFillMapWithMults = VarManager::ObjTypes::BC | VarManager::ObjTypes::Collision | VarManager::ObjTypes::CollisionMult | VarManager::ObjTypes::CollisionMultExtra;
+constexpr static uint32_t gkEventFillMapWithQvectorCentr = arManager::ObjTypes::BC | VarManager::ObjTypes::Collision | VarManager::ObjTypes::CollisionCent | VarManager::CollisionMult | VarManager::ObjTypes::CollisionMultExtra | VarManager::ObjTypes::CollisionQvect;
 constexpr static uint32_t gkTrackFillMapWithCov = VarManager::ObjTypes::Track | VarManager::ObjTypes::TrackExtra | VarManager::ObjTypes::TrackDCA | VarManager::ObjTypes::TrackCov | VarManager::ObjTypes::TrackPID;
 constexpr static uint32_t gkTrackFillMapWithCovNoTOF = VarManager::ObjTypes::Track | VarManager::ObjTypes::TrackExtra | VarManager::ObjTypes::TrackDCA | VarManager::ObjTypes::TrackCov | VarManager::ObjTypes::TrackTPCPID | VarManager::ObjTypes::TrackTOFService;
 
@@ -607,9 +614,18 @@ struct AnalysisEventSelection {
     cout << "AnalysisEventSelection::processDirect() completed" << endl;
   }
 
+  void processSkimmedWithQvectorCentr(MyEventsQvectorCentr const& events, BCsWithTimestamps const& bcs)
+  {
+    cout << "AnalysisEventSelection::processSkimmedWithQvectorCentr() called" << endl;
+    runEventSelection<gkEventFillMapWithQvectorCentr>(events, bcs);
+    publishSelections<gkEventFillMapWithQvectorCentr>(events);
+    cout << "AnalysisEventSelection::processSkimmedWithQvectorCentr() completed" << endl;
+  }
+
   void processDummy(aod::Collisions&) {}
 
   PROCESS_SWITCH(AnalysisEventSelection, processDirect, "Run event selection on framework AO2Ds", false);
+  PROCESS_SWITCH(AnalysisEventSelection, processSkimmedWithQvectorCentr, "Run event selection on skimmed data with Q-vector and centrality", false);
   PROCESS_SWITCH(AnalysisEventSelection, processDummy, "Dummy function", true);
 };
 
