@@ -1094,6 +1094,8 @@ struct AnalysisSameEventPairing {
   Produces<aod::JPsieeCandidates> PromptNonPromptSepTable;
 
   o2::base::MatLayerCylSet* fLUT = nullptr;
+  TH1D* ResoFlowSP = nullptr;
+  TH1D* ResoFlowEP = nullptr;
   int fCurrentRun; // needed to detect if the run changed and trigger update of calibrations etc.
 
   OutputObj<THashList> fOutputList{"output"};
@@ -1640,7 +1642,7 @@ struct AnalysisSameEventPairing {
           }
 
           if constexpr (eventHasQvector) {
-            VarManager::FillPairVn<TPairType>(t1, t2);
+            VarManager::FillPairVn<TEventFillMap, TPairType>(t1, t2);
           }
         }
         // Fill normal histograms
