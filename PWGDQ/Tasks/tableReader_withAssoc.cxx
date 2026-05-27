@@ -281,8 +281,6 @@ struct AnalysisEventSelection {
   Configurable<std::string> fConfigEventCutsJSON{"cfgEventCutsJSON", "", "Additional event cuts specified in JSON format"};
   Configurable<std::string> fConfigAddEventHistogram{"cfgAddEventHistogram", "", "Comma separated list of histograms"};
   Configurable<std::string> fConfigAddJSONHistograms{"cfgAddJSONHistograms", "", "Add event histograms defined via JSON formatting (see HistogramsLibrary)"};
-  Configurable<float> fCentHighEdge{"cfgCentHighEdge", 100.0, "High edge of the centrality percentile for event selection"};
-  Configurable<float> fCentLowEdge{"cfgCentLowEdge", 0.0, "Low edge of the centrality percentile for event selection"};
   Configurable<bool> fConfigQA{"cfgQA", true, "If true, QA histograms will be created and filled"};
 
   Configurable<int> fConfigITSROFrameStartBorderMargin{"cfgITSROFrameStartBorderMargin", -1, "Number of bcs at the start of ITS RO Frame border. Take from CCDB if -1"};
@@ -1277,6 +1275,9 @@ struct AnalysisSameEventPairing {
     Configurable<std::string> pair{"cfgPairCuts", "", "Comma separated list of pair cuts"};
     Configurable<bool> event{"cfgRemoveCollSplittingCandidates", false, "If true, remove collision splitting candidates as determined by the event selection task upstream"};
     // TODO: Add pair cuts via JSON
+    // tmp
+    Configurable<float> centLow{"cfgCentLow", 0.0f, "Centrality lower bound"};
+    Configurable<float> centHigh{"cfgCentHigh", 100.0f, "Centrality upper bound"};
   } fConfigCuts;
 
   Configurable<int> fConfigMixingDepth{"cfgMixingDepth", 100, "Number of Events stored for event mixing"};
@@ -1833,6 +1834,9 @@ struct AnalysisSameEventPairing {
       VarManager::ResetValues(0, VarManager::kNVars);
       // VarManager::FillEvent<gkEventFillMap>(event, VarManager::fgValues);
       VarManager::FillEvent<TEventFillMap>(event, VarManager::fgValues);
+      if (VarManager::fgValues[VarManager::kCentFT0C] < fConfigCuts.centLow || VarManager::fgValues[VarManager::kCentFT0C] > fConfigCuts.centHigh) {
+        continue; // skip events with invalid centrality
+      }
 
       auto groupedAssocs = assocs.sliceBy(preslice, event.globalIndex());
       if (groupedAssocs.size() == 0) {
