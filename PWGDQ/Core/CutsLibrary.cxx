@@ -3081,6 +3081,21 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
     return cut;
   }
 
+  if (!nameStr.compare("pidJpsi_pion0_TPConly")) {
+    cut->AddCut(GetAnalysisCut("SPDfirst"));
+    cut->AddCut(GetAnalysisCut("pidJpsi_magnus_prot2"));
+    cut->AddCut(GetAnalysisCut("pidJpsi_TPCpion0"));
+    return cut;
+  }
+
+  if (!nameStr.compare("pidJpsi_pion0_comb")) {
+    cut->AddCut(GetAnalysisCut("SPDfirst"));
+    cut->AddCut(GetAnalysisCut("pidJpsi_noTOF_prot"));
+    cut->AddCut(GetAnalysisCut("pidJpsi_beta"));
+    cut->AddCut(GetAnalysisCut("pidJpsi_TPCpion0"));
+    return cut;
+  }
+
   // -------------------------------------------------------------------------------------------------
   // lmee pair cuts
 
@@ -5461,7 +5476,7 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
   }
 
   if (!nameStr.compare("pidJpsi_noTOF_prot")) {
-    cut->AddCut(VarManager::kTPCnSigmaPr, 3.3, 1000.0, false, VarManager::kHasTOF, -0.5, 0.5);
+    cut->AddCut(VarManager::kTPCnSigmaPr, 3.5, 1000.0, false, VarManager::kHasTOF, -0.5, 0.5);
     return cut;
   }
 
