@@ -6012,9 +6012,9 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     ROOT::Math::XYZVectorF yAxis_RF = zAxis_RF.Cross(zAxis).Unit();
     ROOT::Math::XYZVectorF xAxis_RF = yAxis_RF.Cross(zAxis_RF).Unit();
     ROOT::Math::XYZVectorF daughterVec_RF{(v_daughter.Vect()).Unit()};
-    ROOT::Math::XYZVectorF b_TPC_RF{TMath::Cos(Psi2A), TMath::Sin(Psi2A), 0.};
-    ROOT::Math::XYZVectorF b_FT0A_RF{TMath::Cos(Psi2B), TMath::Sin(Psi2B), 0.};
-    ROOT::Math::XYZVectorF b_FT0C_RF{TMath::Cos(Psi2C), TMath::Sin(Psi2C), 0.};
+    ROOT::Math::XYZVectorF b_TPC_RF{std::cos(Psi2A), std::sin(Psi2A), 0.f};
+    ROOT::Math::XYZVectorF b_FT0A_RF{std::cos(Psi2B), std::sin(Psi2B), 0.f};
+    ROOT::Math::XYZVectorF b_FT0C_RF{std::cos(Psi2C), std::sin(Psi2C), 0.f};
     float cosPhi = yAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
     float sinPhi = -1. * xAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
     float phi_PP = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
