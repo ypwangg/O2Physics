@@ -1335,7 +1335,7 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
 
         int bins[6] = {50, 20, 20, 9, 200, 10};
         double minBins[6] = {2.0, 0.0, -1., 0.0, -10.0, 0.0};
-        double maxBins[6] = {4.0, 2.0, 1.0, 90.0, 10.0, TMath::Pi()};
+        double maxBins[6] = {4.0, 2.0, 1.0, 90.0, 10.0, 3.14};
         TString labels[6] = {"kMass", "kPt", "kRapidity", "kCentFT0C", "kA2EP", "kDeltaPhiA2"};
         if (subGroupStr.Contains("tpc")) {
           hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_A2PP_TPC", "", 6, varA2_TPC_PP, bins, minBins, maxBins, 0, -1, kTRUE);

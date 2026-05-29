@@ -5884,60 +5884,20 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   float Q3Y0A = values[kQ3Y0A]*values[kMultA];
   float nNorm = values[kMultA];
 
-  // auto checkTrack = [&](auto const& t) {
-  //   bool trackSelected = false;
-  //   if constexpr (requires {t.hasTPC();}) {
-  //     trackSelected = true;
-  //     if (!t.hasTPC()) {
-  //       trackSelected = false;
-  //       return trackSelected;
-  //     }
-  //     if (std::abs(t.eta()) > 0.8) {
-  //       trackSelected = false;
-  //       return trackSelected;
-  //     }
-  //     if (t.pt() < 0.15 || t.pt() > 5.) {
-  //       trackSelected = false;
-  //       return trackSelected;
-  //     }
-  //     if (t.tpcNClsCrossedRows() / t.tpcNClsFound() < 0.8 || t.tpcChi2NCl() > 4.) {
-  //       trackSelected = false;
-  //       return trackSelected;
-  //     }
-  //     if (!((t.itsClusterMap() & (1 << uint8_t(0))) > 0 || (t.itsClusterMap() & (1 << uint8_t(1))) > 0 || (t.itsClusterMap() & (1 << uint8_t(2))) > 0)) {
-  //       trackSelected = false;
-  //       return trackSelected;
-  //     }
-  //     if (t.itsChi2NCl() > 36.) {
-  //       trackSelected = false;
-  //       return trackSelected;
-  //     }
-  //     if (t.dcaZ() > 2) {
-  //       trackSelected = false;
-  //       return trackSelected;
-  //     }
-  //     if (t.dcaXY() > 0.0105+0.0350 / std::pow(t.pt(), 1.1)) {
-  //       trackSelected = false;
-  //       return trackSelected;
-  //     }
-  //   }
-  //   return trackSelected;
-  // };
-
   // checkTrack(t1);
   if (isSelectedinTPC(t1) && values[kAmbi1] > 0) {
-    Q2X0A = Q2X0A - t1.pt()*TMath::Cos(2 * t1.phi());
-    Q2Y0A = Q2Y0A - t1.pt()*TMath::Sin(2 * t1.phi());
-    Q3X0A = Q3X0A - t1.pt()*TMath::Cos(3 * t1.phi());
-    Q3Y0A = Q3Y0A - t1.pt()*TMath::Sin(3 * t1.phi());
+    Q2X0A = Q2X0A - t1.pt()*TMath::Cos(2. * t1.phi());
+    Q2Y0A = Q2Y0A - t1.pt()*TMath::Sin(2. * t1.phi());
+    Q3X0A = Q3X0A - t1.pt()*TMath::Cos(3. * t1.phi());
+    Q3Y0A = Q3Y0A - t1.pt()*TMath::Sin(3. * t1.phi());
     nNorm = nNorm - 1.;
   }
   // checkTrack(t2);
   if (isSelectedinTPC(t2) && values[kAmbi2] > 0) {
-    Q2X0A = Q2X0A - t2.pt()*TMath::Cos(2 * t2.phi());
-    Q2Y0A = Q2Y0A - t2.pt()*TMath::Sin(2 * t2.phi());
-    Q3X0A = Q3X0A - t2.pt()*TMath::Cos(3 * t2.phi());
-    Q3Y0A = Q3Y0A - t2.pt()*TMath::Sin(3 * t2.phi());
+    Q2X0A = Q2X0A - t2.pt()*TMath::Cos(2. * t2.phi());
+    Q2Y0A = Q2Y0A - t2.pt()*TMath::Sin(2. * t2.phi());
+    Q3X0A = Q3X0A - t2.pt()*TMath::Cos(3. * t2.phi());
+    Q3Y0A = Q3Y0A - t2.pt()*TMath::Sin(3. * t2.phi());
     nNorm = nNorm - 1.;
   }
   values[kNnorm] = nNorm;
@@ -6052,14 +6012,26 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     ROOT::Math::XYZVectorF yAxis_RF = zAxis_RF.Cross(zAxis).Unit();
     ROOT::Math::XYZVectorF xAxis_RF = yAxis_RF.Cross(zAxis_RF).Unit();
     ROOT::Math::XYZVectorF daughterVec_RF{(v_daughter.Vect()).Unit()};
+    ROOT::Math::XYZVectorF b_TPC_RF{TMath::Cos(Psi2A), TMath::Sin(Psi2A), 0.};
+    ROOT::Math::XYZVectorF b_FT0A_RF{TMath::Cos(Psi2B), TMath::Sin(Psi2B), 0.};
+    ROOT::Math::XYZVectorF b_FT0C_RF{TMath::Cos(Psi2C), TMath::Sin(Psi2C), 0.};
     float cosPhi = yAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
     float sinPhi = -1. * xAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
     float phi_PP = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);
-    values[kDeltaPhiPP_TPC] = phi_PP > Psi2A ? phi_PP - Psi2A : Psi2A - phi_PP;
+    float cosPsi2APP = b_TPC_RF.Dot(xAxis_RF.Cross(daughterVec_RF));
+    float sinPsi2APP = b_TPC_RF.Dot(yAxis_RF.Cross(daughterVec_RF));
+    float Psi2APP = sinPsi2APP > 0 ? TMath::ACos(cosPsi2APP) : -1. * TMath::ACos(cosPsi2APP);
+    float cosPsi2BPP = b_FT0A_RF.Dot(xAxis_RF.Cross(daughterVec_RF));
+    float sinPsi2BPP = b_FT0A_RF.Dot(yAxis_RF.Cross(daughterVec_RF));
+    float Psi2BPP = sinPsi2BPP > 0 ? TMath::ACos(cosPsi2BPP) : -1. * TMath::ACos(cosPsi2BPP);
+    float cosPsi2CPP = b_FT0C_RF.Dot(xAxis_RF.Cross(daughterVec_RF));
+    float sinPsi2CPP = b_FT0C_RF.Dot(yAxis_RF.Cross(daughterVec_RF));
+    float Psi2CPP = sinPsi2CPP > 0 ? TMath::ACos(cosPsi2CPP) : -1. * TMath::ACos(cosPsi2CPP);
+    values[kDeltaPhiPP_TPC] = phi_PP > Psi2APP ? phi_PP - Psi2APP : Psi2APP - phi_PP;
     values[kDeltaPhiPP_TPC]  = values[kDeltaPhiPP_TPC] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiPP_TPC] : values[kDeltaPhiPP_TPC];
-    values[kDeltaPhiPP_FT0A] = phi_PP > Psi2B ? phi_PP - Psi2B : Psi2B - phi_PP;
+    values[kDeltaPhiPP_FT0A] = phi_PP > Psi2BPP ? phi_PP - Psi2BPP : Psi2BPP - phi_PP;
     values[kDeltaPhiPP_FT0A]  = values[kDeltaPhiPP_FT0A] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiPP_FT0A] : values[kDeltaPhiPP_FT0A];
-    values[kDeltaPhiPP_FT0C] = phi_PP > Psi2C ? phi_PP - Psi2C : Psi2C - phi_PP;
+    values[kDeltaPhiPP_FT0C] = phi_PP > Psi2CPP ? phi_PP - Psi2CPP : Psi2CPP - phi_PP;
     values[kDeltaPhiPP_FT0C]  = values[kDeltaPhiPP_FT0C] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiPP_FT0C] : values[kDeltaPhiPP_FT0C];
     values[kCos2DeltaPhiPP_TPC] = TMath::Cos(2. * (phi_PP - Psi2A));
     values[kCos2DeltaPhiPP_FT0A] = TMath::Cos(2. * (phi_PP - Psi2B));
