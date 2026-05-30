@@ -1510,6 +1510,11 @@ class VarManager : public TObject
     fgShiftProfiles.clear(); 
   }
 
+  static void SetEventQVectorCorrection(TH3F* qvec) { 
+    fgObjQvec = qvec; 
+    fgApplyQVectorCorrection = true;
+  }
+
  public:
   VarManager();
   ~VarManager() override;
@@ -1564,12 +1569,15 @@ class VarManager : public TObject
   static o2::globaltracking::MatchGlobalFwd mMatching;
 
   static std::map<CalibObjects, TObject*> fgCalibs; // map of calibration histograms
-  static std::vector<TProfile3D*> fgShiftProfiles;   // shift correction profiles for q-vectors
-  static bool fgApplyShiftCorrection;               // flag to apply shift correction
-  static std::vector<int> fgHarmonics;              // vector of harmonics to apply shift correction
   static bool fgRunTPCPostCalibration[4];           // 0-electron, 1-pion, 2-kaon, 3-proton
   static int fgCalibrationType;                     // 0 - no calibration, 1 - calibration vs (TPCncls,pIN,eta) typically for pp, 2 - calibration vs (eta,nPV,nLong,tLong) typically for PbPb
   static bool fgUseInterpolatedCalibration;         // use interpolated calibration histograms (default: true)
+
+  static TH3F* fgObjQvec;
+  static bool fgApplyQVectorCorrection;
+  static std::vector<TProfile3D*> fgShiftProfiles;   // shift correction profiles for q-vectors
+  static bool fgApplyShiftCorrection;               // flag to apply shift correction
+  static std::vector<int> fgHarmonics;              // vector of harmonics to apply shift correction
 
   VarManager& operator=(const VarManager& c);
   VarManager(const VarManager& c);
@@ -5876,68 +5884,15 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   // TODO: provide different computations for vn
   // Compute the scalar product UQ using Q-vector from A, for second and third harmonic
   // Dilepton vn could be accessible after dividing this product with the R factor
-  // remove daughter from TPC Q-vector
-  // TODO: remove based on track cut in qVectorTable
-  float Q2X0A = values[kQ2X0A]*values[kMultA];
-  float Q2Y0A = values[kQ2Y0A]*values[kMultA];
-  float Q3X0A = values[kQ3X0A]*values[kMultA];
-  float Q3Y0A = values[kQ3Y0A]*values[kMultA];
-  float nNorm = values[kMultA];
-
-  // checkTrack(t1);
-  if (isSelectedinTPC(t1) && values[kAmbi1] > 0) {
-    Q2X0A = Q2X0A - t1.pt()*TMath::Cos(2. * t1.phi());
-    Q2Y0A = Q2Y0A - t1.pt()*TMath::Sin(2. * t1.phi());
-    Q3X0A = Q3X0A - t1.pt()*TMath::Cos(3. * t1.phi());
-    Q3Y0A = Q3Y0A - t1.pt()*TMath::Sin(3. * t1.phi());
-    nNorm = nNorm - 1.;
-  }
-  // checkTrack(t2);
-  if (isSelectedinTPC(t2) && values[kAmbi2] > 0) {
-    Q2X0A = Q2X0A - t2.pt()*TMath::Cos(2. * t2.phi());
-    Q2Y0A = Q2Y0A - t2.pt()*TMath::Sin(2. * t2.phi());
-    Q3X0A = Q3X0A - t2.pt()*TMath::Cos(3. * t2.phi());
-    Q3Y0A = Q3Y0A - t2.pt()*TMath::Sin(3. * t2.phi());
-    nNorm = nNorm - 1.;
-  }
-  values[kNnorm] = nNorm;
-  if (nNorm <= 0) {
-    values[kU2Q2] = -999.;
-    values[kU3Q3] = -999.;
-    values[kR2SP_AB] = -999.;
-    values[kR2SP_AC] = -999.;
-    values[kR2SP_BC] = -999.;
-    values[kR3SP] = -999.;
-    values[kPsi2A] = -999.;
-    values[kCos2DeltaPhi] = -999.;
-    values[kCos3DeltaPhi] = -999.;
-    values[kR2EP_AB] = -999.;
-    values[kR2EP_AC] = -999.;
-    values[kR2EP_BC] = -999.;
-    values[kR3EP] = -999.;
-    values[kV2SP] = -999.;
-    values[kWV2SP] = -999.;
-    values[kV2EP] = -999.;
-    values[kWV2EP] = -999.;
-    return;
-  }
-  
-  Q2X0A = nNorm > 0 ? Q2X0A/nNorm : NAN;
-  Q2Y0A = nNorm > 0 ? Q2Y0A/nNorm : NAN;
-  Q3X0A = nNorm > 0 ? Q3X0A/nNorm : NAN;
-  Q3Y0A = nNorm > 0 ? Q3Y0A/nNorm : NAN;
-  values[kU2Q2] = Q2X0A * TMath::Cos(2 * v12.Phi()) + Q2Y0A * TMath::Sin(2 * v12.Phi());
-  values[kU3Q3] = Q3X0A * TMath::Cos(3 * v12.Phi()) + Q3Y0A * TMath::Sin(3 * v12.Phi());
-  values[kR2SP_AB] = (Q2X0A * values[kQ2X0B] + Q2Y0A * values[kQ2Y0B]);
-  values[kR2SP_AC] = (Q2X0A * values[kQ2X0C] + Q2Y0A * values[kQ2Y0C]);
+  values[kU2Q2] = values[kQ2X0A] * TMath::Cos(2 * v12.Phi()) + values[kQ2Y0A] * TMath::Sin(2 * v12.Phi());
+  values[kU3Q3] = values[kQ3X0A] * TMath::Cos(3 * v12.Phi()) + values[kQ3Y0A] * TMath::Sin(3 * v12.Phi());
+  values[kR2SP_AB] = (values[kQ2X0A] * values[kQ2X0B] + values[kQ2Y0A] * values[kQ2Y0B]);
+  values[kR2SP_AC] = (values[kQ2X0A] * values[kQ2X0C] + values[kQ2Y0A] * values[kQ2Y0C]);
   values[kR2SP_BC] = (values[kQ2X0B] * values[kQ2X0C] + values[kQ2Y0B] * values[kQ2Y0C]);
   values[kR3SP] = (values[kQ3X0B] * values[kQ3X0C] + values[kQ3Y0B] * values[kQ3Y0C]);
 
-  float Psi2A = getEventPlane(2, Q2X0A, Q2Y0A);
-  values[kPsi2A] = Psi2A;
-  float Psi3A = getEventPlane(3, Q3X0A, Q3Y0A);
-  // float Psi2A = getEventPlane(2, values[kQ2X0A], values[kQ2Y0A]);
-  // float Psi3A = getEventPlane(3, values[kQ3X0A], values[kQ3Y0A]);
+  float Psi2A = getEventPlane(2, values[kQ2X0A], values[kQ2Y0A]);
+  float Psi3A = getEventPlane(3, values[kQ3X0A], values[kQ3Y0A]);
   float Psi2B = getEventPlane(2, values[kQ2X0B], values[kQ2Y0B]);
   float Psi3B = getEventPlane(3, values[kQ3X0B], values[kQ3Y0B]);
   float Psi2C = getEventPlane(2, values[kQ2X0C], values[kQ2Y0C]);
@@ -5998,8 +5953,58 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   }
 
   // Coherent Jpsi A2
-  bool useCoherentJpsiA2 = fgUsedVars[kA2EP_RP_TPC] || fgUsedVars[kA2EP_RP_FT0A] || fgUsedVars[kA2EP_RP_FT0C];
+  bool useCoherentJpsiA2 = fgUsedVars[kA2EP_RP_TPC] || fgUsedVars[kA2EP_RP_FT0A] || fgUsedVars[kA2EP_RP_FT0C] || fgUsedVars[kA2EP_PP_TPC] || fgUsedVars[kA2EP_PP_FT0A] || fgUsedVars[kA2EP_PP_FT0C];
   if (useCoherentJpsiA2) {
+    // remove daughter from TPC Q-vector
+    // TODO: remove based on track cut in qVectorTable
+    float Q2X0A = values[kQ2X0A]*values[kMultA];
+    float Q2Y0A = values[kQ2Y0A]*values[kMultA];
+    float nNorm = values[kMultA];
+
+    int centBin = static_cast<int>(values[kCentFT0C]) + 1;  // centrality bin
+    int detIdx = 6; // TPC all
+    EventPlaneHelper epHelper;
+    // checkTrack(t1);
+    if (isSelectedinTPC(t1) && values[kAmbi1] > 0) {
+      float qx1 = t1.pt()*TMath::Cos(2. * t1.phi());
+      float qy1 = t1.pt()*TMath::Sin(2. * t1.phi());
+      if (fgApplyQVectorCorrection) {
+        epHelper.DoRecenter(qx1, qy1, fgObjQvec->GetBinContent(centBin, 1, detIdx + 1), fgObjQvec->GetBinContent(centBin, 2, detIdx + 1));
+        epHelper.DoTwist(qx1, qy1, fgObjQvec->GetBinContent(centBin, 3, detIdx + 1), fgObjQvec->GetBinContent(centBin, 4, detIdx + 1));
+        epHelper.DoRescale(qx1, qy1, fgObjQvec->GetBinContent(centBin, 5, detIdx + 1), fgObjQvec->GetBinContent(centBin, 6, detIdx + 1));
+      }
+      Q2X0A = Q2X0A - qx1;
+      Q2Y0A = Q2Y0A - qy1;
+      nNorm = nNorm - 1.;
+    }
+    // checkTrack(t2);
+    if (isSelectedinTPC(t2) && values[kAmbi2] > 0) {
+      float qx2 = t2.pt()*TMath::Cos(2. * t2.phi());
+      float qy2 = t2.pt()*TMath::Sin(2. * t2.phi());
+      if (fgApplyQVectorCorrection) {
+        epHelper.DoRecenter(qx2, qy2, fgObjQvec->GetBinContent(centBin, 1, detIdx + 1), fgObjQvec->GetBinContent(centBin, 2, detIdx + 1));
+        epHelper.DoTwist(qx2, qy2, fgObjQvec->GetBinContent(centBin, 3, detIdx + 1), fgObjQvec->GetBinContent(centBin, 4, detIdx + 1));
+        epHelper.DoRescale(qx2, qy2, fgObjQvec->GetBinContent(centBin, 5, detIdx + 1), fgObjQvec->GetBinContent(centBin, 6, detIdx + 1));
+      }
+      Q2X0A = Q2X0A - qx2;
+      Q2Y0A = Q2Y0A - qy2;
+      nNorm = nNorm - 1.;
+    }
+    values[kNnorm] = nNorm;
+    if (nNorm <= 0) {
+      values[kQ2X0A] = -999.;
+      values[kQ2Y0A] = -999.;
+      return;
+    }
+  
+    Q2X0A = nNorm > 0 ? Q2X0A/nNorm : NAN;
+    Q2Y0A = nNorm > 0 ? Q2Y0A/nNorm : NAN;
+    Q3X0A = nNorm > 0 ? Q3X0A/nNorm : NAN;
+    Q3Y0A = nNorm > 0 ? Q3Y0A/nNorm : NAN;
+
+    float Psi2A = getEventPlane(2, Q2X0A, Q2Y0A);
+    values[kPsi2A] = Psi2A;
+
     // pT ~ 0.2, non-relativistic
     // ROOT::Math::PtEtaPhiMVector v_daughter = t1.sign() > 0 ? v1 - v2 : v2 - v1;
     // boost to Jpsi rest frame, then calculate the angle with respect to the event plane
@@ -6012,9 +6017,9 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     ROOT::Math::XYZVectorF yAxis_RF = zAxis_RF.Cross(zAxis).Unit();
     ROOT::Math::XYZVectorF xAxis_RF = yAxis_RF.Cross(zAxis_RF).Unit();
     ROOT::Math::XYZVectorF daughterVec_RF{(v_daughter.Vect()).Unit()};
-    ROOT::Math::XYZVectorF b_TPC_RF{std::cos(Psi2A), std::sin(Psi2A), 0.f};
-    ROOT::Math::XYZVectorF b_FT0A_RF{std::cos(Psi2B), std::sin(Psi2B), 0.f};
-    ROOT::Math::XYZVectorF b_FT0C_RF{std::cos(Psi2C), std::sin(Psi2C), 0.f};
+    ROOT::Math::XYZVectorF b_TPC_RF = ROOT::Math::XYZVectorF(std::cos(Psi2A), std::sin(Psi2A), 0.f);
+    ROOT::Math::XYZVectorF b_FT0A_RF = ROOT::Math::XYZVectorF(std::cos(Psi2B), std::sin(Psi2B), 0.f);
+    ROOT::Math::XYZVectorF b_FT0C_RF = ROOT::Math::XYZVectorF(std::cos(Psi2C), std::sin(Psi2C), 0.f);
     float cosPhi = yAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
     float sinPhi = -1. * xAxis_RF.Dot(zAxis_RF.Cross(daughterVec_RF));
     float phi_PP = sinPhi > 0 ? TMath::ACos(cosPhi) : -1. * TMath::ACos(cosPhi);

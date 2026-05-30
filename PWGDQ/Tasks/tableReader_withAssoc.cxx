@@ -1265,6 +1265,7 @@ struct AnalysisSameEventPairing {
   o2::base::MatLayerCylSet* fLUT = nullptr;
   TH1D* ResoFlowSP = nullptr;
   TH1D* ResoFlowEP = nullptr;
+  TH3F* qvecObj = nullptr;
   int fCurrentRun; // needed to detect if the run changed and trigger update of calibrations etc.
 
   OutputObj<THashList> fOutputList{"output"};
@@ -1299,6 +1300,7 @@ struct AnalysisSameEventPairing {
     Configurable<std::string> GrpLhcIfPath{"grplhcif", "GLO/Config/GRPLHCIF", "Path on the CCDB for the GRPLHCIF object"};
     Configurable<std::string> flowPath{"flowPath", "Users/y/yiping/FlowResolution", "Path to the flow resolution object"};
     Configurable<std::string> flowPathLocal{"flowPathLocal", "/lustre/alice/users/ywang/calib/FlowReso.root", "Path to the flow resolution object in the local cache"};
+    Configurable<std::string> QvecCalibPath{"cfgQvecCalibPath", "Users/j/junlee/Qvector/Pass5/QvecShift/v2", "Path to the q vector calibration object"};
   } fConfigCCDB;
 
   struct : ConfigurableGroup {
@@ -1317,6 +1319,8 @@ struct AnalysisSameEventPairing {
     Configurable<bool> useRemoteCollisionInfo{"cfgUseRemoteCollisionInfo", false, "Use remote collision information from CCDB"};
     Configurable<bool> useRemoteFlow{"cfgUseRemoteFlow", false, "Use remote flow information from CCDB"};
     Configurable<bool> useLocalFlow{"cfgUseLocalFlow", false, "Use flow information from local cache"};
+    Configurable<bool> useQvecCalib{"cfgUseQvecCalib", false, "Use flow correction factors for Q-vector recalibration when removing the daughter"};
+    Configurable<bool> useCorrectionForRun{"cfgUseCorrectionForRun", false, "Apply run-by-run correction factors to the flow vectors"};
   } fConfigOptions;
   struct : ConfigurableGroup {
     Configurable<bool> applyBDT{"applyBDT", false, "Flag to apply ML selections"};
@@ -1762,6 +1766,15 @@ struct AnalysisSameEventPairing {
         }
       }
     }
+
+    if (fConfigOptions.useQvecCalib) {
+      TString pathQvecCalib = fConfigCCDB.QvecCalibPath.value;
+      if (fConfigOptions.useCorrectionForRun) {
+        qvecObj = fCCDB->getForRun<TH3F>(pathQvecCalib.Data(), runNumber);
+      } else {
+        qvecObj = fCCDB->getForTimeStamp<TH3F>(pathQvecCalib.Data(), timestamp);
+      }
+    }
   }
 
   // Template function to run same event pairing (barrel-barrel, muon-muon, barrel-muon)
@@ -1848,6 +1861,12 @@ struct AnalysisSameEventPairing {
           LOGF(fatal, "Flow resolution histograms are not available, cannot fill flow variables!");
         }
         VarManager::FillEventFlowResoFactor(ResoFlowSP, ResoFlowEP);
+        if (fConfigOptions.useQvecCalib) {
+          if (qvecObj == nullptr) {
+            LOGF(fatal, "Q-vector calibration object is not available, cannot fill flow variables!");
+          }
+          VarManager::SetEventQVectorCorrection(qvecObj);
+        }
       }
 
       bool isFirst = true;

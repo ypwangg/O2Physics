@@ -1096,6 +1096,8 @@ struct AnalysisSameEventPairing {
   o2::base::MatLayerCylSet* fLUT = nullptr;
   TH1D* ResoFlowSP = nullptr;
   TH1D* ResoFlowEP = nullptr;
+  TH3F* qvecObj = nullptr;
+  TString pathQvecCalib;
   int fCurrentRun; // needed to detect if the run changed and trigger update of calibrations etc.
 
   OutputObj<THashList> fOutputList{"output"};
@@ -1132,6 +1134,8 @@ struct AnalysisSameEventPairing {
     Configurable<float> fConfigMiniTreeMaxMass{"cfgMiniTreeMaxMass", 5, "Max. mass cut for minitree"};
     Configurable<bool> useRemoteFlow{"cfgUseRemoteFlow", false, "Use remote flow information from CCDB"};
     Configurable<bool> useLocalFlow{"cfgUseLocalFlow", false, "Use flow information from local cache"};
+    Configurable<bool> useQvecCalib{"cfgUseQvecCalib", false, "Use flow correction factors for Q-vector recalibration when removing the daughter"};
+    Configurable<bool> useCorrectionForRun{"cfgUseCorrectionForRun", false, "Apply run-by-run correction factors to the flow vectors"};
   } fConfigOptions;
 
   struct : ConfigurableGroup {
@@ -1141,6 +1145,7 @@ struct AnalysisSameEventPairing {
     Configurable<std::string> geoPath{"geoPath", "GLO/Config/GeometryAligned", "Path of the geometry file"};
     Configurable<std::string> flowPath{"flowPath", "Users/y/yiping/FlowResolution", "Path to the flow resolution object"};
     Configurable<std::string> flowPathLocal{"flowPathLocal", "/lustre/alice/users/ywang/calib/FlowReso.root", "Path to the flow resolution object in the local cache"};
+    Configurable<std::string> QvecCalibPath{"cfgQvecCalibPath", "Users/j/junlee/Qvector/Pass5/QvecShift/v2", "Path to the q vector calibration object"};
   } fConfigCCDB;
 
   Service<o2::ccdb::BasicCCDBManager> fCCDB;
@@ -1391,6 +1396,12 @@ struct AnalysisSameEventPairing {
     VarManager::SetUseVars(fHistMan->GetUsedVars());                                                      // provide the list of required variables so that VarManager knows what to fill
     fOutputList.setObject(fHistMan->GetMainHistogramList());
 
+    if (fConfigOptions.useQvecCalib) {
+      string tmppathQvecCalib;
+      getTaskOptionValue<string>(context, "q-vectors-table", "cfgQvecCalibPath", tmppathQvecCalib, false);
+      pathQvecCalib = tmppathQvecCalib;
+    }
+
     cout << "AnalysisSameEventPairing::init() completed" << endl;
   }
 
@@ -1451,6 +1462,18 @@ struct AnalysisSameEventPairing {
       fileFlow->GetObject("EventPlane", ResoFlowEP);
       if (ResoFlowSP == nullptr || ResoFlowEP == nullptr) {
         LOGF(fatal, "Flow resolution histograms not available in file %s", pathFlow.Data());
+      }
+    }
+
+    if (fConfigOptions.useQvecCalib) {
+      TString ccdbPathQvecCalib = Form("%s/v2", pathQvecCalib.Data());
+      if (fConfigOptions.useCorrectionForRun) {
+        qvecObj = fCCDB->getForRun<TH3F>(ccdbPathQvecCalib.Data(), timestamp);
+      } else {
+        qvecObj = fCCDB->getForTimeStamp<TH3F>(ccdbPathQvecCalib.Data(), 0); // get the object without time dependence if no correction for run is needed
+      }
+      if (qvecObj == nullptr) {
+        LOGF(fatal, "Q-vector calibration object not available in CCDB at timestamp=%llu", timestamp);
       }
     }
     cout << "AnalysisSameEventPairing::initParamsFromCCDB() completed" << endl;
@@ -1565,6 +1588,12 @@ struct AnalysisSameEventPairing {
           LOGF(fatal, "Flow resolution histograms are not available, cannot fill flow variables!");
         }
         VarManager::FillEventFlowResoFactor(ResoFlowSP, ResoFlowEP);
+        if (fConfigOptions.useQvecCalib) {
+          if (qvecObj == nullptr) {
+            LOGF(fatal, "Q-vector calibration object is not available, cannot fill flow variables!");
+          }
+          VarManager::SetEventQVectorCorrection(qvecObj);
+        }
       }
 
       for (auto& [a1, a2] : o2::soa::combinations(groupedAssocs, groupedAssocs)) {
