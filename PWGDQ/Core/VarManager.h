@@ -5999,8 +5999,6 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   
     Q2X0A = nNorm > 0 ? Q2X0A/nNorm : NAN;
     Q2Y0A = nNorm > 0 ? Q2Y0A/nNorm : NAN;
-    Q3X0A = nNorm > 0 ? Q3X0A/nNorm : NAN;
-    Q3Y0A = nNorm > 0 ? Q3Y0A/nNorm : NAN;
 
     float Psi2A = getEventPlane(2, Q2X0A, Q2Y0A);
     values[kPsi2A] = Psi2A;
