@@ -1471,9 +1471,9 @@ struct AnalysisSameEventPairing {
       cout << "Fetching Q-vector calibration object from CCDB with path: " << fConfigCCDB.QvecCalibPath.value << endl;
       TString ccdbPathQvecCalib = Form("%s/v2", pathQvecCalib.Data());
       if (fConfigOptions.useCorrectionForRun) {
-        qvecObj = fCCDB->getForRun<TH3F>(ccdbPathQvecCalib.Data(), timestamp);
+        qvecObj = fCCDB->getForRun<TH3F>(ccdbPathQvecCalib.Data(), runnumber); // get the object with run dependence if correction for run is needed
       } else {
-        qvecObj = fCCDB->getForTimeStamp<TH3F>(ccdbPathQvecCalib.Data(), runnumber); // get the object without time dependence if no correction for run is needed
+        qvecObj = fCCDB->getForTimeStamp<TH3F>(ccdbPathQvecCalib.Data(), timestamp); // get the object without time dependence if no correction for run is needed
       }
       cout << "Q-vector calibration object fetched from CCDB: " << (qvecObj != nullptr ? "YES" : "NO") << endl;
       if (qvecObj == nullptr) {
