@@ -451,6 +451,7 @@ struct AnalysisEventSelection {
         }*/
       }
       std::map<std::string, std::string> metadataRCT, header;
+      cout << "Retrieving RCT header information from CCDB for run " << bcs.begin().runNumber() << endl;
       header = fCCDBApi.retrieveHeaders(Form("RCT/Info/RunInformation/%i", bcs.begin().runNumber()), metadataRCT, -1);
       uint64_t sor = std::atol(header["SOR"].c_str());
       uint64_t eor = std::atol(header["EOR"].c_str());
