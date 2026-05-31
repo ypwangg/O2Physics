@@ -1573,6 +1573,7 @@ struct AnalysisSameEventPairing {
     constexpr bool fillFlowReso = eventHasQvector;
 
     for (auto& event : events) {
+      cout << "Processing event with global index: " << event.globalIndex() << endl;
       if (!event.isEventSelected_bit(0))
         continue;
 
@@ -1752,7 +1753,7 @@ struct AnalysisSameEventPairing {
                                          MyBarrelTracksWithCovWithAmbiguities const& barrelTracks)
   {
     cout << "AnalysisSameEventPairing::processBarrelOnlyWithQvectorCentrNoCov() called" << endl;
-    runSameEventPairing<true, VarManager::kDecayToEE, gkEventFillMapWithQvectorCentr, gkTrackFillMapWithCov>(events, bcs, trackAssocsPerCollision, barrelAssocs, barrelTracks);
+    runSameEventPairing<false, VarManager::kDecayToEE, gkEventFillMapWithQvectorCentr, gkTrackFillMapWithCov>(events, bcs, trackAssocsPerCollision, barrelAssocs, barrelTracks);
     cout << "AnalysisSameEventPairing::processBarrelOnlyWithQvectorCentrNoCov() completed" << endl;
   }
   // todo: no cov
