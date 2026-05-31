@@ -1300,7 +1300,7 @@ struct AnalysisSameEventPairing {
     Configurable<std::string> GrpLhcIfPath{"grplhcif", "GLO/Config/GRPLHCIF", "Path on the CCDB for the GRPLHCIF object"};
     Configurable<std::string> flowPath{"flowPath", "Users/y/yiping/FlowResolution", "Path to the flow resolution object"};
     Configurable<std::string> flowPathLocal{"flowPathLocal", "/lustre/alice/users/ywang/calib/FlowReso.root", "Path to the flow resolution object in the local cache"};
-    Configurable<std::string> QvecCalibPath{"cfgQvecCalibPath", "Users/j/junlee/Qvector/Pass5/QvecShift/v2", "Path to the q vector calibration object"};
+    Configurable<std::string> QvecCalibPath{"cfgQvecCalibPath", "Users/j/junlee/Qvector/Pass5/QvecCalib/v2", "Path to the q vector calibration object"};
   } fConfigCCDB;
 
   struct : ConfigurableGroup {
@@ -1337,6 +1337,7 @@ struct AnalysisSameEventPairing {
   Filter filterEventSelected = aod::dqanalysisflags::isEventSelected > static_cast<uint8_t>(0);
 
   HistogramManager* fHistMan;
+  HistogramRegistry registry{"registry"};
 
   o2::analysis::DQMlResponse<float> fDQMlResponse;
   std::vector<float> fOutputMlPsi2ee = {}; // TODO: check this is needed or not
@@ -1685,6 +1686,7 @@ struct AnalysisSameEventPairing {
     if (fConfigShiftCorr) {
       VarManager::initShiftCorrection(fConfignModes);
     }
+    registry.add("psi2A", "Psi2A", HistType::kTH2F, {{10, 0, 100}, {100, -3.14, 3.14}});
   }
 
   void initParamsFromCCDB(uint64_t timestamp, int runNumber, bool withTwoProngFitter = true)
@@ -2211,6 +2213,7 @@ struct AnalysisSameEventPairing {
           }
         } // end loop (cuts)
       } // end loop over pairs of track associations
+      registry.fill(HIST("psi2A"), VarManager::fgValues[VarManager::kCentFT0C], VarManager::fgValues[VarManager::kPsi2A]);
     } // end loop over events
   }
 

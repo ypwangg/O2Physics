@@ -1454,7 +1454,6 @@ struct AnalysisSameEventPairing {
       }
     } else if (fConfigOptions.useLocalFlow) {
       // LOGP(info, "Developing");
-      cout<< "setting flow reso from local file: " << fConfigCCDB.flowPathLocal.value << endl;
       TString  pathFlow = fConfigCCDB.flowPathLocal.value;
       TFile* fileFlow = TFile::Open(pathFlow.Data(), "READ");
       if (fileFlow == nullptr || fileFlow->IsZombie()) {
@@ -1468,7 +1467,6 @@ struct AnalysisSameEventPairing {
     }
 
     if (fConfigOptions.useQvecCalib) {
-      cout << "Fetching Q-vector calibration object from CCDB with path: " << fConfigCCDB.QvecCalibPath.value << endl;
       TString ccdbPathQvecCalib = Form("%s/v2", pathQvecCalib.Data());
       if (fConfigOptions.useCorrectionForRun) {
         qvecObj = fCCDB->getForRun<TH3F>(ccdbPathQvecCalib.Data(), runnumber); // get the object with run dependence if correction for run is needed
@@ -1573,7 +1571,6 @@ struct AnalysisSameEventPairing {
     constexpr bool fillFlowReso = eventHasQvector;
 
     for (auto& event : events) {
-      cout << "Processing event with global index: " << event.globalIndex() << endl;
       if (!event.isEventSelected_bit(0))
         continue;
 
@@ -1589,7 +1586,6 @@ struct AnalysisSameEventPairing {
         continue;
 
       if (fillFlowReso) {
-        cout << "Filling flow variables for event with global index: " << event.globalIndex() << endl;
         if (ResoFlowSP == nullptr || ResoFlowEP == nullptr) {
           LOGF(fatal, "Flow resolution histograms are not available, cannot fill flow variables!");
         }
