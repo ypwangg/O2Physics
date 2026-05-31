@@ -1405,9 +1405,9 @@ struct AnalysisSameEventPairing {
     cout << "AnalysisSameEventPairing::init() completed" << endl;
   }
 
-  void initParamsFromCCDB(uint64_t timestamp, bool withTwoProngFitter = true)
+  void initParamsFromCCDB(uint64_t timestamp, uint64_t runnumber, bool withTwoProngFitter = true)
   {
-    cout << "AnalysisSameEventPairing::initParamsFromCCDB() called for timestamp " << timestamp << endl;
+    cout << "AnalysisSameEventPairing::initParamsFromCCDB() called for timestamp " << timestamp << " and run number " << runnumber << endl;
     if (fConfigOptions.useRemoteField.value) {
       o2::parameters::GRPMagField* grpmag = fCCDB->getForTimeStamp<o2::parameters::GRPMagField>(fConfigCCDB.grpMagPath, timestamp);
       o2::base::MatLayerCylSet* lut = o2::base::MatLayerCylSet::rectifyPtrFromFile(fCCDB->get<o2::base::MatLayerCylSet>(fConfigCCDB.lutPath));
@@ -1470,7 +1470,7 @@ struct AnalysisSameEventPairing {
       if (fConfigOptions.useCorrectionForRun) {
         qvecObj = fCCDB->getForRun<TH3F>(ccdbPathQvecCalib.Data(), timestamp);
       } else {
-        qvecObj = fCCDB->getForTimeStamp<TH3F>(ccdbPathQvecCalib.Data(), 0); // get the object without time dependence if no correction for run is needed
+        qvecObj = fCCDB->getForTimeStamp<TH3F>(ccdbPathQvecCalib.Data(), runnumber); // get the object without time dependence if no correction for run is needed
       }
       if (qvecObj == nullptr) {
         LOGF(fatal, "Q-vector calibration object not available in CCDB at timestamp=%llu", timestamp);
@@ -1540,7 +1540,7 @@ struct AnalysisSameEventPairing {
       return;
     }
     if (fCurrentRun != bcs.begin().runNumber()) {
-      initParamsFromCCDB(bcs.begin().timestamp(), TTwoProngFitter);
+      initParamsFromCCDB(bcs.begin().timestamp(), bcs.begin().runNumber(), TTwoProngFitter);
       fCurrentRun = bcs.begin().runNumber();
     }
 
