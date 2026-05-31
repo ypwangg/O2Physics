@@ -1406,7 +1406,7 @@ struct AnalysisSameEventPairing {
     cout << "AnalysisSameEventPairing::init() completed" << endl;
   }
 
-  void initParamsFromCCDB(uint64_t timestamp, uint64_t runnumber, bool withTwoProngFitter = true)
+  void initParamsFromCCDB(uint64_t timestamp, int runnumber, bool withTwoProngFitter = true)
   {
     cout << "AnalysisSameEventPairing::initParamsFromCCDB() called for timestamp " << timestamp << " and run number " << runnumber << endl;
     if (fConfigOptions.useRemoteField.value) {
@@ -1475,6 +1475,7 @@ struct AnalysisSameEventPairing {
       } else {
         qvecObj = fCCDB->getForTimeStamp<TH3F>(ccdbPathQvecCalib.Data(), runnumber); // get the object without time dependence if no correction for run is needed
       }
+      cout << "Q-vector calibration object fetched from CCDB: " << (qvecObj != nullptr ? "YES" : "NO") << endl;
       if (qvecObj == nullptr) {
         LOGF(fatal, "Q-vector calibration object not available in CCDB at timestamp=%llu", timestamp);
       }
