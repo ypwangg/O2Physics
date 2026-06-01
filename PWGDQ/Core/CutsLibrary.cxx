@@ -3090,6 +3090,7 @@ AnalysisCompositeCut* o2::aod::dqcuts::GetCompositeCut(const char* cutName)
 
   if (!nameStr.compare("pidJpsi_pion0_comb")) {
     cut->AddCut(GetAnalysisCut("SPDfirst"));
+    cut->AddCut(GetAnalysisCut("TPCQuality"));
     cut->AddCut(GetAnalysisCut("pidJpsi_noTOF_prot"));
     cut->AddCut(GetAnalysisCut("pidJpsi_beta"));
     cut->AddCut(GetAnalysisCut("pidJpsi_TPCpion0"));
@@ -5105,6 +5106,11 @@ AnalysisCut* o2::aod::dqcuts::GetAnalysisCut(const char* cutName)
     cut->AddCut(VarManager::kTPCchi2, 0.0, 4.0);
     cut->AddCut(VarManager::kTPCnclsCR, 80.0, 161.);
     cut->AddCut(VarManager::kIsTPCrefit, 0.5, 1.5);
+    return cut;
+  }
+
+  if (!nameStr.compare("TPCQuality")) {
+    cut->AddCut(VarManager::kTPCncls, 100.0, 161.);
     return cut;
   }
 
