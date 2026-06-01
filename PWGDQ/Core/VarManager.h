@@ -5968,16 +5968,11 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     if (isSelectedinTPC(t1) && values[kAmbi1] > 0) {
       float qx1 = t1.pt()*TMath::Cos(2. * t1.phi());
       float qy1 = t1.pt()*TMath::Sin(2. * t1.phi());
-      cout << "Before correction: qx1 = " << qx1 << ", qy1 = " << qy1 << endl;
       if (fgApplyQVectorCorrection) {
-        cout << "recenter: " << fgObjQvec->GetBinContent(centBin, 1, detIdx + 1) << ", " << fgObjQvec->GetBinContent(centBin, 2, detIdx + 1) << endl;
-        cout << "twist: " << fgObjQvec->GetBinContent(centBin, 3, detIdx + 1) << ", " << fgObjQvec->GetBinContent(centBin, 4, detIdx + 1) << endl;
-        cout << "rescale: " << fgObjQvec->GetBinContent(centBin, 5, detIdx + 1) << ", " << fgObjQvec->GetBinContent(centBin, 6, detIdx + 1) << endl;
         epHelper.DoRecenter(qx1, qy1, fgObjQvec->GetBinContent(centBin, 1, detIdx + 1), fgObjQvec->GetBinContent(centBin, 2, detIdx + 1));
         epHelper.DoTwist(qx1, qy1, fgObjQvec->GetBinContent(centBin, 3, detIdx + 1), fgObjQvec->GetBinContent(centBin, 4, detIdx + 1));
         epHelper.DoRescale(qx1, qy1, fgObjQvec->GetBinContent(centBin, 5, detIdx + 1), fgObjQvec->GetBinContent(centBin, 6, detIdx + 1));
       }
-      cout << "After correction: qx1 = " << qx1 << ", qy1 = " << qy1 << endl;
       Q2X0A = Q2X0A - qx1;
       Q2Y0A = Q2Y0A - qy1;
       nNorm = nNorm - 1.;
