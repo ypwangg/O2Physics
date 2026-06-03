@@ -6036,6 +6036,13 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     values[kDeltaPhiPP_FT0A]  = values[kDeltaPhiPP_FT0A] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiPP_FT0A] : values[kDeltaPhiPP_FT0A];
     values[kDeltaPhiPP_FT0C] = phi_PP > Psi2CPP ? phi_PP - Psi2CPP : Psi2CPP - phi_PP;
     values[kDeltaPhiPP_FT0C]  = values[kDeltaPhiPP_FT0C] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiPP_FT0C] : values[kDeltaPhiPP_FT0C];
+    // fold delta phi to [0, pi/2]
+    values[kDeltaPhiPP_TPC] = values[kDeltaPhiPP_TPC] > TMath::Pi() / 2. ? TMath::Pi() - values[kDeltaPhiPP_TPC] : values[kDeltaPhiPP_TPC];
+    values[kDeltaPhiPP_FT0A] = values[kDeltaPhiPP_FT0A] > TMath::Pi() / 2. ? TMath::Pi() - values[kDeltaPhiPP_FT0A] : values[kDeltaPhiPP_FT0A];
+    values[kDeltaPhiPP_FT0C] = values[kDeltaPhiPP_FT0C] > TMath::Pi() / 2. ? TMath::Pi() - values[kDeltaPhiPP_FT0C] : values[kDeltaPhiPP_FT0C];
+    values[kDeltaPhiPP_TPC] = values[kDeltaPhiPP_TPC] / values[kR2EP];
+    values[kDeltaPhiPP_FT0A] = values[kDeltaPhiPP_FT0A] / values[kR2EP];
+    values[kDeltaPhiPP_FT0C] = values[kDeltaPhiPP_FT0C] / values[kR2EP];
     values[kCos2DeltaPhiPP_TPC] = TMath::Cos(2. * (phi_PP - Psi2A));
     values[kCos2DeltaPhiPP_FT0A] = TMath::Cos(2. * (phi_PP - Psi2B));
     values[kCos2DeltaPhiPP_FT0C] = TMath::Cos(2. * (phi_PP - Psi2C));
@@ -6055,6 +6062,13 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
     values[kDeltaPhiRP_FT0A]  = values[kDeltaPhiRP_FT0A] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiRP_FT0A] : values[kDeltaPhiRP_FT0A];
     values[kDeltaPhiRP_FT0C] = phi > Psi2C ? phi - Psi2C : Psi2C - phi;
     values[kDeltaPhiRP_FT0C]  = values[kDeltaPhiRP_FT0C] > TMath::Pi() ? 2. * TMath::Pi() - values[kDeltaPhiRP_FT0C] : values[kDeltaPhiRP_FT0C];
+    // fold delta phi to [0, pi/2]
+    values[kDeltaPhiRP_TPC] = values[kDeltaPhiRP_TPC] > TMath::Pi() / 2. ? TMath::Pi() - values[kDeltaPhiRP_TPC] : values[kDeltaPhiRP_TPC];
+    values[kDeltaPhiRP_FT0A] = values[kDeltaPhiRP_FT0A] > TMath::Pi() / 2. ? TMath::Pi() - values[kDeltaPhiRP_FT0A] : values[kDeltaPhiRP_FT0A];
+    values[kDeltaPhiRP_FT0C] = values[kDeltaPhiRP_FT0C] > TMath::Pi() / 2. ? TMath::Pi() - values[kDeltaPhiRP_FT0C] : values[kDeltaPhiRP_FT0C];
+    values[kDeltaPhiRP_TPC] = values[kDeltaPhiRP_TPC] / values[kR2EP];
+    values[kDeltaPhiRP_FT0A] = values[kDeltaPhiRP_FT0A] / values[kR2EP];
+    values[kDeltaPhiRP_FT0C] = values[kDeltaPhiRP_FT0C] / values[kR2EP];
     values[kCos2DeltaPhiRP_TPC] = TMath::Cos(2. * (phi - Psi2A));
     values[kCos2DeltaPhiRP_FT0A] = TMath::Cos(2. * (phi - Psi2B));
     values[kCos2DeltaPhiRP_FT0C] = TMath::Cos(2. * (phi - Psi2C));
