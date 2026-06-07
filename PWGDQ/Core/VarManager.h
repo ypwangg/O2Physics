@@ -2276,7 +2276,9 @@ void VarManager::FillEvent(T const& event, float* values)
     values[kQ1X0C] = -999;
     values[kQ1Y0C] = -999;
     values[kQ2X0A] = (event.qvecBPosRe() * event.nTrkBPos() + event.qvecBNegRe() * event.nTrkBNeg()) / (event.nTrkBPos() + event.nTrkBNeg());
+    values[kQ2X0A] = std::isnan(values[kQ2X0A]) || std::isinf(values[kQ2X0A]) ? -999. : values[kQ2X0A];
     values[kQ2Y0A] = (event.qvecBPosIm() * event.nTrkBPos() + event.qvecBNegIm() * event.nTrkBNeg()) / (event.nTrkBPos() + event.nTrkBNeg());
+    values[kQ2Y0A] = std::isnan(values[kQ2Y0A]) || std::isinf(values[kQ2Y0A]) ? -999. : values[kQ2Y0A];
     values[kQ2X0APOS] = event.qvecBPosRe();
     values[kQ2Y0APOS] = event.qvecBPosIm();
     values[kQ2X0ANEG] = event.qvecBNegRe();
