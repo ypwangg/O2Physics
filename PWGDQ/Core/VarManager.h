@@ -2457,6 +2457,27 @@ void VarManager::FillEvent(T const& event, float* values)
     values[kWR2EP_AC_Im] = std::isnan(R2EP_AC_Im) || std::isinf(R2EP_AC_Im) ? 0. : 1.0;
     values[kR2EP_BC_Im] = std::isnan(R2EP_BC_Im) || std::isinf(R2EP_BC_Im) ? 0. : R2EP_BC_Im;
     values[kWR2EP_BC_Im] = std::isnan(R2EP_BC_Im) || std::isinf(R2EP_BC_Im) ? 0. : 1.0;
+
+    values[kRandomPsi2] = gRandom->Uniform(-0.5 * TMath::Pi(), 0.5 * TMath::Pi());
+    float Psi2Random = values[kRandomPsi2];
+
+    // Also store the modulation value from the TF1 at the sampled Psi2
+    if (fgModulationPsi2) {
+      double u2 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
+      values[kModulPsi2] = fgModulationPsi2->GetX(
+          u2,
+          -0.5 * TMath::Pi(),
+          0.5 * TMath::Pi()
+      );
+    }
+    if (fgModulationPsi3) {
+      double u3 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
+      values[kModulPsi3] = fgModulationPsi3->GetX(
+          u3,
+          -0.5 * TMath::Pi(),
+          0.5 * TMath::Pi()
+      );
+    }
   }
 
   if constexpr ((fillMap & CollisionMC) > 0) {
@@ -6160,7 +6181,6 @@ void VarManager::FillPairVnRandom(T1 const& t1, T2 const& t2, float* values)
     values = fgValues;
   }
 
-  values[kRandomPsi2] = gRandom->Uniform(-0.5 * TMath::Pi(), 0.5 * TMath::Pi());
   float m1 = o2::constants::physics::MassElectron;
   float m2 = o2::constants::physics::MassElectron;
   if constexpr (pairType == kDecayToMuMu) {
@@ -6180,26 +6200,6 @@ void VarManager::FillPairVnRandom(T1 const& t1, T2 const& t2, float* values)
   ROOT::Math::PtEtaPhiMVector v2(t2.pt(), t2.eta(), t2.phi(), m2);
   ROOT::Math::PtEtaPhiMVector v12 = v1 + v2;
 
-  // Use the pre-sampled random event plane (sampled per event in the task)
-  float Psi2Random = values[kRandomPsi2];
-
-  // Also store the modulation value from the TF1 at the sampled Psi2
-  if (fgModulationPsi2) {
-    double u2 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
-    values[kModulPsi2] = fgModulationPsi2->GetX(
-        u2,
-        -0.5 * TMath::Pi(),
-        0.5 * TMath::Pi()
-    );
-  }
-  if (fgModulationPsi3) {
-    double u3 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
-    values[kModulPsi3] = fgModulationPsi3->GetX(
-        u3,
-        -0.5 * TMath::Pi(),
-        0.5 * TMath::Pi()
-    );
-  }
   ROOT::Math::Boost boostv12{v12.BoostToCM()};
   ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
   float phi = v_daughter.Phi() > TMath::Pi() ? 2. * TMath::Pi() - v_daughter.Phi() : v_daughter.Phi();
