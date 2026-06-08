@@ -1391,6 +1391,9 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
         hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_RP", "", 5, varRP, binsRP, minRP, maxRP, 0, -1, kTRUE);
         hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_DeltaPhiModul2", "", 5, varMold2, binsRP, minRP, maxRP, 0, -1, kTRUE);
         hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_DeltaPhiModul3", "", 5, varMold3, binsRP, minRP, maxRP, 0, -1, kTRUE);
+        hm->AddHistogram(histClass, "PsiRandom", "", false, 100, -2.0, 2.0, VarManager::kRandomPsi2);
+        hm->AddHistogram(histClass, "PsiModulation2", "", false, 100, -2.0, 2.0, VarManager::kModulPsi2);
+        hm->AddHistogram(histClass, "PsiModulation3", "", false, 100, -2.0, 2.0, VarManager::kModulPsi3);
       }
       if (subGroupStr.Contains("flow-jpsi_hadronic-ep")) {
         int varHadronic[5] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kV2EP};
