@@ -216,7 +216,7 @@ void HistogramManager::AddHistogram(const char* histClass, const char* hname, co
 
     case 2: // either TH2F or TProfile
       if (isProfile) {
-        h = new TProfile(hname, (arr->At(0) ? arr->At(0)->GetName() : ""), nXbins, xmin, xmax);
+        h = new TProfile(hname, (arr->At(0) ? arr->At(0)->GetName() : ""), nXbins, xmin, xmax, ymin, ymax);
         fBinsAllocated += nXbins + 2;
         h->Sumw2();
         // if requested, build the profile using the profile widths instead of stat errors
