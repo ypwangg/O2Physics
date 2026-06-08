@@ -6193,7 +6193,7 @@ void VarManager::FillPairVnRandom(T1 const& t1, T2 const& t2, float* values)
     );
   }
   if (fgModulationPsi3) {
-    double u3 = (Psi3Random + TMath::Pi()) / (2.0 * TMath::Pi());
+    double u3 = (Psi2Random + TMath::Pi()) / (2.0 * TMath::Pi());
     values[kModulPsi3] = fgModulationPsi3->GetX(
         u3,
         -TMath::Pi(),
