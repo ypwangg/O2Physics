@@ -6160,7 +6160,7 @@ void VarManager::FillPairVnRandom(T1 const& t1, T2 const& t2, float* values)
     values = fgValues;
   }
 
-  values[kRandomPsi2] = gRandom->Uniform(-1. * TMath::Pi(), TMath::Pi());
+  values[kRandomPsi2] = gRandom->Uniform(-0.5 * TMath::Pi(), 0.5 * TMath::Pi());
   float m1 = o2::constants::physics::MassElectron;
   float m2 = o2::constants::physics::MassElectron;
   if constexpr (pairType == kDecayToMuMu) {
@@ -6185,19 +6185,19 @@ void VarManager::FillPairVnRandom(T1 const& t1, T2 const& t2, float* values)
 
   // Also store the modulation value from the TF1 at the sampled Psi2
   if (fgModulationPsi2) {
-    double u2 = (Psi2Random + TMath::Pi()) / (2.0 * TMath::Pi());
+    double u2 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
     values[kModulPsi2] = fgModulationPsi2->GetX(
         u2,
-        -TMath::Pi(),
-        TMath::Pi()
+        -0.5 * TMath::Pi(),
+        0.5 * TMath::Pi()
     );
   }
   if (fgModulationPsi3) {
-    double u3 = (Psi2Random + TMath::Pi()) / (2.0 * TMath::Pi());
+    double u3 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
     values[kModulPsi3] = fgModulationPsi3->GetX(
         u3,
-        -TMath::Pi(),
-        TMath::Pi()
+        -0.5 * TMath::Pi(),
+        0.5 * TMath::Pi()
     );
   }
   ROOT::Math::Boost boostv12{v12.BoostToCM()};

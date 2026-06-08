@@ -58,8 +58,8 @@ bool VarManager::fgApplyQVectorCorrection = false;
 std::vector<TProfile3D*> VarManager::fgShiftProfiles;
 std::vector<int> VarManager::fgHarmonics;
 bool VarManager::fgApplyShiftCorrection = false;
-TF1* VarManager::fgModulationPsi2 = new TF1("fgModulationPsi2", "(x + TMath::Pi() + 0.05/2.0*sin(2*x)) / (2.0*TMath::Pi())", -1. * TMath::Pi(), TMath::Pi()); // Default modulation function for sampling random event plane with modulation
-TF1* VarManager::fgModulationPsi3 = new TF1("fgModulationPsi3", "(x + TMath::Pi() + 0.05/3.0*sin(3*x)) / (2.0*TMath::Pi())", -1. * TMath::Pi(), TMath::Pi()); // Default modulation function for sampling random event plane with modulation
+TF1* VarManager::fgModulationPsi2 = new TF1("fgModulationPsi2", "(x + 0.5*TMath::Pi() + 0.05/2.0*sin(2*x)) / TMath::Pi()", -0.5 * TMath::Pi(), 0.5 * TMath::Pi()); // Default modulation function for sampling random event plane with modulation
+TF1* VarManager::fgModulationPsi3 = new TF1("fgModulationPsi3", "(x + 0.5*TMath::Pi() + 0.05/3.0*(sin(3*x) - 1.0)) / (TMath::Pi() - 2.0*0.05/3.0)", -0.5 * TMath::Pi(), 0.5 * TMath::Pi()); // Default modulation function for sampling random event plane with modulation
 
 //__________________________________________________________________
 VarManager::VarManager() : TObject()
