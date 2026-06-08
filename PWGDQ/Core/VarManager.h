@@ -6185,10 +6185,12 @@ void VarManager::FillPairVnRandom(T1 const& t1, T2 const& t2, float* values)
 
   // Also store the modulation value from the TF1 at the sampled Psi2
   if (fgModulationPsi2) {
-    values[kModulPsi2] = fgModulationPsi2->Eval(Psi2Random);
+    double u2 = (Psi2Random - psiMin) / (psiMax - psiMin);
+    values[kModulPsi2] = fgModulationPsi2->GetX(u2, psiMin, psiMax);
   }
   if (fgModulationPsi3) {
-    values[kModulPsi3] = fgModulationPsi3->Eval(Psi2Random);
+    double u3 = (Psi3Random - psiMin) / (psiMax - psiMin);
+    values[kModulPsi3] = fgModulationPsi3->GetX(u3, psiMin, psiMax);
   }
   ROOT::Math::Boost boostv12{v12.BoostToCM()};
   ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
