@@ -2333,6 +2333,27 @@ void VarManager::FillEvent(T const& event, float* values)
     values[kPsi2B] = Psi2B;
     values[kPsi2C] = Psi2C;
 
+    values[kRandomPsi2] = gRandom->Uniform(-0.5 * TMath::Pi(), 0.5 * TMath::Pi());
+    float Psi2Random = values[kRandomPsi2];
+
+    // Also store the modulation value from the TF1 at the sampled Psi2
+    if (fgModulationPsi2) {
+      double u2 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
+      values[kModulPsi2] = fgModulationPsi2->GetX(
+          u2,
+          -0.5 * TMath::Pi(),
+          0.5 * TMath::Pi()
+      );
+    }
+    if (fgModulationPsi3) {
+      double u3 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
+      values[kModulPsi3] = fgModulationPsi3->GetX(
+          u3,
+          -0.5 * TMath::Pi(),
+          0.5 * TMath::Pi()
+      );
+    }
+
     float R2SP_AB = (values[kQ2X0A] * values[kQ2X0B] + values[kQ2Y0A] * values[kQ2Y0B]);
     float R2SP_AC = (values[kQ2X0A] * values[kQ2X0C] + values[kQ2Y0A] * values[kQ2Y0C]);
     float R2SP_BC = (values[kQ2X0B] * values[kQ2X0C] + values[kQ2Y0B] * values[kQ2Y0C]);
@@ -2457,27 +2478,6 @@ void VarManager::FillEvent(T const& event, float* values)
     values[kWR2EP_AC_Im] = std::isnan(R2EP_AC_Im) || std::isinf(R2EP_AC_Im) ? 0. : 1.0;
     values[kR2EP_BC_Im] = std::isnan(R2EP_BC_Im) || std::isinf(R2EP_BC_Im) ? 0. : R2EP_BC_Im;
     values[kWR2EP_BC_Im] = std::isnan(R2EP_BC_Im) || std::isinf(R2EP_BC_Im) ? 0. : 1.0;
-
-    values[kRandomPsi2] = gRandom->Uniform(-0.5 * TMath::Pi(), 0.5 * TMath::Pi());
-    float Psi2Random = values[kRandomPsi2];
-
-    // Also store the modulation value from the TF1 at the sampled Psi2
-    if (fgModulationPsi2) {
-      double u2 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
-      values[kModulPsi2] = fgModulationPsi2->GetX(
-          u2,
-          -0.5 * TMath::Pi(),
-          0.5 * TMath::Pi()
-      );
-    }
-    if (fgModulationPsi3) {
-      double u3 = (Psi2Random + 0.5 * TMath::Pi()) / (TMath::Pi());
-      values[kModulPsi3] = fgModulationPsi3->GetX(
-          u3,
-          -0.5 * TMath::Pi(),
-          0.5 * TMath::Pi()
-      );
-    }
   }
 
   if constexpr ((fillMap & CollisionMC) > 0) {
