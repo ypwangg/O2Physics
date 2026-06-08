@@ -343,6 +343,9 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
       hm->AddHistogram(histClass, "Psi2A_CentFT0C", "", false, 90, 0.0, 90.0, VarManager::kCentFT0C, 100, -2.0, 2.0, VarManager::kPsi2A);
       hm->AddHistogram(histClass, "Psi2B_CentFT0C", "", false, 90, 0.0, 90.0, VarManager::kCentFT0C, 100, -2.0, 2.0, VarManager::kPsi2B);
       hm->AddHistogram(histClass, "Psi2C_CentFT0C", "", false, 90, 0.0, 90.0, VarManager::kCentFT0C, 100, -2.0, 2.0, VarManager::kPsi2C);
+      hm->AddHistogram(histClass, "PsiRandom", "", false, 100, -2.0, 2.0, VarManager::kRandomPsi2);
+      hm->AddHistogram(histClass, "PsiModulation2", "", false, 100, -2.0, 2.0, VarManager::kModulPsi2);
+      hm->AddHistogram(histClass, "PsiModulation3", "", false, 100, -2.0, 2.0, VarManager::kModulPsi3);
       // hm->AddHistogram(histClass, "centrFT0C_Corr2REF_ev", "", true, 100, 0.0, 100.0, VarManager::kCentFT0C, 250, -1.0, 1.0, VarManager::kCORR2REF, VarManager::kM11REF);
       // hm->AddHistogram(histClass, "centrFT0C_Corr2REFetagap_ev", "", true, 100, 0.0, 100.0, VarManager::kCentFT0C, 250, -1.0, 1.0, VarManager::kCORR2REFetagap, VarManager::kM11REFetagap);
       // hm->AddHistogram(histClass, "centrFT0C_Corr4REF_ev", "", true, 100, 0.0, 100.0, VarManager::kCentFT0C, 250, -1.0, 1.0, VarManager::kCORR4REF, VarManager::kM1111REF);
@@ -1377,6 +1380,17 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
         hm->AddHistogram(histClass, "MultA_CentFT0C", "", false, 250, 0.0, 250.0, VarManager::kMultA, 20, 0.0, 100.0, VarManager::kCentFT0C);
         hm->AddHistogram(histClass, "Nnorm_CentFT0C", "", false, 102, -2.0, 100.0, VarManager::kNnorm, 20, 0.0, 100.0, VarManager::kCentFT0C);
         hm->AddHistogram(histClass, "Nnorm_MultA", "", false, 102, -2.0, 100.0, VarManager::kNnorm, 20, 0.0, 100.0, VarManager::kMultA);
+      }
+      if (subGroupStr.Contains("flow-jpsi-rp")) {
+        int varRP[5] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kDeltaPhiRandom};
+        int varMold2[5] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kDeltaPhiModul2};
+        int varMold3[5] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kDeltaPhiModul3};
+        int binsRP[5] = {50, 20, 20, 9, 10};
+        double minRP[5] = {2.0, 0.0, -1., 0.0, 0};
+        double maxRP[5] = {4.0, 2.0, 1.0, 90.0, 3.14};
+        hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_RP", "", 5, varRP, binsRP, minRP, maxRP, 0, -1, kTRUE);
+        hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_DeltaPhiModul2", "", 5, varMold2, binsRP, minRP, maxRP, 0, -1, kTRUE);
+        hm->AddHistogram(histClass, "Mass_Pt_centrFT0C_DeltaPhiModul3", "", 5, varMold3, binsRP, minRP, maxRP, 0, -1, kTRUE);
       }
       if (subGroupStr.Contains("flow-jpsi_hadronic-ep")) {
         int varHadronic[5] = {VarManager::kMass, VarManager::kPt, VarManager::kRap, VarManager::kCentFT0C, VarManager::kV2EP};

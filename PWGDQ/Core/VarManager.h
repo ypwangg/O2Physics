@@ -903,7 +903,12 @@ class VarManager : public TObject
     kPsi2B,
     kPsi2C,
     kRandomPsi2,
+    kModulPsi2,
+    kModulPsi3,
     kCos2DeltaPhi,
+    kDeltaPhiRandom,
+    kDeltaPhiModul2,
+    kDeltaPhiModul3,
     kCos2DeltaPhiMu1, // cos(phi - phi1) for muon1
     kCos2DeltaPhiMu2, ////cos(phi - phi2) for muon2
     kCos2DeltaPhiE1,
@@ -1420,6 +1425,8 @@ class VarManager : public TObject
   static void FillSpectatorPlane(C const& collision, float* values = nullptr);
   template <uint32_t fillMap, int pairType, typename T1, typename T2>
   static void FillPairVn(T1 const& t1, T2 const& t2, float* values = nullptr);
+  template <uint32_t fillMap, int pairType, typename T1, typename T2>
+  static void FillPairVnRandom(T1 const& t1, T2 const& t2, float* values = nullptr);
   template <int candidateType, typename T1, typename T2, typename T3>
   static void FillDileptonTrackTrack(T1 const& dilepton, T2 const& hadron1, T3 const& hadron2, float* values = nullptr);
   template <int candidateType, uint32_t collFillMap, uint32_t fillMap, typename C, typename T1>
@@ -1578,6 +1585,8 @@ class VarManager : public TObject
   static std::vector<TProfile3D*> fgShiftProfiles;   // shift correction profiles for q-vectors
   static bool fgApplyShiftCorrection;               // flag to apply shift correction
   static std::vector<int> fgHarmonics;              // vector of harmonics to apply shift correction
+  static TF1* fgModulationPsi2;                     // TF1 for sampling random event plane with modulation
+  static TF1* fgModulationPsi3;                     // TF1 for sampling random event plane with modulation
 
   VarManager& operator=(const VarManager& c);
   VarManager(const VarManager& c);
@@ -6142,6 +6151,55 @@ void VarManager::FillPairVn(T1 const& t1, T2 const& t2, float* values)
   auto vRef = p12_vp.Cross(p12_vp_projXZ);
   values[kCosPhiVP] = vDimu.Dot(vRef) / (vRef.R() * vDimu.R());
   values[kPhiVP] = std::acos(vDimu.Dot(vRef) / (vRef.R() * vDimu.R()));
+}
+
+template <uint32_t fillMap, int pairType, typename T1, typename T2>
+void VarManager::FillPairVnRandom(T1 const& t1, T2 const& t2, float* values)
+{
+  if (!values) {
+    values = fgValues;
+  }
+
+  values[kRandomPsi2] = gRandom->Uniform(-1. * TMath::Pi(), TMath::Pi());
+  float m1 = o2::constants::physics::MassElectron;
+  float m2 = o2::constants::physics::MassElectron;
+  if constexpr (pairType == kDecayToMuMu) {
+    m1 = o2::constants::physics::MassMuon;
+    m2 = o2::constants::physics::MassMuon;
+  }
+  if constexpr (pairType == kDecayToPiPi) {
+    m1 = o2::constants::physics::MassPionCharged;
+    m2 = o2::constants::physics::MassPionCharged;
+  }
+  if constexpr (pairType == kElectronMuon) {
+    m2 = o2::constants::physics::MassMuon;
+  }
+
+  // Build dilepton 4-momentum
+  ROOT::Math::PtEtaPhiMVector v1(t1.pt(), t1.eta(), t1.phi(), m1);
+  ROOT::Math::PtEtaPhiMVector v2(t2.pt(), t2.eta(), t2.phi(), m2);
+  ROOT::Math::PtEtaPhiMVector v12 = v1 + v2;
+
+  // Use the pre-sampled random event plane (sampled per event in the task)
+  float Psi2Random = values[kRandomPsi2];
+
+  // Also store the modulation value from the TF1 at the sampled Psi2
+  if (fgModulationPsi2) {
+    values[kModulPsi2] = fgModulationPsi2->Eval(Psi2Random);
+  }
+  if (fgModulationPsi3) {
+    values[kModulPsi3] = fgModulationPsi3->Eval(Psi2Random);
+  }
+  ROOT::Math::Boost boostv12{v12.BoostToCM()};
+  ROOT::Math::PtEtaPhiMVector v_daughter = boostv12(t1.sign() > 0 ? v1 : v2);
+  float phi = v_daughter.Phi() > TMath::Pi() ? 2. * TMath::Pi() - v_daughter.Phi() : v_daughter.Phi();
+
+  values[kDeltaPhiRandom] = phi > values[kRandomPsi2] ? phi - values[kRandomPsi2] : values[kRandomPsi2] - phi;
+  values[kDeltaPhiRandom] = values[kDeltaPhiRandom] > TMath::Pi() / 2. ? TMath::Pi() - values[kDeltaPhiRandom] : values[kDeltaPhiRandom];
+  values[kDeltaPhiModul2] = phi > values[kModulPsi2] ? phi - values[kModulPsi2] : values[kModulPsi2] - phi;
+  values[kDeltaPhiModul2] = values[kDeltaPhiModul2] > TMath::Pi() / 2. ? TMath::Pi() - values[kDeltaPhiModul2] : values[kDeltaPhiModul2];
+  values[kDeltaPhiModul3] = phi > values[kModulPsi3] ? phi - values[kModulPsi3] : values[kModulPsi3] - phi;
+  values[kDeltaPhiModul3] = values[kDeltaPhiModul3] > TMath::Pi() / 2. ? TMath::Pi() - values[kDeltaPhiModul3] : values[kDeltaPhiModul3];
 }
 
 template <typename T>

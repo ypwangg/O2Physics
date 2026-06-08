@@ -1921,6 +1921,7 @@ struct AnalysisSameEventPairing {
           }
           if constexpr (eventHasQvectorCentr) {
             VarManager::FillPairVn<TEventFillMap, TPairType>(t1, t2);
+            VarManager::FillPairVnRandom<TEventFillMap, TPairType>(t1, t2);
           }
 
           dielectronList(event.globalIndex(), VarManager::fgValues[VarManager::kMass],
