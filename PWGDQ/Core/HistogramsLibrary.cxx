@@ -346,6 +346,11 @@ void o2::aod::dqhistograms::DefineHistograms(HistogramManager* hm, const char* h
       hm->AddHistogram(histClass, "PsiRandom", "", false, 100, -2.0, 2.0, VarManager::kRandomPsi2);
       hm->AddHistogram(histClass, "PsiModulation2", "", false, 100, -2.0, 2.0, VarManager::kModulPsi2);
       hm->AddHistogram(histClass, "PsiModulation3", "", false, 100, -2.0, 2.0, VarManager::kModulPsi3);
+      hm->AddHistogram(histClass, "Psi2A_Vtxz", "", true, 60, -15.0, 15.0, VarManager::kVtxZ, 100, -2.0, 2.0, VarManager::kPsi2A);
+      hm->AddHistogram(histClass, "Psi2B_Vtxz", "", true, 60, -15.0, 15.0, VarManager::kVtxZ, 100, -2.0, 2.0, VarManager::kPsi2B);
+      hm->AddHistogram(histClass, "Psi2C_Vtxz", "", true, 60, -15.0, 15.0, VarManager::kVtxZ, 100, -2.0, 2.0, VarManager::kPsi2C);
+      hm->AddHistogram(histClass, "Psi2APOS_Vtxz", "", true, 60, -15.0, 15.0, VarManager::kVtxZ, 100, -2.0, 2.0, VarManager::kPsi2APOS);
+      hm->AddHistogram(histClass, "Psi2ANEG_Vtxz", "", true, 60, -15.0, 15.0, VarManager::kVtxZ, 100, -2.0, 2.0, VarManager::kPsi2ANEG);
       // hm->AddHistogram(histClass, "centrFT0C_Corr2REF_ev", "", true, 100, 0.0, 100.0, VarManager::kCentFT0C, 250, -1.0, 1.0, VarManager::kCORR2REF, VarManager::kM11REF);
       // hm->AddHistogram(histClass, "centrFT0C_Corr2REFetagap_ev", "", true, 100, 0.0, 100.0, VarManager::kCentFT0C, 250, -1.0, 1.0, VarManager::kCORR2REFetagap, VarManager::kM11REFetagap);
       // hm->AddHistogram(histClass, "centrFT0C_Corr4REF_ev", "", true, 100, 0.0, 100.0, VarManager::kCentFT0C, 250, -1.0, 1.0, VarManager::kCORR4REF, VarManager::kM1111REF);
